@@ -1,17 +1,57 @@
 # AGENTS Context & Log
 
-**Purpose**: This file provides immediate context to any AI model/agent working on the `collab_docx` project.
+**Purpose**: This file provides immediate, comprehensive context to any AI model/agent working on the `collab_docx` project. You MUST read this entire document to understand the architectural paradigms and security flows before taking action or suggesting changes.
 
 ## Current Architecture & Stack
-- **Framework**: Next.js (App Router)
-- **Database**: Supabase
-- **Authentication**: Auth.js + Supabase SDK (`@supabase/supabase-js`, `@supabase/ssr`). No Prisma.
-- **Styling**: Tailwind CSS (with Shadcn/Radix for UI components if needed)
+- **Framework**: Next.js 15 (App Router)
+- **Database & Authentication**: Supabase (Native Auth via `@supabase/ssr`). **NO Auth.js. NO Prisma.**
+- **Routing & Security**: Edge Proxy (`src/proxy.ts` and `src/lib/supabase/proxy.ts`)
+- **Styling & UI**: Tailwind CSS + Shadcn/Radix. 
+- **Modularity**: Strict Feature-Based Folder Structure (`src/features/`).
+- **Real-time Collaboration**: (Upcoming) Yjs & Hocuspocus.
 
-## Implementation Rules
-- **Database Interaction**: ALWAYS use the Supabase SDK for client and server interactions. DO NOT use Prisma.
-- **Phased Approach**: Implement features step-by-step. Do not attempt massive monolithic PRs/changes.
-- **Documentation**: For every major feature, create an explanatory markdown file inside `docx/project/`.
+## Critical Implementation Rules for Agents
 
-## Progress Log
-- **2026-06-04**: Starting Authentication implementation. Decided on Auth.js + Supabase SDK step-by-step approach. (Refer to `docx/project/auth.md` for details).
+1. **Database & Auth Interaction (The 3 Clients)**
+   Do not create generic Supabase clients. Next.js App Router runs in 3 environments, and you MUST use the correct client for the environment:
+   - **Client Components (`'use client'`)**: Use `src/lib/supabase/client.ts`. It reads/writes cookies via the browser.
+   - **Server Components & Actions (`'use server'`)**: Use `src/lib/supabase/server.ts`. It securely reads/writes cookies from Next.js headers.
+   - **Edge Proxy**: Use `src/lib/supabase/proxy.ts`. It handles token refreshing globally.
+   - *Never introduce Auth.js or Prisma. Stick to native Supabase RLS and Session management.*
+
+2. **Routing & Proxy Protection**
+   - The application uses an Edge Proxy (`src/proxy.ts` -> `src/lib/supabase/proxy.ts`) to intercept ALL routes.
+   - Public routes (e.g., `/`, `/login`, `/auth/callback`) are explicitly whitelisted.
+   - Unauthorized access to protected routes (e.g., `/dashboard`) forces a redirect to `/login?next=[intended_path]`.
+   - Always ensure new public routes are added to the whitelist in `src/lib/supabase/proxy.ts`.
+
+3. **Feature-Based Folder Structure**
+   - **DO NOT** clutter the Next.js `app/` router directory with UI components or server actions. The `app/` directory is strictly for URL routing (`page.tsx`, `layout.tsx`).
+   - Place all logic inside `src/features/[feature_name]/`. For example, authentication components live in `src/features/auth/components/` and auth actions in `src/features/auth/actions/`.
+
+4. **Phased Approach & Documentation**
+   - Implement features step-by-step. Do not attempt massive monolithic PRs.
+   - For every major feature, create/update an explanatory markdown file inside `docx/project/`.
+   - Update `docx/project/step_by_step_log.md` with detailed explanations of *what* you did, *how* it works, and *why* you chose that approach.
+
+---
+
+## Detailed Progress & Context Log
+
+The following timeline details the exact evolution of the project to help you understand the current state:
+
+### Phase 1: Project Setup & Authentication Pivot (2026-06-04)
+- **Initial Plan**: The project started with the intention of using NextAuth/Auth.js.
+- **The Pivot**: We quickly realized that bridging Auth.js sessions into Supabase Row Level Security (RLS) is overly complex. We dropped Auth.js entirely and installed `@supabase/ssr` to handle native sessions.
+- **The Result**: Supabase is now the absolute source of truth for Authentication.
+
+### Phase 2: Feature-Based Refactoring & UI (2026-06-04)
+- **Refactoring**: Moved tightly-coupled authentication logic out of the `app/` directory and into `src/features/auth/`.
+- **UI Components**: Installed Shadcn UI and created a stunning, minimalist Landing Page (`src/app/page.tsx`) and a central global Navbar (`src/components/layout/navbar.tsx`).
+- **OAuth Update**: Removed Google OAuth. The app exclusively uses **GitHub OAuth**. The Client ID and Secret are managed directly in the Supabase Dashboard, NOT in the local `.env` file.
+
+### Phase 3: Advanced Routing, Proxy, and Dashboard (2026-06-04)
+- **Proxy Convention**: Next.js threw a framework warning regarding middleware. We renamed the routing interceptor to `proxy.ts`.
+- **Smart Redirects**: Implemented complex `next` parameter tracking. If a user visits `/about` while logged out, they go to `/login?next=/about`. After logging in via Email or GitHub, they are seamlessly redirected back to `/about`.
+- **Dashboard Shell**: Created a feature-based layout (`src/features/dashboard/components/dashboard-layout.tsx`) with a sticky Sidebar and a Top Navbar containing a working server-action "Sign Out" button.
+- **Empty State Routes**: Created `/dashboard/page.tsx` and a dynamic `/dashboard/[docId]/page.tsx` that currently just display their pathnames in `<h1>` tags to prevent 404 errors during early development.
