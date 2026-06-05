@@ -53,5 +53,9 @@ The following timeline details the exact evolution of the project to help you un
 ### Phase 3: Advanced Routing, Proxy, and Dashboard (2026-06-04)
 - **Proxy Convention**: Next.js threw a framework warning regarding middleware. We renamed the routing interceptor to `proxy.ts`.
 - **Smart Redirects**: Implemented complex `next` parameter tracking. If a user visits `/about` while logged out, they go to `/login?next=/about`. After logging in via Email or GitHub, they are seamlessly redirected back to `/about`.
-- **Dashboard Shell**: Created a feature-based layout (`src/features/dashboard/components/dashboard-layout.tsx`) with a sticky Sidebar and a Top Navbar containing a working server-action "Sign Out" button.
 - **Empty State Routes**: Created `/dashboard/page.tsx` and a dynamic `/dashboard/[docId]/page.tsx` that currently just display their pathnames in `<h1>` tags to prevent 404 errors during early development.
+
+### Phase 4: Core Database Schema (2026-06-05)
+- **Supabase Native Auth Realignment**: Updated the database schema to completely sever ties with Auth.js. User data is now synced directly from Supabase `auth.users` to `public.users` via a PostgreSQL Trigger.
+- **5-Table MVP Schema**: Finalized the `users`, `documents`, `document_members`, `document_content_state`, and `invites` tables.
+- **Documentation Overhaul**: Created `docx/project/db.md` and updated `docx/DATABASE.md` to reflect the new architecture. All subsequent Phase 2 Dashboard actions will now query these finalized tables.
