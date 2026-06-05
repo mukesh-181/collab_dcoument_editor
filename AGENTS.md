@@ -64,3 +64,9 @@ The following timeline details the exact evolution of the project to help you un
 - **Zod & React Hook Form**: Implemented strict validation schemas (`loginSchema` and `registerSchema`). Replaced standard HTML forms with `react-hook-form` to prevent network requests on invalid input.
 - **Server Actions**: Updated auth actions to return JSON payloads (`{ success, error }`) instead of utilizing Next.js `redirect()` on error.
 - **Sonner Toasts**: Added native toast notifications for instant, non-intrusive feedback on login/signup success or failure.
+
+### Phase 6: Production UI Polish & Hydration Fixes (2026-06-05)
+- **Hydration Mismatches**: Resolved SSR vs. Client rendering mismatches by removing `asChild` from nested Radix primitives in Server Components, preventing full client-side tree regeneration.
+- **Auth-Aware UI**: Converted the global Navbar and Landing Page into async Server Components. They now check `supabase.auth.getUser()` on the server to instantly display the correct Call-To-Action ("Get Started" vs "Log In") without client-side flicker.
+- **Dashboard Refinements**: Built a dynamic `SidebarDocList` Client Component to track the active URL and highlight the current document. Polished hover states, integrated Shadcn's native `variant="destructive"` for delete menus, and removed redundant mobile hamburger navigation.
+- **Documentation**: Added `docx/project/folder_structure.md` to provide agents with a comprehensive, one-liner mapping of the entire `web/` directory and its architectural rules.
