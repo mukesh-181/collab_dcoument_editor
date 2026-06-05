@@ -3,8 +3,11 @@ import { Button } from '@/components/ui/button'
 import { FileText, Plus, Settings, LogOut } from 'lucide-react'
 import { ReactNode } from 'react'
 import { logout } from '@/features/auth/actions/auth.actions'
+import { getUserDocuments, createDocument } from '../actions/document.actions'
 
-export function DashboardLayout({ children }: { children: ReactNode }) {
+export async function DashboardLayout({ children }: { children: ReactNode }) {
+  const documents = await getUserDocuments()
+
   return (
     <div className="flex h-screen w-full bg-zinc-50 dark:bg-zinc-950">
       {/* Sidebar */}
@@ -22,24 +25,27 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
         
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-          <Button className="w-full justify-start bg-indigo-600 hover:bg-indigo-700 text-white mb-6">
-            <Plus className="mr-2 h-4 w-4" />
-            New Document
-          </Button>
+          <form action={createDocument} className="mb-6">
+            <Button type="submit" className="w-full justify-start bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Plus className="mr-2 h-4 w-4" />
+              New Document
+            </Button>
+          </form>
 
           <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 px-3">Your Documents</div>
-          <Link href="/dashboard/doc-1">
-             <Button variant="ghost" className="w-full justify-start text-zinc-600 dark:text-zinc-300">
-              <FileText className="mr-2 h-4 w-4 shrink-0" />
-              <span className="truncate">Project Proposal</span>
-            </Button>
-          </Link>
-          <Link href="/dashboard/doc-2">
-             <Button variant="ghost" className="w-full justify-start text-zinc-600 dark:text-zinc-300">
-              <FileText className="mr-2 h-4 w-4 shrink-0" />
-              <span className="truncate">Meeting Notes</span>
-            </Button>
-          </Link>
+          
+          {documents.length === 0 ? (
+            <div className="px-3 text-sm text-zinc-500">No documents yet.</div>
+          ) : (
+            documents.map((doc: any) => (
+              <Link key={doc.id} href={`/dashboard/${doc.id}`}>
+                <Button variant="ghost" className="w-full justify-start text-zinc-600 dark:text-zinc-300">
+                  <FileText className="mr-2 h-4 w-4 shrink-0" />
+                  <span className="truncate">{doc.title}</span>
+                </Button>
+              </Link>
+            ))
+          )}
         </div>
 
         <div className="p-4 border-t border-zinc-200 dark:border-zinc-800">
