@@ -1,0 +1,78 @@
+# CollabDoc — Project Overview
+
+This document provides a summary of how the `collab_docx` project is built. It covers the core architecture, the flow of data, and why we made certain technical choices.
+
+---
+
+## 1. What We've Built So Far
+
+We are building a real-time collaborative document editor. We've finished the foundational setup, which includes:
+
+- **Authentication**: Users can log in using Email/Password or GitHub. We use Supabase to handle the sessions.
+- **Route Protection**: We have a proxy setup that automatically redirects logged-out users away from private pages (like the dashboard) and sends them to the login page.
+- **Dashboard**: A simple interface where users can view, create, and delete their documents.
+- **Document Access**: We use server-side checks to make sure users can only open documents they are allowed to see.
+- **Rich Text Editor**: We added a text editor using Tiptap and Tailwind's typography plugin. It includes a custom toolbar for formatting.
+- **UI & Styling**: The interface is built with Tailwind CSS v4 and Shadcn UI components.
+
+---
+
+## 2. Our Tech Stack
+
+We tried to keep the technology stack as unified as possible to avoid unnecessary complexity.
+
+- **Next.js 15 (App Router)**: We use this as our core framework. By using Server Components and Server Actions, we can securely talk to our database straight from the server without needing to build a separate backend API.
+- **Supabase**: We use Supabase for both our database and authentication. Because the database handles the logins natively, it inherently knows who is making the request. This makes setting up security rules (Row Level Security) much easier than if we used a separate auth library like Auth.js.
+- **Tailwind v4 & Shadcn UI**: Tailwind handles the styling. Shadcn provides basic, accessible UI components (like dropdowns and buttons) that we copy into our codebase so we can customize them exactly how we need.
+- **Zod & React Hook Form**: We use these for form validation. They make sure the user inputs valid data before the browser even tries to talk to the server.
+
+---
+
+## 3. How the App Actually Works
+
+### A. Logging In & Database Sync
+1. When a user submits the signup form, `react-hook-form` and `zod` check the inputs locally.
+2. The form submits to a Next.js Server Action (`auth.actions.ts`). 
+3. The server tells Supabase to create the account and sets a secure HTTP-only cookie to keep the user logged in.
+4. Behind the scenes, the database has a trigger that automatically copies the new user's public info (like their name) into our `public.users` table so we can safely show it in the app.
+
+### B. Protecting the Pages
+1. Every time a user loads a page, the request goes through our Edge Proxy (`proxy.ts`).
+2. The proxy checks if the user's login token is expiring and quietly refreshes it if needed.
+3. If a logged-out user tries to access a private route like `/dashboard`, the proxy intercepts the request and issues a redirect to `/login`.
+
+### C. Preventing UI "Flashes"
+To prevent the page from flashing a logged-out state before realizing the user is actually logged in, we check the authentication state on the server.
+1. Our global layout and navbar ask Supabase for the user's session before sending any HTML to the browser.
+2. Because the server knows the auth state immediately, it renders the correct buttons ("Go to Dashboard" vs "Log In") on the very first paint.
+3. We only use client-side React components when we need interactivity, like highlighting the active document in the sidebar based on the current URL.
+
+---
+
+## 4. How Our Folders are Organized
+
+We group our files by feature rather than putting everything directly into the Next.js `app/` folder.
+
+- **`src/app/`**: This is strictly for URL routing (like `page.tsx` and `layout.tsx`).
+- **`src/features/`**: This is where the actual logic lives. We have folders for `auth`, `dashboard`, and `editor`. Each feature folder contains its own components and actions.
+- **`src/components/ui/`**: Reusable Shadcn UI components.
+- **`src/lib/supabase/`**: This contains our three Supabase clients. We need three because Next.js runs code in three different places: the browser (`client.ts`), the server (`server.ts`), and the Edge network (`proxy.ts`).
+
+By separating the URL routing from the feature logic, the codebase stays predictable and easy to manage.
+
+---
+
+## 5. The Rich-Text Editor
+
+We use [Tiptap](https://tiptap.dev) to power the document editing experience.
+
+### Editor Setup
+- We wrap the editor in an `EditorProvider`.
+- We built a custom `FontSize` extension from scratch because Tiptap doesn't include one by default. It applies inline pixel sizes to the text.
+- We designed the editor to look like a standard document page. It's a centered, white container with a drop shadow sitting on a gray background, similar to Google Docs.
+
+### Toolbar Behavior
+Making the formatting toolbar work smoothly required a few specific setups:
+1. **Transaction listener**: We force the toolbar to re-render every time the cursor moves so the dropdowns and buttons always reflect the correct formatting.
+2. **Preventing focus loss**: We added `e.preventDefault()` to the toolbar buttons. This stops the browser from moving focus away from the editor when you click a button, which prevents the editor from forgetting your formatting choices.
+3. **Tracking text context**: The color picker and font size dropdown dynamically read the actual attributes of the text you are clicking on (`editor.getAttributes("textStyle")`). This ensures the toolbar accurately reflects the formatting of the text currently under your cursor.
