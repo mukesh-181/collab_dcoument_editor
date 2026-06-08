@@ -69,37 +69,9 @@ export async function DashboardLayout({ children }: { children: ReactNode }) {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* Top Navbar */}
-        <header className="h-14 shrink-0 border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 flex items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
-
-
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8 border border-zinc-200 dark:border-zinc-800">
-                <AvatarImage src={avatarUrl} alt={displayName} />
-                <AvatarFallback className="bg-zinc-100 text-zinc-900 text-xs font-medium dark:bg-zinc-800 dark:text-zinc-100">{initial}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col hidden sm:flex">
-                <span className="text-sm font-medium leading-none text-zinc-900 dark:text-zinc-100">{displayName}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <form action={logout}>
-              <Button variant="ghost" size="sm" type="submit" className="bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium h-8 px-3">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </Button>
-            </form>
-          </div>
-        </header>
-
         {/* Dynamic Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto max-w-5xl">
-            {children}
-          </div>
+        <div className="flex-1 overflow-y-auto">
+          {children}
         </div>
       </main>
     </div>
