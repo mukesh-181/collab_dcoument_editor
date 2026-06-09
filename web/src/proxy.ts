@@ -1,10 +1,11 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
 
-export async function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest,) {
   console.log('proxy', request.url)
   // return await updateSession(request)
-}
+return NextResponse.next()
+}  
 
 export const config = {
   matcher: [
