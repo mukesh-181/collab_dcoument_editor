@@ -19,16 +19,33 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { ShareDialog } from '@/features/invites/components/share-dialog'
 
 interface DocumentHeaderProps {
   document: {
     id: string
     title: string
     updated_at: string
+    all_members?: {
+      role: string
+      user: {
+        id: string
+        name: string
+        image: string
+        email: string
+      }
+    }[]
   }
+  currentUserRole?: string
 }
 
-export function DocumentHeader({ document }: DocumentHeaderProps) {
+export function DocumentHeader({ document, currentUserRole = 'viewer' }: DocumentHeaderProps) {
   const { syncState } = useDocumentSync()
   const [title, setTitle] = useState(document.title)
   const [open, setOpen] = useState(false)
@@ -82,13 +99,14 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
               {title}
             </h1>
             
-            <Dialog open={open} onOpenChange={handleOpenChange}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50">
-                  <Pencil className="h-3 w-3" />
-                  <span className="sr-only">Rename document</span>
-                </Button>
-              </DialogTrigger>
+            {currentUserRole !== 'viewer' && (
+              <Dialog open={open} onOpenChange={handleOpenChange}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50">
+                    <Pencil className="h-3 w-3" />
+                    <span className="sr-only">Rename document</span>
+                  </Button>
+                </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <form action={handleTitleChange}>
                   <DialogHeader>
@@ -124,6 +142,7 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
                 </form>
               </DialogContent>
             </Dialog>
+            )}
           </div>
           
           <div className="flex items-center gap-1.5 mt-0.5">
@@ -147,6 +166,74 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="flex items-center gap-4">
+        {/* View Only Badge */}
+        {currentUserRole === 'viewer' && (
+          <div className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 bg-zinc-100 dark:text-zinc-400 dark:bg-zinc-800 rounded-sm">
+            View Only
+          </div>
+        )}
+
+        {/* Member Avatars */}
+        {document.all_members && document.all_members.length > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="flex items-center -space-x-2 mr-2 focus:outline-none cursor-pointer group">
+                {document.all_members.map((member) => (
+                  <Avatar 
+                    key={member.user.id} 
+                    className="w-8 h-8 border-2 border-white dark:border-zinc-950 transition-transform group-hover:scale-105"
+                  >
+                    <AvatarImage src={member.user.image || ''} alt={member.user.name || 'User'} />
+                    <AvatarFallback className="text-[10px]">
+                      {(member.user.name || member.user.email || '?').charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="bottom" align="end" className="w-80 p-0 shadow-lg rounded-xl overflow-hidden border-zinc-200 dark:border-zinc-800">
+              <div className="bg-zinc-50/80 dark:bg-zinc-900/50 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 backdrop-blur-sm">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Document Members</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{document.all_members.length} people have access</p>
+              </div>
+              <div className="max-h-[300px] overflow-y-auto p-2 scrollbar-thin">
+                {document.all_members.map((member) => (
+                  <div key={member.user.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors">
+                    <div className="flex items-center space-x-3 overflow-hidden">
+                      <Avatar className="w-9 h-9 border border-zinc-200 dark:border-zinc-800 shrink-0">
+                        <AvatarImage src={member.user.image || ''} alt={member.user.name || 'User'} />
+                        <AvatarFallback>
+                          {(member.user.name || member.user.email || '?').charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate">
+                          {member.user.name || 'Anonymous User'}
+                        </span>
+                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                          {member.user.email}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="ml-3 shrink-0">
+                      <span className="text-[10px] font-medium text-zinc-600 dark:text-zinc-300 capitalize bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-sm border border-zinc-200 dark:border-zinc-700">
+                        {member.role}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+
+        {/* Invite Button */}
+        {currentUserRole !== 'viewer' && (
+          <ShareDialog documentId={document.id} />
+        )}
       </div>
     </div>
   )
