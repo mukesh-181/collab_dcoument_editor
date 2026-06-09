@@ -100,6 +100,9 @@ Instead of generating a generic link that anyone can copy and paste forever, our
 ### Flawless Onboarding
 If you send an invite link to a friend who doesn't even have an account yet, our Edge Proxy handles it perfectly. The proxy sees they are logged out, remembers the exact invite token they were trying to use, redirects them to the signup page, and then automatically bounces them back to process the invite the moment they finish creating their account. They never lose the link.
 
+### Intermediate Invite Screen
+Before instantly dropping a user into a document, we show an intermediate invitation card (`/dashboard/invite`). This card securely fetches the document title, the inviter's name, and the specific role granted by the link. It gives the user a clear "Accept" or "Cancel" choice, and its layout is seamlessly integrated into the main dashboard shell (sidebar and top navbar included) for a cohesive experience.
+
 ### Member Visibility
 In the document header, all active members are displayed as a cluster of overlapping avatars. To see exactly who has access, you can click anywhere on the avatar group. This opens a unified, scrollable list showing each member's profile picture, full name, email address, and their specific role (Owner, Editor, or Viewer).
 

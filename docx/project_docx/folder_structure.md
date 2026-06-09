@@ -42,6 +42,8 @@ web/
     │   └── dashboard/
     │       ├── layout.tsx              # Dashboard layout shell — provides global sidebar navigation
     │       ├── page.tsx                # Dashboard home — top navbar + document table list with CRUD actions
+    │       ├── invite/
+    │       │   └── page.tsx            # Intermediate Accept/Cancel invitation screen
     │       └── [docId]/
     │           └── page.tsx            # Dynamic document page — displays individual document by ID
     │

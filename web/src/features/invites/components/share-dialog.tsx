@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Share2, Copy, Check, Loader2 } from 'lucide-react'
+import { Share2, Copy, Check, Loader2, AlertCircle } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -38,7 +38,7 @@ export function ShareDialog({ documentId }: { documentId: string }) {
     setError('')
     try {
       const token = await createInviteLink(documentId, role)
-      const url = new URL(`/invite?token=${token}`, window.location.origin)
+      const url = new URL(`/dashboard/invite?token=${token}`, window.location.origin)
       setInviteLink(url.toString())
     } catch (err: any) {
       setError(err.message || 'Failed to create invite link')
@@ -90,7 +90,10 @@ export function ShareDialog({ documentId }: { documentId: string }) {
         </DialogHeader>
 
         {error && (
-          <div className="text-sm text-red-500 font-medium">{error}</div>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium p-3 rounded-md mt-2 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {error}
+          </div>
         )}
 
         {!inviteLink ? (
@@ -110,15 +113,20 @@ export function ShareDialog({ documentId }: { documentId: string }) {
             </Button>
           </div>
         ) : (
-          <div className="flex items-center gap-2 mt-4">
-            <Input
-              readOnly
-              value={inviteLink}
-              className="flex-1"
-            />
-            <Button size="icon" variant="secondary" onClick={handleCopy}>
-              {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-            </Button>
+          <div className="mt-4 p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg flex flex-col gap-3">
+            <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              One-time link generated successfully
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                readOnly
+                value={inviteLink}
+                className="flex-1 bg-white dark:bg-zinc-950 font-mono text-xs"
+              />
+              <Button size="icon" variant="secondary" onClick={handleCopy} className="shrink-0">
+                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>
