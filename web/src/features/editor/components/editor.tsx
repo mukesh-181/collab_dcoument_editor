@@ -13,8 +13,12 @@ import Highlight from "@tiptap/extension-highlight";
 import { FontSize } from "../extensions/font-size";
 import { Toolbar } from "./toolbar";
 import { LinkBubbleMenu } from "./link-bubble-menu";
+import { useDocumentSync } from "@/features/document/components/document-context";
+import { useRef, useEffect } from "react";
+import { updateDocumentContent } from "@/features/dashboard/actions/document.actions";
 
 interface EditorProps {
+  documentId: string;
   initialContent?: string;
 }
 
@@ -25,7 +29,16 @@ const CustomLink = Link.extend({
   },
 });
 
-export function Editor({ initialContent = "" }: EditorProps) {
+export function Editor({ documentId, initialContent = "" }: EditorProps) {
+  const { setSyncState } = useDocumentSync()
+  const debounceTimeoutRef = useRef<NodeJS.Timeout>(undefined)
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current)
+    }
+  }, [])
+
   return (
     <div 
       className="flex flex-col w-full min-h-full"
@@ -89,6 +102,21 @@ export function Editor({ initialContent = "" }: EditorProps) {
         }}
         immediatelyRender={false}
         onUpdate={({ editor }) => {
+          setSyncState('saving')
+          if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current)
+          }
+          debounceTimeoutRef.current = setTimeout(async () => {
+            try {
+              const html = editor.getHTML()
+              await updateDocumentContent(documentId, html)
+              setSyncState('saved')
+            } catch (error) {
+              console.error('Failed to save document:', error)
+              setSyncState('offline')
+            }
+          }, 1500)
+
           if (editor.isActive("link")) {
             const { empty, $from } = editor.state.selection;
             if (empty) {

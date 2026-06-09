@@ -79,8 +79,9 @@ web/
     │   │
     │   ├── dashboard/                  # Dashboard feature
     │   │   ├── actions/
-    │   │   │   └── document.actions.ts # Server Actions — createDocument, getUserDocuments, deleteDocument
+    │   │   │   └── document.actions.ts # Server Actions — createDocument, getUserDocuments, deleteDocument, updateDocumentTitle
     │   │   ├── components/
+    │   │   │   ├── create-document-button.tsx # Client component — Dialog for creating new documents
     │   │   │   ├── dashboard-layout.tsx # Edge-to-edge sidebar layout shell
     │   │   │   └── sidebar-doc-list.tsx # Client component — highlights active document using usePathname
     │   │   └── hooks/                  # (Empty) Reserved for dashboard-related custom hooks
@@ -91,9 +92,10 @@ web/
     │   │
     │   ├── document/                   # Document-level operations
     │   │   ├── actions/
-    │   │   │   └── document.actions.ts # Server Actions — getDocumentById for secure access
+    │   │   │   └── document.actions.ts # Server Actions — getDocumentById, getDocumentContent for secure access
     │   │   ├── components/
-    │   │   │   └── document-header.tsx # Top navigation bar for the document page
+    │   │   │   ├── document-context.tsx # Context Provider — manages sync state (saving/saved/offline) between header and editor
+    │   │   │   └── document-header.tsx # Client component — top navigation bar, handles title renaming and save status
     │   │   └── hooks/                  # (Empty) Will hold useDocument hook
     │   │
     │   ├── editor/                     # Rich text editor feature

@@ -2,9 +2,10 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { FileText, Plus, Settings, LogOut } from 'lucide-react'
 import { SidebarDocList } from './sidebar-doc-list'
+import { CreateDocumentButton } from './create-document-button'
 import { ReactNode } from 'react'
 import { logout } from '@/features/auth/actions/auth.actions'
-import { getUserDocuments, createDocument } from '../actions/document.actions'
+import { getUserDocuments } from '../actions/document.actions'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -37,12 +38,7 @@ export async function DashboardLayout({ children }: { children: ReactNode }) {
       
       <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
         <div className="mb-4">
-          <form action={createDocument}>
-            <Button type="submit" className="w-full justify-start bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-none font-medium h-9">
-              <Plus className="mr-2 h-4 w-4" />
-              New Document
-            </Button>
-          </form>
+          <CreateDocumentButton />
           <div className="h-px bg-zinc-200 dark:bg-zinc-800 mx-1 mt-4" />
         </div>
 
