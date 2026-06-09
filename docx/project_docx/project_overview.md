@@ -76,3 +76,11 @@ Making the formatting toolbar work smoothly required a few specific setups:
 1. **Transaction listener**: We force the toolbar to re-render every time the cursor moves so the dropdowns and buttons always reflect the correct formatting.
 2. **Preventing focus loss**: We added `e.preventDefault()` to the toolbar buttons. This stops the browser from moving focus away from the editor when you click a button, which prevents the editor from forgetting your formatting choices.
 3. **Tracking text context**: The color picker and font size dropdown dynamically read the actual attributes of the text you are clicking on (`editor.getAttributes("textStyle")`). This ensures the toolbar accurately reflects the formatting of the text currently under your cursor.
+
+### Saving and Renaming (Phase 5)
+Right now, the editor uses a standard "REST-style" auto-save mechanism:
+1. **Renaming**: Instead of going to a separate settings page, you can click the pencil icon right in the document header. This opens a modal dialog where you can change the name. It checks your permissions on the server before applying the new title.
+2. **Auto-Save**: As you type, the app waits for you to pause for 1 second (this is called "debouncing"). Once you pause, it takes all the text and formatting from the editor (the HTML) and quietly sends it to a Server Action. That action drops the HTML directly into our database.
+3. **The Sync UI**: To let you know it's working, the header has a tiny cloud icon. It pulses "Saving..." while the database update is happening, and turns to a solid "Saved" cloud when it's done. If your internet drops, it catches the error and warns you that you are "Offline".
+
+*(Note: We will eventually rip out this simple HTML saving and replace it with a real-time multiplayer WebSocket connection in Phase 6. But this gives us a fully working save system in the meantime!)*
