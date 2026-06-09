@@ -4,8 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-export async function createDocument() {
+export async function createDocument(formData: FormData) {
   const supabase = await createClient()
+
+  // Extract title or default to 'Untitled Document'
+  const title = (formData.get('title') as string)?.trim() || 'Untitled Document';
 
   // 1. Get current user
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -17,7 +20,7 @@ export async function createDocument() {
   const { data: document, error: docError } = await supabase
     .from('documents')
     .insert({
-      title: 'Untitled Document',
+      title: title,
       owner_id: user.id,
     })
     .select()
@@ -44,9 +47,9 @@ export async function createDocument() {
     throw new Error('Failed to assign document ownership')
   }
 
-  // 4. Redirect to the new document
+  // 4. Return the new document ID
   revalidatePath('/dashboard')
-  redirect(`/dashboard/${document.id}`)
+  return document.id
 }
 
 export async function getUserDocuments() {
@@ -106,4 +109,71 @@ export async function deleteDocument(documentId: string) {
   }
 
   revalidatePath('/dashboard')
+}
+
+export async function updateDocumentTitle(documentId: string, title: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  // Verify membership (owners and editors should be able to rename)
+  const { data: member } = await supabase
+    .from('document_members')
+    .select('role')
+    .eq('document_id', documentId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!member || (member.role !== 'owner' && member.role !== 'editor')) {
+    throw new Error('You do not have permission to rename this document')
+  }
+
+  const newTitle = title.trim() || 'Untitled Document'
+
+  const { error } = await supabase
+    .from('documents')
+    .update({ title: newTitle })
+    .eq('id', documentId)
+
+  if (error) {
+    console.error('Error updating document title:', error)
+    throw new Error('Failed to update document title')
+  }
+
+  revalidatePath(`/dashboard/${documentId}`)
+  revalidatePath('/dashboard')
+}
+
+export async function updateDocumentContent(documentId: string, contentHTML: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  // Verify membership (owners and editors can edit)
+  const { data: member } = await supabase
+    .from('document_members')
+    .select('role')
+    .eq('document_id', documentId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!member || (member.role !== 'owner' && member.role !== 'editor')) {
+    throw new Error('You do not have permission to edit this document')
+  }
+
+  // Upsert into document_content_state
+  const { error } = await supabase
+    .from('document_content_state')
+    .upsert({
+      document_id: documentId,
+      ydoc_state: contentHTML,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'document_id' })
+
+  if (error) {
+    console.error('Error updating document content:', error)
+    throw new Error('Failed to update document content')
+  }
 }

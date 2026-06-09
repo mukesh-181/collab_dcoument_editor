@@ -42,6 +42,8 @@ web/
     │   └── dashboard/
     │       ├── layout.tsx              # Dashboard layout shell — provides global sidebar navigation
     │       ├── page.tsx                # Dashboard home — top navbar + document table list with CRUD actions
+    │       ├── invite/
+    │       │   └── page.tsx            # Intermediate Accept/Cancel invitation screen
     │       └── [docId]/
     │           └── page.tsx            # Dynamic document page — displays individual document by ID
     │
@@ -58,6 +60,7 @@ web/
     │       ├── form.tsx                # React Hook Form integration with Shadcn fields
     │       ├── input.tsx               # Styled text input
     │       ├── label.tsx               # Form label with required-field support
+    │       ├── popover.tsx             # Floating popover panel for member lists
     │       ├── separator.tsx           # Horizontal/vertical divider line
     │       ├── sheet.tsx               # Slide-out drawer (mobile sidebar, dialogs)
     │       ├── sonner.tsx              # Toast notification provider (success/error feedback)
@@ -79,8 +82,9 @@ web/
     │   │
     │   ├── dashboard/                  # Dashboard feature
     │   │   ├── actions/
-    │   │   │   └── document.actions.ts # Server Actions — createDocument, getUserDocuments, deleteDocument
+    │   │   │   └── document.actions.ts # Server Actions — createDocument, getUserDocuments, deleteDocument, updateDocumentTitle
     │   │   ├── components/
+    │   │   │   ├── create-document-button.tsx # Client component — Dialog for creating new documents
     │   │   │   ├── dashboard-layout.tsx # Edge-to-edge sidebar layout shell
     │   │   │   └── sidebar-doc-list.tsx # Client component — highlights active document using usePathname
     │   │   └── hooks/                  # (Empty) Reserved for dashboard-related custom hooks
@@ -91,9 +95,10 @@ web/
     │   │
     │   ├── document/                   # Document-level operations
     │   │   ├── actions/
-    │   │   │   └── document.actions.ts # Server Actions — getDocumentById for secure access
+    │   │   │   └── document.actions.ts # Server Actions — getDocumentById, getDocumentContent for secure access
     │   │   ├── components/
-    │   │   │   └── document-header.tsx # Top navigation bar for the document page
+    │   │   │   ├── document-context.tsx # Context Provider — manages sync state (saving/saved/offline) between header and editor
+    │   │   │   └── document-header.tsx # Client component — top navigation bar, handles title renaming and save status
     │   │   └── hooks/                  # (Empty) Will hold useDocument hook
     │   │
     │   ├── editor/                     # Rich text editor feature
@@ -104,9 +109,11 @@ web/
     │   │   │   └── font-size.ts        # Custom Tiptap extension — applies inline px font sizes via textStyle mark
     │   │   └── hooks/                  # (Empty) Will hold useEditor, useToolbar hooks
     │   │
-    │   └── invites/                    # (Scaffolded) Document sharing and invite system
-    │       ├── actions/                # (Empty) Will hold invite CRUD server actions
-    │       ├── components/             # (Empty) Will hold invite modal, share dialog
+    │   └── invites/                    # Sharing and access control feature
+    │       ├── actions/
+    │       │   └── invite.actions.ts   # Server Actions — createInviteLink, acceptInvite
+    │       ├── components/
+    │       │   └── share-dialog.tsx    # Client component — Dialog to generate one-time invite links
     │       └── hooks/                  # (Empty) Will hold useInvites hook
     │
     ├── lib/                            # Core utilities and third-party client setup

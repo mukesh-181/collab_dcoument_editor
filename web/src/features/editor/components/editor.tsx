@@ -13,9 +13,14 @@ import Highlight from "@tiptap/extension-highlight";
 import { FontSize } from "../extensions/font-size";
 import { Toolbar } from "./toolbar";
 import { LinkBubbleMenu } from "./link-bubble-menu";
+import { useDocumentSync } from "@/features/document/components/document-context";
+import { useRef, useEffect } from "react";
+import { updateDocumentContent } from "@/features/dashboard/actions/document.actions";
 
 interface EditorProps {
+  documentId: string;
   initialContent?: string;
+  currentUserRole?: string;
 }
 
 const CustomLink = Link.extend({
@@ -25,7 +30,16 @@ const CustomLink = Link.extend({
   },
 });
 
-export function Editor({ initialContent = "" }: EditorProps) {
+export function Editor({ documentId, initialContent = "", currentUserRole = "viewer" }: EditorProps) {
+  const { setSyncState } = useDocumentSync()
+  const debounceTimeoutRef = useRef<NodeJS.Timeout>(undefined)
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current)
+    }
+  }, [])
+
   return (
     <div 
       className="flex flex-col w-full min-h-full"
@@ -37,12 +51,15 @@ export function Editor({ initialContent = "" }: EditorProps) {
       }}
     >
       <EditorProvider
+        editable={currentUserRole !== 'viewer'}
         slotBefore={
-          <div className="sticky top-0 z-10 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 p-2 flex justify-center shadow-sm">
-            <div className="w-full max-w-[816px]">
-              <Toolbar />
+          currentUserRole !== 'viewer' && (
+            <div className="sticky top-0 z-10 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 p-2 flex justify-center shadow-sm">
+              <div className="w-full max-w-[816px]">
+                <Toolbar />
+              </div>
             </div>
-          </div>
+          )
         }
         extensions={[
           StarterKit.configure({
@@ -89,6 +106,22 @@ export function Editor({ initialContent = "" }: EditorProps) {
         }}
         immediatelyRender={false}
         onUpdate={({ editor }) => {
+          if (currentUserRole === 'viewer') return;
+          setSyncState('saving')
+          if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current)
+          }
+          debounceTimeoutRef.current = setTimeout(async () => {
+            try {
+              const html = editor.getHTML()
+              await updateDocumentContent(documentId, html)
+              setSyncState('saved')
+            } catch (error) {
+              console.error('Failed to save document:', error)
+              setSyncState('offline')
+            }
+          }, 1500)
+
           if (editor.isActive("link")) {
             const { empty, $from } = editor.state.selection;
             if (empty) {
@@ -113,7 +146,7 @@ export function Editor({ initialContent = "" }: EditorProps) {
           }
         }}
       >
-        <LinkBubbleMenu />
+        {currentUserRole !== 'viewer' && <LinkBubbleMenu />}
       </EditorProvider>
     </div>
   );
