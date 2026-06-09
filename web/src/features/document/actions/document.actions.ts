@@ -12,7 +12,8 @@ export async function getDocumentById(documentId: string) {
     .from('documents')
     .select(`
       *,
-      document_members!inner(role)
+      document_members!inner(role),
+      all_members:document_members(role, user:users(id, name, image, email))
     `)
     .eq('id', documentId)
     .eq('is_deleted', false)

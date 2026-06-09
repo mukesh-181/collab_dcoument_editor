@@ -84,3 +84,32 @@ Right now, the editor uses a standard "REST-style" auto-save mechanism:
 3. **The Sync UI**: To let you know it's working, the header has a tiny cloud icon. It pulses "Saving..." while the database update is happening, and turns to a solid "Saved" cloud when it's done. If your internet drops, it catches the error and warns you that you are "Offline".
 
 *(Note: We will eventually rip out this simple HTML saving and replace it with a real-time multiplayer WebSocket connection in Phase 6. But this gives us a fully working save system in the meantime!)*
+
+---
+
+## 6. Sharing & Permissions
+
+We've built a robust sharing system that allows users to invite others to their documents securely.
+
+### One-Time Invite Links
+Instead of generating a generic link that anyone can copy and paste forever, our system uses **one-time use tokens**. 
+1. When you click the "Invite" button, the server generates a unique, random string (a UUID) and saves it in the database as a `pending` invite.
+2. When someone clicks that link, the server checks the database. If the token is still `pending`, it adds them to the document and instantly marks the token as `accepted`. 
+3. If anyone else tries to use that exact same link later, the system will reject them. This ensures you always know exactly who is joining your document.
+
+### Flawless Onboarding
+If you send an invite link to a friend who doesn't even have an account yet, our Edge Proxy handles it perfectly. The proxy sees they are logged out, remembers the exact invite token they were trying to use, redirects them to the signup page, and then automatically bounces them back to process the invite the moment they finish creating their account. They never lose the link.
+
+### Intermediate Invite Screen
+Before instantly dropping a user into a document, we show an intermediate invitation card (`/dashboard/invite`). This card securely fetches the document title, the inviter's name, and the specific role granted by the link. It gives the user a clear "Accept" or "Cancel" choice, and its layout is seamlessly integrated into the main dashboard shell (sidebar and top navbar included) for a cohesive experience.
+
+### Member Visibility
+In the document header, all active members are displayed as a cluster of overlapping avatars. To see exactly who has access, you can click anywhere on the avatar group. This opens a unified, scrollable list showing each member's profile picture, full name, email address, and their specific role (Owner, Editor, or Viewer).
+
+### Strict Viewer Mode
+We enforce permissions strictly based on your role (`owner`, `editor`, or `viewer`).
+When a `viewer` opens a document:
+1. The app detects their role on the server before the page even finishes loading.
+2. The "Invite" button completely disappears from their header, so they can't invite others. They also lose the ability to rename the document.
+3. We send a strict `editable=false` command deep into the Tiptap editor engine. This natively disables all keyboard inputs and prevents them from accidentally modifying the local content.
+4. Finally, we completely hide the formatting toolbar and the link editing popups. This gives them a clean, distraction-free reading experience that feels like viewing a published article rather than an active editing app.

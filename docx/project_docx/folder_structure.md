@@ -42,6 +42,8 @@ web/
     │   └── dashboard/
     │       ├── layout.tsx              # Dashboard layout shell — provides global sidebar navigation
     │       ├── page.tsx                # Dashboard home — top navbar + document table list with CRUD actions
+    │       ├── invite/
+    │       │   └── page.tsx            # Intermediate Accept/Cancel invitation screen
     │       └── [docId]/
     │           └── page.tsx            # Dynamic document page — displays individual document by ID
     │
@@ -58,6 +60,7 @@ web/
     │       ├── form.tsx                # React Hook Form integration with Shadcn fields
     │       ├── input.tsx               # Styled text input
     │       ├── label.tsx               # Form label with required-field support
+    │       ├── popover.tsx             # Floating popover panel for member lists
     │       ├── separator.tsx           # Horizontal/vertical divider line
     │       ├── sheet.tsx               # Slide-out drawer (mobile sidebar, dialogs)
     │       ├── sonner.tsx              # Toast notification provider (success/error feedback)
@@ -106,9 +109,11 @@ web/
     │   │   │   └── font-size.ts        # Custom Tiptap extension — applies inline px font sizes via textStyle mark
     │   │   └── hooks/                  # (Empty) Will hold useEditor, useToolbar hooks
     │   │
-    │   └── invites/                    # (Scaffolded) Document sharing and invite system
-    │       ├── actions/                # (Empty) Will hold invite CRUD server actions
-    │       ├── components/             # (Empty) Will hold invite modal, share dialog
+    │   └── invites/                    # Sharing and access control feature
+    │       ├── actions/
+    │       │   └── invite.actions.ts   # Server Actions — createInviteLink, acceptInvite
+    │       ├── components/
+    │       │   └── share-dialog.tsx    # Client component — Dialog to generate one-time invite links
     │       └── hooks/                  # (Empty) Will hold useInvites hook
     │
     ├── lib/                            # Core utilities and third-party client setup

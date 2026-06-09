@@ -20,6 +20,7 @@ import { updateDocumentContent } from "@/features/dashboard/actions/document.act
 interface EditorProps {
   documentId: string;
   initialContent?: string;
+  currentUserRole?: string;
 }
 
 const CustomLink = Link.extend({
@@ -29,7 +30,7 @@ const CustomLink = Link.extend({
   },
 });
 
-export function Editor({ documentId, initialContent = "" }: EditorProps) {
+export function Editor({ documentId, initialContent = "", currentUserRole = "viewer" }: EditorProps) {
   const { setSyncState } = useDocumentSync()
   const debounceTimeoutRef = useRef<NodeJS.Timeout>(undefined)
 
@@ -50,12 +51,15 @@ export function Editor({ documentId, initialContent = "" }: EditorProps) {
       }}
     >
       <EditorProvider
+        editable={currentUserRole !== 'viewer'}
         slotBefore={
-          <div className="sticky top-0 z-10 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 p-2 flex justify-center shadow-sm">
-            <div className="w-full max-w-[816px]">
-              <Toolbar />
+          currentUserRole !== 'viewer' && (
+            <div className="sticky top-0 z-10 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 p-2 flex justify-center shadow-sm">
+              <div className="w-full max-w-[816px]">
+                <Toolbar />
+              </div>
             </div>
-          </div>
+          )
         }
         extensions={[
           StarterKit.configure({
@@ -102,6 +106,7 @@ export function Editor({ documentId, initialContent = "" }: EditorProps) {
         }}
         immediatelyRender={false}
         onUpdate={({ editor }) => {
+          if (currentUserRole === 'viewer') return;
           setSyncState('saving')
           if (debounceTimeoutRef.current) {
             clearTimeout(debounceTimeoutRef.current)
@@ -141,7 +146,7 @@ export function Editor({ documentId, initialContent = "" }: EditorProps) {
           }
         }}
       >
-        <LinkBubbleMenu />
+        {currentUserRole !== 'viewer' && <LinkBubbleMenu />}
       </EditorProvider>
     </div>
   );
