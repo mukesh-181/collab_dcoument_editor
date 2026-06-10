@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { ENV } from "./env.js";
+import { ENV } from "../config/env.js";
 
 // This client is strictly for database operations. For auth validation we can just use the public key.
 export const supabase = createClient(
