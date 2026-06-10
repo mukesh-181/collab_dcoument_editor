@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Cloud, CloudOff, CloudUpload, Pencil } from "lucide-react";
+import { ArrowLeft, Cloud, CloudOff, CloudUpload, Pencil, Users, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useDocumentSync } from "./document-context";
@@ -125,40 +125,60 @@ export function DocumentHeader({
                     <span className="sr-only">Rename document</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg">
                   <form action={handleTitleChange}>
-                    <DialogHeader>
-                      <DialogTitle>Rename Document</DialogTitle>
-                      <DialogDescription>
-                        Enter a new name for your document.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="title" className="text-right">
-                          Title
+                    <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
+                      <DialogHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                            <Pencil className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+                          </div>
+                          <div className="text-left">
+                            <DialogTitle className="text-xl font-semibold">Rename Document</DialogTitle>
+                            <DialogDescription className="mt-1.5 -ml-2 text-[13px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/50 dark:bg-zinc-800/50 px-2 py-1 rounded-md inline-block">
+                              Enter a new name for your document.
+                            </DialogDescription>
+                          </div>
+                        </div>
+                      </DialogHeader>
+                    </div>
+                    
+                    <div className="p-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="title" className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                          Document Title
                         </Label>
                         <Input
                           id="title"
                           name="title"
                           value={draftTitle}
                           onChange={(e) => setDraftTitle(e.target.value)}
-                          className="col-span-3"
+                          onFocus={(e) => e.target.select()}
+                          className="h-11 px-4 text-[15px] rounded-lg border-zinc-200 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:focus-visible:ring-zinc-600 shadow-sm bg-white dark:bg-zinc-950"
                           autoFocus
                           required
                         />
                       </div>
                     </div>
-                    <DialogFooter>
+                    
+                    <DialogFooter className="bg-zinc-50/50 dark:bg-zinc-900/50 p-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-end gap-2 sm:space-x-0">
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         onClick={() => setOpen(false)}
                         disabled={isPending}
+                        className="rounded-lg h-10 px-4 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
                       >
                         Cancel
                       </Button>
-                      <Button type="submit" disabled={isSaveDisabled}>
+                      
+                      <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1 hidden sm:block" />
+                      
+                      <Button 
+                        type="submit" 
+                        disabled={isSaveDisabled}
+                        className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-10 px-6 font-medium"
+                      >
                         {isPending ? "Saving..." : "Save"}
                       </Button>
                     </DialogFooter>
@@ -230,22 +250,27 @@ export function DocumentHeader({
               align="end"
               className="w-80 p-0 shadow-lg rounded-xl overflow-hidden border-zinc-200 dark:border-zinc-800"
             >
-              <div className="bg-zinc-50/80 dark:bg-zinc-900/50 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 backdrop-blur-sm">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                  Document Members
-                </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                  {document.all_members.length} people have access
-                </p>
+              <div className="bg-zinc-50/80 dark:bg-zinc-900/50 p-4 border-b border-zinc-100 dark:border-zinc-800 backdrop-blur-sm flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm shrink-0">
+                  <Users className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-50">
+                    Document Members
+                  </h3>
+                  <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                    {document.all_members.length} people have access
+                  </p>
+                </div>
               </div>
               <div className="max-h-[300px] overflow-y-auto p-2 scrollbar-thin">
                 {document.all_members.map((member) => (
                   <div
                     key={member.user.id}
-                    className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors"
+                    className="flex items-center justify-between p-2.5 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors"
                   >
                     <div className="flex items-center space-x-3 overflow-hidden">
-                      <Avatar className="w-9 h-9 border border-zinc-200 dark:border-zinc-800 shrink-0">
+                      <Avatar className="w-9 h-9 border border-zinc-200 dark:border-zinc-800 shrink-0 shadow-sm">
                         <AvatarImage
                           src={member.user.image || ""}
                           alt={member.user.name || "User"}
@@ -257,16 +282,21 @@ export function DocumentHeader({
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col overflow-hidden">
-                        <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate">
+                        <span className="text-[14px] font-medium text-zinc-900 dark:text-zinc-50 truncate leading-snug">
                           {member.user.name || "Anonymous User"}
                         </span>
-                        <span className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                        <span className="text-[12px] text-zinc-500 dark:text-zinc-400 truncate leading-snug">
                           {member.user.email}
                         </span>
                       </div>
                     </div>
-                    <div className="ml-3 shrink-0">
-                      <span className="text-[10px] font-medium text-zinc-600 dark:text-zinc-300 capitalize bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-sm border border-zinc-200 dark:border-zinc-700">
+                    <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 cursor-default select-none">
+                      {member.role === "editor" || member.role === "owner" ? (
+                        <Pencil className="h-3 w-3 text-zinc-500" />
+                      ) : (
+                        <Eye className="h-3 w-3 text-zinc-500" />
+                      )}
+                      <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-300 capitalize">
                         {member.role}
                       </span>
                     </div>

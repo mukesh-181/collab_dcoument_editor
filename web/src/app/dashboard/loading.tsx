@@ -3,11 +3,11 @@ import { DocumentListSkeleton } from "@/features/dashboard/components/page/docum
 
 export default function Loading() {
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex h-full w-full flex-col overflow-hidden">
       <DashboardHeader user={null} />
 
-      <div className="p-4 sm:p-6 lg:p-8 w-full flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl">
+      <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col">
           <DocumentListSkeleton />
         </div>
       </div>

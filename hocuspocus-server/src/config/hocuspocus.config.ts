@@ -1,7 +1,7 @@
 import { Server } from "@hocuspocus/server";
 import * as Y from "yjs";
 import { supabase } from "../lib/supabase.js";
-import { ENV } from "../lib/env.js";
+import { ENV } from "./env.js";
 
 export const server = new Server({
   port: ENV.PORT,
