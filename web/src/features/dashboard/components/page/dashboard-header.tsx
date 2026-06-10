@@ -1,11 +1,9 @@
 'use client'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { LogOut } from 'lucide-react'
-import { logout } from '@/features/auth/actions/logout.action'
 import { User } from '@supabase/supabase-js'
 import { MobileSidebar } from '../layout/mobile-sidebar'
+import { SignOutButton } from '@/features/auth/components/sign-out-button'
 
 export function DashboardHeader({ user, documents = [] }: { user: User | null, documents?: any[] }) {
   const rawName = user?.user_metadata?.full_name || user?.user_metadata?.username || user?.email || 'User'
@@ -29,12 +27,7 @@ export function DashboardHeader({ user, documents = [] }: { user: User | null, d
       </div>
 
       <div className="flex items-center gap-4">
-        <form action={logout}>
-          <Button variant="ghost" size="sm" type="submit" className="bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium h-8 px-3">
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
-        </form>
+        <SignOutButton />
       </div>
     </header>
   )

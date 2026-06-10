@@ -102,6 +102,7 @@ collab_docx/
 │       │   │   │
 │       │   │   ├── components/
 │       │   │   │   ├── login-page.tsx
+│       │   │   │   ├── sign-out-button.tsx       # Reusable button with confirmation dialog
 │       │   │   │   └── page/
 │       │   │   │       ├── auth-tabs.tsx     # Tab container switching between LoginForm and RegisterForm
 │       │   │   │       ├── login-form.tsx    # Email/password login form with show/hide toggle
@@ -125,8 +126,11 @@ collab_docx/
 │       │   │   │   └── update-document-title.action.ts
 │       │   │   │
 │       │   │   ├── components/
-│       │   │   │   ├── dashboard-layout.tsx  # Edge-to-edge sidebar layout shell
+│       │   │   │   ├── dashboard-layout.tsx       # Edge-to-edge sidebar layout shell
 │       │   │   │   ├── dashboard-page.tsx
+│       │   │   │   ├── document-action-menu.tsx   # Action menu dropdown (Rename/Delete)
+│       │   │   │   ├── document-delete-dialog.tsx # Extracted Delete confirmation dialog
+│       │   │   │   ├── document-rename-dialog.tsx # Extracted Rename input dialog
 │       │   │   │   ├── layout/
 │       │   │   │   │   ├── create-document-button.tsx # Client component — Dialog for creating new documents
 │       │   │   │   │   ├── mobile-sidebar.tsx         # Slide-out Shadcn Sheet for mobile navigation
