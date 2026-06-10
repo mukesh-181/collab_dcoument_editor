@@ -11,134 +11,205 @@ collab_docx/
 │   ├── package.json                    # Dependencies (tsx, @hocuspocus/server, yjs, supabase-js)
 │   ├── tsconfig.json                   # TypeScript compiler options (ESNext module resolution)
 │   └── src/                            # Server source code
-│       ├── server.ts                   # Entry point — starts the HTTP/WebSocket listener
 │       ├── config/
+│       │   ├── env.ts                  # Centralized constants for environment variables
 │       │   └── hocuspocus.config.ts    # Core logic — onAuthenticate, onLoadDocument, onStoreDocument hooks
-│       └── lib/
-│           └── supabase.ts             # Supabase client initialized with Service Role key to bypass RLS
+│       ├── lib/
+│       │   └── supabase.ts             # Supabase client initialized with Service Role key to bypass RLS
+│       └── server.ts                   # Entry point — starts the HTTP/WebSocket listener
 │
 ├── web/                                # Next.js frontend application
-│   ├── .env.local                      # Supabase URL and anon key (secrets, not committed)
-│   ├── .gitignore                      # Git ignore rules for node_modules, .next, etc.
+│   ├── AGENTS.md                       # LLM agent instructions & context
+│   ├── CLAUDE.md                       # IDE specific agent instructions
 │   ├── components.json                 # Shadcn UI configuration (Radix, Nova preset, Tailwind v4)
+│   ├── .env.local                      # Supabase URL and anon key (secrets, not committed)
 │   ├── eslint.config.mjs               # ESLint config for Next.js
+│   ├── .gitignore                      # Git ignore rules for node_modules, .next, etc.
 │   ├── next.config.ts                  # Next.js configuration
 │   ├── next-env.d.ts                   # Auto-generated Next.js TypeScript declarations
 │   ├── package.json                    # Dependencies and scripts (next dev, build, start)
 │   ├── package-lock.json               # Locked dependency tree
 │   ├── postcss.config.mjs              # PostCSS config for Tailwind processing
-│   ├── tsconfig.json                   # TypeScript compiler options and path aliases (@/)
-│   │
 │   ├── public/                         # Static assets served at root URL
-│   │
+│   │   ├── file.svg
+│   │   ├── globe.svg
+│   │   ├── next.svg
+│   │   ├── vercel.svg
+│   │   └── window.svg
+│   ├── README.md
+│   ├── tsconfig.json                   # TypeScript compiler options and path aliases (@/)
+│   ├── tsconfig.tsbuildinfo
 │   └── src/                            # All application source code
-    │
-    ├── proxy.ts                        # Edge Proxy — intercepts every request for auth + route protection
-    │
-    ├── app/                            # Next.js App Router — strictly for URL routing only
-    │   ├── globals.css                 # Global styles, Tailwind directives, CSS custom properties
-    │   ├── layout.tsx                  # Root layout — wraps entire app with fonts, metadata, Toaster
-    │   ├── page.tsx                    # Landing page (/) — auth-aware hero CTA + editor mockup
-    │   ├── favicon.ico                 # Browser tab icon
-    │   │
-    │   ├── about/
-    │   │   └── page.tsx                # Static about page placeholder
-    │   │
-    │   ├── auth/
-    │   │   └── callback/
-    │   │       └── route.ts            # OAuth callback — exchanges auth code for session (PKCE flow)
-    │   │
-    │   ├── login/
-    │   │   └── page.tsx                # Login/Register page — renders AuthTabs with tab param support
-    │   │
-    │   └── dashboard/
-    │       ├── layout.tsx              # Dashboard layout shell — provides global sidebar navigation
-    │       ├── page.tsx                # Dashboard home — top navbar + document table list with CRUD actions
-    │       ├── invite/
-    │       │   └── page.tsx            # Intermediate Accept/Cancel invitation screen
-    │       └── [docId]/
-    │           └── page.tsx            # Dynamic document page — displays individual document by ID
-    │
-    ├── components/                     # Shared, reusable components (not feature-specific)
-    │   │
-    │   ├── layout/
-    │   │   └── navbar.tsx              # Global navbar — auth-aware (Get Started vs Login/Signup)
-    │   │
-    │   └── ui/                         # Shadcn UI primitives (auto-generated, customized)
-    │       ├── avatar.tsx              # User avatar with image fallback
-    │       ├── button.tsx              # Button component with forwardRef and variant system
-    │       ├── card.tsx                # Card container with header, content, footer slots
-    │       ├── dropdown-menu.tsx       # Radix dropdown menu with styled items
-    │       ├── form.tsx                # React Hook Form integration with Shadcn fields
-    │       ├── input.tsx               # Styled text input
-    │       ├── label.tsx               # Form label with required-field support
-    │       ├── popover.tsx             # Floating popover panel for member lists
-    │       ├── separator.tsx           # Horizontal/vertical divider line
-    │       ├── sheet.tsx               # Slide-out drawer (mobile sidebar, dialogs)
-    │       ├── sonner.tsx              # Toast notification provider (success/error feedback)
-    │       └── tabs.tsx                # Tab switcher with simplified pill-style triggers
-    │
-    ├── features/                       # Feature-based modules — all business logic lives here
-    │   │
-    │   ├── auth/                       # Authentication feature
-    │   │   ├── actions/
-    │   │   │   └── auth.actions.ts     # Server Actions — login, register, logout with Zod validation
-    │   │   ├── components/
-    │   │   │   ├── auth-tabs.tsx       # Tab container switching between LoginForm and RegisterForm
-    │   │   │   ├── login-form.tsx      # Email/password login form with show/hide toggle
-    │   │   │   ├── oauth-buttons.tsx   # GitHub OAuth button (client-side redirect)
-    │   │   │   └── register-form.tsx   # Registration form with username, email, password, confirm
-    │   │   ├── hooks/                  # (Empty) Reserved for auth-related custom hooks
-    │   │   └── schemas/
-    │   │       └── auth.schema.ts      # Zod schemas — loginSchema and registerSchema validation
-    │   │
-    │   ├── dashboard/                  # Dashboard feature
-    │   │   ├── actions/
-    │   │   │   └── document.actions.ts # Server Actions — createDocument, getUserDocuments, deleteDocument, updateDocumentTitle
-    │   │   ├── components/
-    │   │   │   ├── create-document-button.tsx # Client component — Dialog for creating new documents
-    │   │   │   ├── dashboard-layout.tsx # Edge-to-edge sidebar layout shell
-    │   │   │   └── sidebar-doc-list.tsx # Client component — highlights active document using usePathname
-    │   │   └── hooks/                  # (Empty) Reserved for dashboard-related custom hooks
-    │   │
-    │   ├── collaboration/              # (Scaffolded) Real-time collaboration via Yjs/Hocuspocus
-    │   │   ├── components/             # (Empty) Will hold presence indicators, cursor overlays
-    │   │   └── hooks/                  # (Empty) Will hold useCollaboration, usePresence hooks
-    │   │
-    │   ├── document/                   # Document-level operations
-    │   │   ├── actions/
-    │   │   │   └── document.actions.ts # Server Actions — getDocumentById, getDocumentContent for secure access
-    │   │   ├── components/
-    │   │   │   ├── document-context.tsx # Context Provider — manages sync state (saving/saved/offline) between header and editor
-    │   │   │   └── document-header.tsx # Client component — top navigation bar, handles title renaming and save status
-    │   │   └── hooks/                  # (Empty) Will hold useDocument hook
-    │   │
-    │   ├── editor/                     # Rich text editor feature
-    │   │   ├── components/             
-    │   │   │   ├── editor.tsx          # EditorProvider wrapper with Pageless A4 layout and all extensions
-    │   │   │   └── toolbar.tsx         # Reactive formatting toolbar (Font Family, Size, Color, Headings, Undo/Redo)
-    │   │   ├── extensions/             
-    │   │   │   └── font-size.ts        # Custom Tiptap extension — applies inline px font sizes via textStyle mark
-    │   │   └── hooks/                  # (Empty) Will hold useEditor, useToolbar hooks
-    │   │
-    │   └── invites/                    # Sharing and access control feature
-    │       ├── actions/
-    │       │   └── invite.actions.ts   # Server Actions — createInviteLink, acceptInvite
-    │       ├── components/
-    │       │   └── share-dialog.tsx    # Client component — Dialog to generate one-time invite links
-    │       └── hooks/                  # (Empty) Will hold useInvites hook
-    │
-    ├── lib/                            # Core utilities and third-party client setup
-    │   ├── utils.ts                    # cn() helper — merges Tailwind classes via clsx + twMerge
-    │   ├── utils/                      # (Empty) Reserved for additional utility modules
-    │   └── supabase/                   # Supabase client factory (3 environments)
-    │       ├── client.ts               # Browser client — reads cookies via document.cookie
-    │       ├── server.ts               # Server client — reads cookies via next/headers
-    │       └── proxy.ts                # Edge client — refreshes expired sessions on every request
-    │
-    ├── store/                          # (Empty) Reserved for Zustand/global state management
-    ├── types/                          # (Empty) Reserved for shared TypeScript type definitions
-    └── utils/                          # (Empty) Reserved for standalone utility functions
+│       ├── proxy.ts                    # Edge Proxy — intercepts every request for auth + route protection
+│       ├── app/                        # Next.js App Router — strictly for URL routing only
+│       │   ├── about/
+│       │   │   └── page.tsx            # Static about page placeholder
+│       │   │
+│       │   ├── auth/
+│       │   │   └── callback/
+│       │   │       └── route.ts        # OAuth callback — exchanges auth code for session (PKCE flow)
+│       │   │
+│       │   ├── dashboard/
+│       │   │   ├── [docId]/
+│       │   │   │   └── page.tsx        # Dynamic document page — displays individual document by ID
+│       │   │   ├── invite/
+│       │   │   │   └── page.tsx        # Intermediate Accept/Cancel invitation screen
+│       │   │   ├── layout.tsx          # Dashboard layout shell — provides global sidebar navigation
+│       │   │   ├── loading.tsx         # Instantly rendered Suspense fallback using skeletons
+│       │   │   └── page.tsx            # Dashboard home — top navbar + document table list with CRUD actions
+│       │   │
+│       │   ├── favicon.ico             # Browser tab icon
+│       │   ├── globals.css             # Global styles, Tailwind directives, CSS custom properties
+│       │   ├── layout.tsx              # Root layout — wraps entire app with fonts, metadata, Toaster
+│       │   ├── login/
+│       │   │   └── page.tsx            # Login/Register page — renders AuthTabs with tab param support
+│       │   └── page.tsx                # Landing page (/) — auth-aware hero CTA + editor mockup
+│       │
+│       ├── components/                 # Shared, reusable components (not feature-specific)
+│       │   ├── layout/
+│       │   │   └── navbar.tsx          # Global navbar — auth-aware (Get Started vs Login/Signup)
+│       │   │
+│       │   └── ui/                     # Shadcn UI primitives (auto-generated, customized)
+│       │       ├── avatar.tsx          # User avatar with image fallback
+│       │       ├── button.tsx          # Button component with forwardRef and variant system
+│       │       ├── card.tsx            # Card container with header, content, footer slots
+│       │       ├── dialog.tsx
+│       │       ├── dropdown-menu.tsx   # Radix dropdown menu with styled items
+│       │       ├── form.tsx            # React Hook Form integration with Shadcn fields
+│       │       ├── input.tsx           # Styled text input
+│       │       ├── label.tsx           # Form label with required-field support
+│       │       ├── popover.tsx         # Floating popover panel for member lists
+│       │       ├── select.tsx
+│       │       ├── separator.tsx       # Horizontal/vertical divider line
+│       │       ├── sheet.tsx           # Slide-out drawer (mobile sidebar, dialogs)
+│       │       ├── skeleton.tsx        # Pulsing loading state primitive
+│       │       ├── sonner.tsx          # Toast notification provider (success/error feedback)
+│       │       ├── tabs.tsx            # Tab switcher with simplified pill-style triggers
+│       │       ├── toggle.tsx
+│       │       ├── tooltip.tsx
+│       │       └── tooltip-wrapper.tsx # Reusable tooltip wrapper component
+│       │
+│       ├── features/                   # Feature-based modules — all business logic lives here
+│       │   ├── about/
+│       │   │   └── components/
+│       │   │       └── about-page.tsx
+│       │   │
+│       │   ├── auth/                   # Authentication feature
+│       │   │   ├── actions/
+│       │   │   │   ├── login.action.ts   # Server Action — login
+│       │   │   │   ├── logout.action.ts  # Server Action — logout
+│       │   │   │   └── signup.action.ts  # Server Action — register
+│       │   │   │
+│       │   │   ├── components/
+│       │   │   │   ├── login-page.tsx
+│       │   │   │   └── page/
+│       │   │   │       ├── auth-tabs.tsx     # Tab container switching between LoginForm and RegisterForm
+│       │   │   │       ├── login-form.tsx    # Email/password login form with show/hide toggle
+│       │   │   │       ├── oauth-buttons.tsx # GitHub OAuth button (client-side redirect)
+│       │   │   │       └── register-form.tsx # Registration form with username, email, password, confirm
+│       │   │   │
+│       │   │   ├── hooks/
+│       │   │   └── schemas/
+│       │   │       └── auth.schema.ts  # Zod schemas — loginSchema and registerSchema validation
+│       │   │
+│       │   ├── collaboration/          # Real-time collaboration via Yjs/Hocuspocus
+│       │   │   ├── components/
+│       │   │   └── hooks/
+│       │   │
+│       │   ├── dashboard/              # Dashboard feature
+│       │   │   ├── actions/
+│       │   │   │   ├── create-document.action.ts
+│       │   │   │   ├── delete-document.action.ts
+│       │   │   │   ├── get-user-documents.action.ts
+│       │   │   │   ├── update-document-content.action.ts
+│       │   │   │   └── update-document-title.action.ts
+│       │   │   │
+│       │   │   ├── components/
+│       │   │   │   ├── dashboard-layout.tsx  # Edge-to-edge sidebar layout shell
+│       │   │   │   ├── dashboard-page.tsx
+│       │   │   │   ├── layout/
+│       │   │   │   │   ├── create-document-button.tsx # Client component — Dialog for creating new documents
+│       │   │   │   │   ├── mobile-sidebar.tsx         # Slide-out Shadcn Sheet for mobile navigation
+│       │   │   │   │   ├── sidebar-content.tsx        # Shared navigation links for desktop and mobile
+│       │   │   │   │   └── sidebar-doc-list.tsx       # Client component — highlights active document
+│       │   │   │   └── page/
+│       │   │   │       ├── dashboard-header.tsx
+│       │   │   │       ├── document-list.tsx
+│       │   │   │       └── document-list-skeleton.tsx # Loading skeleton for the dashboard table
+│       │   │   │
+│       │   │   └── hooks/
+│       │   │
+│       │   ├── document/               # Document-level operations
+│       │   │   ├── actions/
+│       │   │   │   ├── get-document-by-id.action.ts
+│       │   │   │   └── get-document-content.action.ts
+│       │   │   │
+│       │   │   ├── components/
+│       │   │   │   ├── document-page.tsx
+│       │   │   │   └── page/
+│       │   │   │       ├── active-users-cluster.tsx # Renders online member avatars
+│       │   │   │       ├── document-context.tsx  # Context Provider — manages sync state
+│       │   │   │       └── document-header.tsx   # Client component — top navigation bar
+│       │   │   │
+│       │   │   └── hooks/
+│       │   │
+│       │   ├── editor/                 # Rich text editor feature
+│       │   │   ├── components/
+│       │   │   │   ├── editor.tsx      # EditorProvider wrapper with Pageless A4 layout and all extensions
+│       │   │   │   ├── link-bubble-menu.tsx
+│       │   │   │   ├── offline-banner.tsx # Warning displayed when WebSocket disconnects
+│       │   │   │   ├── toolbar/
+│       │   │   │   │   ├── alignment-controls.tsx
+│       │   │   │   │   ├── color-control.tsx
+│       │   │   │   │   ├── font-size-control.tsx
+│       │   │   │   │   ├── format-controls.tsx
+│       │   │   │   │   ├── heading-controls.tsx
+│       │   │   │   │   ├── history-controls.tsx
+│       │   │   │   │   ├── image-control.tsx
+│       │   │   │   │   └── link-control.tsx
+│       │   │   │   └── toolbar.tsx     # Composer layout for all toolbar controls
+│       │   │   │
+│       │   │   ├── extensions/
+│       │   │   │   └── font-size.ts    # Custom Tiptap extension — applies inline px font sizes
+│       │   │   │
+│       │   │   └── hooks/
+│       │   │
+│       │   ├── invites/                # Sharing and access control feature
+│       │   │   ├── actions/
+│       │   │   │   ├── accept-invite.action.ts
+│       │   │   │   ├── create-invite.action.ts
+│       │   │   │   └── get-invite-details.action.ts
+│       │   │   │
+│       │   │   ├── components/
+│       │   │   │   ├── accept-invite-button.tsx
+│       │   │   │   ├── invite-page.tsx
+│       │   │   │   └── share-dialog.tsx  # Client component — Dialog to generate one-time invite links
+│       │   │   │
+│       │   │   └── hooks/
+│       │   │
+│       │   └── landing/
+│       │       └── components/
+│       │           ├── landing-page.tsx
+│       │           └── page/
+│       │               ├── editor-mockup.tsx
+│       │               ├── footer.tsx
+│       │               └── hero.tsx
+│       │
+│       ├── lib/                        # Core utilities and third-party client setup
+│       │   ├── constants/
+│       │   │   └── env.ts              # Centralized, strictly-typed environment variables
+│       │   │
+│       │   ├── supabase/               # Supabase client factory (3 environments)
+│       │   │   ├── client.ts           # Browser client — reads cookies via document.cookie
+│       │   │   ├── proxy.ts            # Edge client — refreshes expired sessions on every request
+│       │   │   └── server.ts           # Server client — reads cookies via next/headers
+│       │   │
+│       │   ├── utils/
+│       │   └── utils.ts                # cn() helper — merges Tailwind classes via clsx + twMerge
+│       │
+│       ├── store/                      # (Empty) Reserved for Zustand/global state management
+│       ├── types/                      # (Empty) Reserved for shared TypeScript type definitions
+│       └── utils/                      # (Empty) Reserved for standalone utility functions
 ```
 
 ---

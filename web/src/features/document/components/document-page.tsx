@@ -4,6 +4,7 @@ import { Editor } from "@/features/editor/components/editor";
 
 interface DocumentPageProps {
   document: any;
+  documents: any[];
   currentUserRole: string;
   currentUserName: string;
   token: string;
@@ -11,6 +12,7 @@ interface DocumentPageProps {
 
 export function DocumentPage({
   document,
+  documents,
   currentUserRole,
   currentUserName,
   token,
@@ -18,7 +20,7 @@ export function DocumentPage({
   return (
     <DocumentProvider>
       <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
-        <DocumentHeader document={document} currentUserRole={currentUserRole} />
+        <DocumentHeader document={document} documents={documents} currentUserRole={currentUserRole} />
 
         <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-900">
           <Editor

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getDocumentById } from '@/features/document/actions/get-document-by-id.action'
 import { DocumentPage } from '@/features/document/components/document-page'
 import { createClient } from '@/lib/supabase/server'
+import { getUserDocuments } from '@/features/dashboard/actions/get-user-documents.action'
 
 export default async function Page(props: { params: Promise<{ docId: string }> }) {
   const params = await props.params
@@ -20,10 +21,12 @@ export default async function Page(props: { params: Promise<{ docId: string }> }
   
   // Extract the current user's role from the filtered document_members array
   const currentUserRole = document.document_members?.[0]?.role || 'viewer'
+  const documents = await getUserDocuments()
 
   return (
     <DocumentPage 
       document={document} 
+      documents={documents}
       currentUserRole={currentUserRole} 
       currentUserName={currentUserName} 
       token={token} 

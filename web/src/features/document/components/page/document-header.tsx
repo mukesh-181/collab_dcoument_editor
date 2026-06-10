@@ -26,6 +26,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ShareDialog } from "@/features/invites/components/share-dialog";
+import { ActiveUsersCluster } from "./active-users-cluster";
+import { MobileSidebar } from "@/features/dashboard/components/layout/mobile-sidebar";
 
 interface DocumentHeaderProps {
   document: {
@@ -42,11 +44,13 @@ interface DocumentHeaderProps {
       };
     }[];
   };
+  documents?: any[];
   currentUserRole?: string;
 }
 
 export function DocumentHeader({
   document,
+  documents = [],
   currentUserRole = "viewer",
 }: DocumentHeaderProps) {
   const { syncState } = useDocumentSync();
@@ -88,6 +92,7 @@ export function DocumentHeader({
   return (
     <div className="flex items-center justify-between h-14 pr-4 pl-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
       <div className="flex items-center gap-2">
+        <MobileSidebar documents={documents} />
         <Button
           variant="ghost"
           size="icon"
@@ -193,6 +198,9 @@ export function DocumentHeader({
             View Only
           </div>
         )}
+
+        {/* Active Users (Live Presence) */}
+        <ActiveUsersCluster />
 
         {/* Member Avatars */}
         {document.all_members && document.all_members.length > 0 && (

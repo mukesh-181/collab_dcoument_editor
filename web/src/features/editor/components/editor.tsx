@@ -20,6 +20,7 @@ import { Toolbar } from "./toolbar";
 import { LinkBubbleMenu } from "./link-bubble-menu";
 import { useDocumentSync } from "@/features/document/components/page/document-context";
 import { useEffect, useState, useRef } from "react";
+import { OfflineBanner } from "./offline-banner";
 
 interface EditorProps {
   documentId: string;
@@ -41,7 +42,7 @@ export function Editor({
   currentUserName,
   token,
 }: EditorProps) {
-  const { setSyncState } = useDocumentSync();
+  const { setSyncState, setActiveUsers } = useDocumentSync();
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
 
@@ -64,6 +65,15 @@ export function Editor({
         if (status === "connected") setSyncState("saved");
         else if (status === "connecting") setSyncState("saving");
         else setSyncState("offline");
+      },
+      onAwarenessUpdate: ({ states }) => {
+        const users: any[] = [];
+        states.forEach((state: any) => {
+          if (state.user && state.clientId !== doc.clientID) {
+            users.push({ clientId: state.clientId, user: state.user });
+          }
+        });
+        setActiveUsers(users);
       },
     });
 
@@ -93,6 +103,7 @@ export function Editor({
         }
       }}
     >
+      <OfflineBanner />
       <EditorProvider
         editable={currentUserRole !== "viewer"}
         slotBefore={
@@ -156,7 +167,7 @@ export function Editor({
         editorProps={{
           attributes: {
             class:
-              "editor-page-bg prose prose-zinc dark:prose-invert max-w-[816px] w-full min-h-[1056px] mx-auto bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md px-16 py-20 my-8 focus:outline-none prose-p:m-0 prose-p:leading-[1.2] prose-headings:m-0 prose-headings:mb-2 prose-headings:leading-tight prose-ul:m-0 prose-ol:m-0 prose-li:m-0 leading-[1.2] prose-a:text-blue-600 prose-a:underline dark:prose-a:text-blue-400 cursor-text [&_strong]:text-inherit",
+              "editor-page-bg prose prose-zinc dark:prose-invert max-w-[816px] w-full min-h-[1056px] mx-auto bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md px-4 sm:px-16 py-8 sm:py-20 my-4 sm:my-8 focus:outline-none prose-p:m-0 prose-p:leading-[1.2] prose-headings:m-0 prose-headings:mb-2 prose-headings:leading-tight prose-ul:m-0 prose-ol:m-0 prose-li:m-0 leading-[1.2] prose-a:text-blue-600 prose-a:underline dark:prose-a:text-blue-400 cursor-text [&_strong]:text-inherit",
           },
           handleClick: (view, pos, event) => {
             const target = event.target as HTMLElement;

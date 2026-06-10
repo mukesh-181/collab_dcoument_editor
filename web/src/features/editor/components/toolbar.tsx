@@ -39,7 +39,7 @@ export function Toolbar() {
 
   return (
     <TooltipProvider>
-      <div className="flex items-center justify-center gap-1 px-2 py-2 w-full whitespace-nowrap">
+      <div className="flex items-center justify-start sm:justify-center gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap scrollbar-hide">
         <HistoryControls editor={editor} />
         
         <Separator
