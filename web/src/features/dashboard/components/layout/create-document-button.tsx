@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createDocument } from '../actions/document.actions'
+import { createDocument } from '../../actions/create-document.action'
 
 import { useRouter } from 'next/navigation'
 

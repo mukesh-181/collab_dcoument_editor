@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
-import { getDocumentById, getDocumentContent } from '@/features/document/actions/document.actions'
-import { DocumentHeader } from '@/features/document/components/document-header'
-import { DocumentProvider } from '@/features/document/components/document-context'
-import { Editor } from '@/features/editor/components/editor'
+import { getDocumentById } from '@/features/document/actions/get-document-by-id.action'
+import { DocumentPage } from '@/features/document/components/document-page'
+import { createClient } from '@/lib/supabase/server'
+import { getUserDocuments } from '@/features/dashboard/actions/get-user-documents.action'
 
-export default async function DocumentPage(props: { params: Promise<{ docId: string }> }) {
+export default async function Page(props: { params: Promise<{ docId: string }> }) {
   const params = await props.params
   
   const document = await getDocumentById(params.docId)
@@ -13,20 +13,23 @@ export default async function DocumentPage(props: { params: Promise<{ docId: str
     redirect('/dashboard')
   }
 
-  const initialContent = await getDocumentContent(params.docId)
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token || ''
+  const currentUserName = user?.user_metadata?.full_name || 'Anonymous'
   
   // Extract the current user's role from the filtered document_members array
-  const currentUserRole = document.document_members[0]?.role || 'viewer'
+  const currentUserRole = document.document_members?.[0]?.role || 'viewer'
+  const documents = await getUserDocuments()
 
   return (
-    <DocumentProvider>
-      <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
-        <DocumentHeader document={document} currentUserRole={currentUserRole} />
-        
-        <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-900">
-          <Editor initialContent={initialContent} documentId={document.id} currentUserRole={currentUserRole} />
-        </div>
-      </div>
-    </DocumentProvider>
+    <DocumentPage 
+      document={document} 
+      documents={documents}
+      currentUserRole={currentUserRole} 
+      currentUserName={currentUserName} 
+      token={token} 
+    />
   )
 }

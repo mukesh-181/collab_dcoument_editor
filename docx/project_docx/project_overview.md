@@ -12,8 +12,9 @@ We are building a real-time collaborative document editor. We've finished the fo
 - **Route Protection**: We have a proxy setup that automatically redirects logged-out users away from private pages (like the dashboard) and sends them to the login page.
 - **Dashboard**: A simple interface where users can view, create, and delete their documents.
 - **Document Access**: We use server-side checks to make sure users can only open documents they are allowed to see.
-- **Rich Text Editor**: We added a text editor using Tiptap and Tailwind's typography plugin. It includes a custom toolbar for formatting.
-- **UI & Styling**: The interface is built with Tailwind CSS v4 and Shadcn UI components.
+- **Rich Text Editor**: We added a text editor using Tiptap and Tailwind's typography plugin. It features real-time collaborative cursors, an offline-resilient sync state, and a custom responsive formatting toolbar.
+- **Mobile Responsiveness**: The entire application is fully responsive, utilizing Shadcn Sheets for slide-out mobile navigation and horizontally scrollable toolbars.
+- **UI & Styling**: The interface is built with Tailwind CSS v4 and Shadcn UI components, including premium Skeleton loading states to prevent layout shifts.
 
 ---
 
@@ -54,8 +55,11 @@ To prevent the page from flashing a logged-out state before realizing the user i
 We group our files by feature rather than putting everything directly into the Next.js `app/` folder.
 
 - **`src/app/`**: This is strictly for URL routing (like `page.tsx` and `layout.tsx`).
-- **`src/features/`**: This is where the actual logic lives. We have folders for `auth`, `dashboard`, and `editor`. Each feature folder contains its own components and actions.
+- **`src/features/`**: This is where the actual logic lives. We have folders for `auth`, `dashboard`, and `editor`. 
+  - **Single-Responsibility Actions**: Inside each feature's `actions/` folder, every server action has its own dedicated file (e.g., `login.action.ts`, `create-document.action.ts`). This ensures maximum tree-shaking and reduces bundle sizes.
+  - **Granular Components**: Complex UI components (like the Editor Toolbar) are decomposed into smaller sub-components (like `history-controls.tsx`) for easier maintenance and faster compilation.
 - **`src/components/ui/`**: Reusable Shadcn UI components.
+- **`src/lib/constants/env.ts`**: A centralized configuration file exporting strictly-typed environment variables, so we never access `process.env` randomly throughout the app.
 - **`src/lib/supabase/`**: This contains our three Supabase clients. We need three because Next.js runs code in three different places: the browser (`client.ts`), the server (`server.ts`), and the Edge network (`proxy.ts`).
 
 By separating the URL routing from the feature logic, the codebase stays predictable and easy to manage.
@@ -77,13 +81,17 @@ Making the formatting toolbar work smoothly required a few specific setups:
 2. **Preventing focus loss**: We added `e.preventDefault()` to the toolbar buttons. This stops the browser from moving focus away from the editor when you click a button, which prevents the editor from forgetting your formatting choices.
 3. **Tracking text context**: The color picker and font size dropdown dynamically read the actual attributes of the text you are clicking on (`editor.getAttributes("textStyle")`). This ensures the toolbar accurately reflects the formatting of the text currently under your cursor.
 
-### Saving and Renaming (Phase 5)
-Right now, the editor uses a standard "REST-style" auto-save mechanism:
-1. **Renaming**: Instead of going to a separate settings page, you can click the pencil icon right in the document header. This opens a modal dialog where you can change the name. It checks your permissions on the server before applying the new title.
-2. **Auto-Save**: As you type, the app waits for you to pause for 1 second (this is called "debouncing"). Once you pause, it takes all the text and formatting from the editor (the HTML) and quietly sends it to a Server Action. That action drops the HTML directly into our database.
-3. **The Sync UI**: To let you know it's working, the header has a tiny cloud icon. It pulses "Saving..." while the database update is happening, and turns to a solid "Saved" cloud when it's done. If your internet drops, it catches the error and warns you that you are "Offline".
+### Saving, Renaming, and Real-Time Sync (Phase 7)
+We completely ripped out our initial manual "REST-style" auto-save and upgraded to an industry-standard real-time collaborative engine:
+1. **Renaming**: You can click the pencil icon right in the document header to change the document name. It verifies permissions on the server before applying the new title.
+2. **Real-Time WebSockets**: As you type, your browser connects to a standalone Node.js server (`/hocuspocus-server`) via WebSockets. It uses a mathematical algorithm called a CRDT (Conflict-free Replicated Data Type) powered by Yjs. This mathematically guarantees that if 10 people type on the same line at the exact same millisecond, the document structure will never corrupt and will elegantly merge everyone's cursors and text.
+3. **Database Persistence**: Relying purely on WebSocket memory is dangerous. Our Hocuspocus backend uses specific "hooks" to constantly listen to the live state and silently compress it into a base64 binary string. Every few seconds, it safely `upserts` this binary string straight into our `document_content_state` Supabase table. If the WebSocket server ever crashes, no one loses a single keystroke.
 
-*(Note: We will eventually rip out this simple HTML saving and replace it with a real-time multiplayer WebSocket connection in Phase 6. But this gives us a fully working save system in the meantime!)*
+### UX Polish & Edge Cases (Phase 9)
+To ensure the editor feels production-ready, we implemented comprehensive UX safeguards:
+1. **Offline Resilience**: If the user's internet drops, an `OfflineBanner` subtly warns them. Because Yjs handles offline edits natively, the user can continue typing. The moment the connection is restored, Yjs mathematically merges their offline changes with the server.
+2. **Live Presence Indicators**: By tapping into the Hocuspocus `onAwarenessUpdate` hook, we extract exactly who is actively viewing the document and render their avatars in a cluster in the document header, letting users know exactly who they are collaborating with.
+3. **Responsive Mobile Layouts**: The editor padding and toolbars adapt dynamically to small screens, utilizing horizontal scrolling rather than breaking the layout, ensuring seamless mobile editing. We also wrap the dashboard sidebar in a slide-out drawer (`Sheet`) so mobile users retain full navigational control.
 
 ---
 

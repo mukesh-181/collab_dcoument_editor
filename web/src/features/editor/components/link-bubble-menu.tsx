@@ -1,7 +1,6 @@
 "use client";
 
-import { useCurrentEditor } from "@tiptap/react";
-import { BubbleMenu } from "@tiptap/react/menus";
+import { useCurrentEditor, BubbleMenu } from "@tiptap/react";
 import { Copy, Edit2, Unlink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
