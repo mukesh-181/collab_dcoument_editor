@@ -5,21 +5,33 @@ Complete project structure of the `web/` directory with one-liner descriptions.
 ---
 
 ```
-web/
-├── .env.local                          # Supabase URL and anon key (secrets, not committed)
-├── .gitignore                          # Git ignore rules for node_modules, .next, etc.
-├── components.json                     # Shadcn UI configuration (Radix, Nova preset, Tailwind v4)
-├── eslint.config.mjs                   # ESLint config for Next.js
-├── next.config.ts                      # Next.js configuration
-├── next-env.d.ts                       # Auto-generated Next.js TypeScript declarations
-├── package.json                        # Dependencies and scripts (next dev, build, start)
-├── package-lock.json                   # Locked dependency tree
-├── postcss.config.mjs                  # PostCSS config for Tailwind processing
-├── tsconfig.json                       # TypeScript compiler options and path aliases (@/)
+collab_docx/
+├── hocuspocus-server/                  # Standalone WebSocket server for real-time collaboration
+│   ├── .env                            # Supabase URL and service role key (secrets, not committed)
+│   ├── package.json                    # Dependencies (tsx, @hocuspocus/server, yjs, supabase-js)
+│   ├── tsconfig.json                   # TypeScript compiler options (ESNext module resolution)
+│   └── src/                            # Server source code
+│       ├── server.ts                   # Entry point — starts the HTTP/WebSocket listener
+│       ├── config/
+│       │   └── hocuspocus.config.ts    # Core logic — onAuthenticate, onLoadDocument, onStoreDocument hooks
+│       └── lib/
+│           └── supabase.ts             # Supabase client initialized with Service Role key to bypass RLS
 │
-├── public/                             # Static assets served at root URL
-│
-└── src/                                # All application source code
+├── web/                                # Next.js frontend application
+│   ├── .env.local                      # Supabase URL and anon key (secrets, not committed)
+│   ├── .gitignore                      # Git ignore rules for node_modules, .next, etc.
+│   ├── components.json                 # Shadcn UI configuration (Radix, Nova preset, Tailwind v4)
+│   ├── eslint.config.mjs               # ESLint config for Next.js
+│   ├── next.config.ts                  # Next.js configuration
+│   ├── next-env.d.ts                   # Auto-generated Next.js TypeScript declarations
+│   ├── package.json                    # Dependencies and scripts (next dev, build, start)
+│   ├── package-lock.json               # Locked dependency tree
+│   ├── postcss.config.mjs              # PostCSS config for Tailwind processing
+│   ├── tsconfig.json                   # TypeScript compiler options and path aliases (@/)
+│   │
+│   ├── public/                         # Static assets served at root URL
+│   │
+│   └── src/                            # All application source code
     │
     ├── proxy.ts                        # Edge Proxy — intercepts every request for auth + route protection
     │

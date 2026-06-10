@@ -10,17 +10,21 @@ import Image from "@tiptap/extension-image";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
+import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+import { HocuspocusProvider } from "@hocuspocus/provider";
+import * as Y from "yjs";
 import { FontSize } from "../extensions/font-size";
 import { Toolbar } from "./toolbar";
 import { LinkBubbleMenu } from "./link-bubble-menu";
 import { useDocumentSync } from "@/features/document/components/document-context";
-import { useRef, useEffect } from "react";
-import { updateDocumentContent } from "@/features/dashboard/actions/document.actions";
+import { useEffect, useState, useRef } from "react";
 
 interface EditorProps {
   documentId: string;
-  initialContent?: string;
   currentUserRole?: string;
+  currentUserName: string;
+  token: string;
 }
 
 const CustomLink = Link.extend({
@@ -30,15 +34,47 @@ const CustomLink = Link.extend({
   },
 });
 
-export function Editor({ documentId, initialContent = "", currentUserRole = "viewer" }: EditorProps) {
-  const { setSyncState } = useDocumentSync()
-  const debounceTimeoutRef = useRef<NodeJS.Timeout>(undefined)
+export function Editor({ documentId, currentUserRole = "viewer", currentUserName, token }: EditorProps) {
+  const { setSyncState } = useDocumentSync();
+  const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
+  const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
 
   useEffect(() => {
+    // Only connect to WebSocket if we have a valid token
+    if (!token) return;
+
+    const doc = new Y.Doc();
+    setYdoc(doc);
+
+    const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:1235";
+    
+    const hocuspocusProvider = new HocuspocusProvider({
+      url: wsUrl,
+      name: documentId,
+      document: doc,
+      token,
+      onStatus: ({ status }) => {
+        if (status === "connected") setSyncState("saved");
+        else if (status === "connecting") setSyncState("saving");
+        else setSyncState("offline");
+      },
+    });
+
+    setProvider(hocuspocusProvider);
+
     return () => {
-      if (debounceTimeoutRef.current) clearTimeout(debounceTimeoutRef.current)
-    }
-  }, [])
+      hocuspocusProvider.destroy();
+      doc.destroy();
+    };
+  }, [documentId, token, setSyncState]);
+
+  if (!provider || !ydoc) {
+    return (
+      <div className="flex items-center justify-center w-full h-full min-h-[1056px]">
+        <p className="text-zinc-500">Connecting to document server...</p>
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -69,6 +105,8 @@ export function Editor({ documentId, initialContent = "", currentUserRole = "vie
             blockquote: false,
             bulletList: false,
             orderedList: false,
+            // Disable history because Collaboration extension handles it natively via Yjs
+            history: false,
           }),
           TextStyle,
           Color,
@@ -76,6 +114,18 @@ export function Editor({ documentId, initialContent = "", currentUserRole = "vie
           Highlight,
           Image,
           FontSize,
+          Collaboration.configure({
+            document: ydoc,
+          }),
+          CollaborationCursor.configure({
+            provider: provider,
+            user: {
+              name: currentUserName,
+              color: ["#f43f5e", "#8b5cf6", "#0ea5e9", "#10b981", "#f59e0b", "#d946ef", "#06b6d4", "#f97316"][
+                Math.floor(Math.random() * 8)
+              ],
+            },
+          }),
           CustomLink.configure({
             openOnClick: false,
             autolink: true,
@@ -89,7 +139,6 @@ export function Editor({ documentId, initialContent = "", currentUserRole = "vie
             emptyEditorClass: "is-editor-empty",
           }),
         ]}
-        content={initialContent}
         editorProps={{
           attributes: {
             class:
@@ -106,22 +155,6 @@ export function Editor({ documentId, initialContent = "", currentUserRole = "vie
         }}
         immediatelyRender={false}
         onUpdate={({ editor }) => {
-          if (currentUserRole === 'viewer') return;
-          setSyncState('saving')
-          if (debounceTimeoutRef.current) {
-            clearTimeout(debounceTimeoutRef.current)
-          }
-          debounceTimeoutRef.current = setTimeout(async () => {
-            try {
-              const html = editor.getHTML()
-              await updateDocumentContent(documentId, html)
-              setSyncState('saved')
-            } catch (error) {
-              console.error('Failed to save document:', error)
-              setSyncState('offline')
-            }
-          }, 1500)
-
           if (editor.isActive("link")) {
             const { empty, $from } = editor.state.selection;
             if (empty) {
