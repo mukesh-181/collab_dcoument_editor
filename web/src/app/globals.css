@@ -199,4 +199,17 @@
       transform: translateY(0);
     }
   }
+
+  /* Tiptap Placeholder */
+  .is-editor-empty:first-child::before {
+    color: #a1a1aa; /* zinc-400 */
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+  
+  .dark .is-editor-empty:first-child::before {
+    color: #52525b; /* zinc-600 */
+  }
 }
