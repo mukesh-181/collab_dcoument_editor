@@ -1,10 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+import { ENV } from "../config/env.js";
 
 // This client is strictly for database operations. For auth validation we can just use the public key.
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(ENV.SUPABASE_URL, ENV.SUPABASE_PUBLISHABLE_KEY);

@@ -1,11 +1,12 @@
 import { Server } from "@hocuspocus/server";
 import * as Y from "yjs";
 import { supabase } from "../lib/supabase.js";
+import { ENV } from "./env.js";
 
 export const server = new Server({
-  port: 1235,
+  port: ENV.PORT,
   async onListen() {
-    console.log(`[Hocuspocus] Server is running on port 1235`);
+    console.log(`[Hocuspocus] Server is running on port ${ENV.PORT}`);
   },
 
   async onAuthenticate(data) {

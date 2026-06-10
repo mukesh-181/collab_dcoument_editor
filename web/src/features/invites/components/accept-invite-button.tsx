@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { acceptInvite } from '../actions/invite.actions'
+import { acceptInvite } from '../actions/accept-invite.action'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 

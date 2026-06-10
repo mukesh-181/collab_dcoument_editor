@@ -1,5 +1,6 @@
 "use client";
 
+import { ENV } from "@/lib/constants/env";
 import { EditorProvider } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -17,7 +18,7 @@ import * as Y from "yjs";
 import { FontSize } from "../extensions/font-size";
 import { Toolbar } from "./toolbar";
 import { LinkBubbleMenu } from "./link-bubble-menu";
-import { useDocumentSync } from "@/features/document/components/document-context";
+import { useDocumentSync } from "@/features/document/components/page/document-context";
 import { useEffect, useState, useRef } from "react";
 
 interface EditorProps {
@@ -34,7 +35,12 @@ const CustomLink = Link.extend({
   },
 });
 
-export function Editor({ documentId, currentUserRole = "viewer", currentUserName, token }: EditorProps) {
+export function Editor({
+  documentId,
+  currentUserRole = "viewer",
+  currentUserName,
+  token,
+}: EditorProps) {
   const { setSyncState } = useDocumentSync();
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
@@ -46,8 +52,9 @@ export function Editor({ documentId, currentUserRole = "viewer", currentUserName
     const doc = new Y.Doc();
     setYdoc(doc);
 
-    const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:1235";
-    
+
+    const wsUrl = ENV.WEBSOCKET_URL;
+
     const hocuspocusProvider = new HocuspocusProvider({
       url: wsUrl,
       name: documentId,
@@ -77,7 +84,7 @@ export function Editor({ documentId, currentUserRole = "viewer", currentUserName
   }
 
   return (
-    <div 
+    <div
       className="flex flex-col w-full min-h-full"
       onClickCapture={(e) => {
         const target = e.target as HTMLElement;
@@ -87,9 +94,9 @@ export function Editor({ documentId, currentUserRole = "viewer", currentUserName
       }}
     >
       <EditorProvider
-        editable={currentUserRole !== 'viewer'}
+        editable={currentUserRole !== "viewer"}
         slotBefore={
-          currentUserRole !== 'viewer' && (
+          currentUserRole !== "viewer" && (
             <div className="sticky top-0 z-10 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 p-2 flex justify-center shadow-sm">
               <div className="w-full max-w-[816px]">
                 <Toolbar />
@@ -121,9 +128,16 @@ export function Editor({ documentId, currentUserRole = "viewer", currentUserName
             provider: provider,
             user: {
               name: currentUserName,
-              color: ["#f43f5e", "#8b5cf6", "#0ea5e9", "#10b981", "#f59e0b", "#d946ef", "#06b6d4", "#f97316"][
-                Math.floor(Math.random() * 8)
-              ],
+              color: [
+                "#f43f5e",
+                "#8b5cf6",
+                "#0ea5e9",
+                "#10b981",
+                "#f59e0b",
+                "#d946ef",
+                "#06b6d4",
+                "#f97316",
+              ][Math.floor(Math.random() * 8)],
             },
           }),
           CustomLink.configure({
@@ -158,8 +172,12 @@ export function Editor({ documentId, currentUserRole = "viewer", currentUserName
           if (editor.isActive("link")) {
             const { empty, $from } = editor.state.selection;
             if (empty) {
-              const isLinkBefore = $from.nodeBefore?.marks.some((mark: any) => mark.type.name === "link");
-              const isLinkAfter = $from.nodeAfter?.marks.some((mark: any) => mark.type.name === "link");
+              const isLinkBefore = $from.nodeBefore?.marks.some(
+                (mark: any) => mark.type.name === "link",
+              );
+              const isLinkAfter = $from.nodeAfter?.marks.some(
+                (mark: any) => mark.type.name === "link",
+              );
               if (!isLinkBefore && !isLinkAfter) {
                 editor.commands.unsetLink();
               }
@@ -170,8 +188,12 @@ export function Editor({ documentId, currentUserRole = "viewer", currentUserName
           if (editor.isActive("link")) {
             const { empty, $from } = editor.state.selection;
             if (empty) {
-              const isLinkBefore = $from.nodeBefore?.marks.some((mark: any) => mark.type.name === "link");
-              const isLinkAfter = $from.nodeAfter?.marks.some((mark: any) => mark.type.name === "link");
+              const isLinkBefore = $from.nodeBefore?.marks.some(
+                (mark: any) => mark.type.name === "link",
+              );
+              const isLinkAfter = $from.nodeAfter?.marks.some(
+                (mark: any) => mark.type.name === "link",
+              );
               if (!isLinkBefore && !isLinkAfter) {
                 editor.commands.unsetLink();
               }
@@ -179,7 +201,7 @@ export function Editor({ documentId, currentUserRole = "viewer", currentUserName
           }
         }}
       >
-        {currentUserRole !== 'viewer' && <LinkBubbleMenu />}
+        {currentUserRole !== "viewer" && <LinkBubbleMenu />}
       </EditorProvider>
     </div>
   );
