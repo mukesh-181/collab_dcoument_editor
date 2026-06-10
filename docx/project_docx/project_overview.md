@@ -57,7 +57,7 @@ We group our files by feature rather than putting everything directly into the N
 - **`src/app/`**: This is strictly for URL routing (like `page.tsx` and `layout.tsx`).
 - **`src/features/`**: This is where the actual logic lives. We have folders for `auth`, `dashboard`, and `editor`. 
   - **Single-Responsibility Actions**: Inside each feature's `actions/` folder, every server action has its own dedicated file (e.g., `login.action.ts`, `create-document.action.ts`). This ensures maximum tree-shaking and reduces bundle sizes.
-  - **Granular Components**: Complex UI components (like the Editor Toolbar) are decomposed into smaller sub-components (like `history-controls.tsx`) for easier maintenance and faster compilation.
+  - **Granular Components**: Complex UI components (like the Editor Toolbar and Dashboard Action Menus) are decomposed into smaller sub-components (like `history-controls.tsx` or `document-rename-dialog.tsx`) for easier maintenance, readability, and faster compilation. We adhere strictly to the rule of avoiding massive monolithic files by breaking down logic into reusable parts whenever possible.
 - **`src/components/ui/`**: Reusable Shadcn UI components.
 - **`src/lib/constants/env.ts`**: A centralized configuration file exporting strictly-typed environment variables, so we never access `process.env` randomly throughout the app.
 - **`src/lib/supabase/`**: This contains our three Supabase clients. We need three because Next.js runs code in three different places: the browser (`client.ts`), the server (`server.ts`), and the Edge network (`proxy.ts`).
