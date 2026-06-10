@@ -17,7 +17,7 @@ export default async function Page(props: { params: Promise<{ docId: string }> }
   const { data: { user } } = await supabase.auth.getUser()
   const { data: { session } } = await supabase.auth.getSession()
   const token = session?.access_token || ''
-  const currentUserName = user?.user_metadata?.full_name || 'Anonymous'
+  const currentUserName = user?.user_metadata?.full_name || user?.user_metadata?.username || user?.user_metadata?.user_name || user?.user_metadata?.preferred_username || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Anonymous'
   
   // Extract the current user's role from the filtered document_members array
   const currentUserRole = document.document_members?.[0]?.role || 'viewer'
