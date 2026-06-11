@@ -14,17 +14,23 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-export function SignOutButton() {
+export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {}) {
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium h-8 px-3">
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
-        </Button>
+        {iconOnly ? (
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+            <LogOut className="h-[18px] w-[18px]" />
+          </Button>
+        ) : (
+          <Button variant="ghost" size="sm" className="bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium h-8 px-3">
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg">
         <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">

@@ -14,7 +14,7 @@ export function DashboardHeader({ user, documents = [] }: { user: User | null, d
   return (
     <header className="h-14 shrink-0 border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
       <div className="flex items-center gap-4">
-        <MobileSidebar documents={documents} />
+        <MobileSidebar documents={documents} user={user} />
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8 border border-zinc-200 dark:border-zinc-800">
             <AvatarImage src={avatarUrl} alt={displayName} />

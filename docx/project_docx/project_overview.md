@@ -10,7 +10,7 @@ We are building a real-time collaborative document editor. We've finished the fo
 
 - **Authentication**: Users can log in using Email/Password or GitHub. We use Supabase to handle the sessions.
 - **Route Protection**: We have a proxy setup that automatically redirects logged-out users away from private pages (like the dashboard) and sends them to the login page.
-- **Dashboard**: A simple interface where users can view, create, and delete their documents.
+- **Dashboard**: A robust, visually-rich interface where users can view, search, and filter their documents in real-time. It features scaled HTML document thumbnails and stacked presence avatars for a premium feel.
 - **Document Access**: We use server-side checks to make sure users can only open documents they are allowed to see.
 - **Rich Text Editor**: We added a text editor using Tiptap and Tailwind's typography plugin. It features real-time collaborative cursors, an offline-resilient sync state, and a custom responsive formatting toolbar.
 - **Mobile Responsiveness**: The entire application is fully responsive, utilizing Shadcn Sheets for slide-out mobile navigation and horizontally scrollable toolbars.
@@ -57,7 +57,7 @@ We group our files by feature rather than putting everything directly into the N
 - **`src/app/`**: This is strictly for URL routing (like `page.tsx` and `layout.tsx`).
 - **`src/features/`**: This is where the actual logic lives. We have folders for `auth`, `dashboard`, and `editor`. 
   - **Single-Responsibility Actions**: Inside each feature's `actions/` folder, every server action has its own dedicated file (e.g., `login.action.ts`, `create-document.action.ts`). This ensures maximum tree-shaking and reduces bundle sizes.
-  - **Granular Components**: Complex UI components (like the Editor Toolbar and Dashboard Action Menus) are decomposed into smaller sub-components (like `history-controls.tsx` or `document-rename-dialog.tsx`) for easier maintenance, readability, and faster compilation. We adhere strictly to the rule of avoiding massive monolithic files by breaking down logic into reusable parts whenever possible.
+  - **Granular Components & Localized State**: Complex UI components (like the Document Header, Share Dialog, and Editor Toolbar) are deeply decomposed into smaller sub-components (like `document-rename-dialog.tsx`, `create-link-tab.tsx`, or `document-card.tsx`). This localized state approach ensures that typing in a specific form input doesn't trigger unnecessary re-renders of the parent layout shell, drastically improving performance and maintaining strict Single Responsibility Principles (SRP).
 - **`src/components/ui/`**: Reusable Shadcn UI components.
 - **`src/lib/constants/env.ts`**: A centralized configuration file exporting strictly-typed environment variables, so we never access `process.env` randomly throughout the app.
 - **`src/lib/supabase/`**: This contains our three Supabase clients. We need three because Next.js runs code in three different places: the browser (`client.ts`), the server (`server.ts`), and the Edge network (`proxy.ts`).

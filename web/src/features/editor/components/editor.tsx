@@ -21,6 +21,7 @@ import { LinkBubbleMenu } from "./link-bubble-menu";
 import { useDocumentSync } from "@/features/document/components/page/document-context";
 import { useEffect, useState, useRef } from "react";
 import { OfflineBanner } from "./offline-banner";
+import { EditorSkeleton } from "@/features/document/components/page/document-skeleton";
 
 interface EditorProps {
   documentId: string;
@@ -42,9 +43,11 @@ export function Editor({
   currentUserName,
   token,
 }: EditorProps) {
-  const { setSyncState, setActiveUsers } = useDocumentSync();
+  const { setSyncState, setActiveUsers, setIsEditorReady } = useDocumentSync();
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
+  const [isSynced, setIsSynced] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     // Only connect to WebSocket if we have a valid token
@@ -52,7 +55,6 @@ export function Editor({
 
     const doc = new Y.Doc();
     setYdoc(doc);
-
 
     const wsUrl = ENV.WEBSOCKET_URL;
 
@@ -62,9 +64,20 @@ export function Editor({
       document: doc,
       token,
       onStatus: ({ status }) => {
-        if (status === "connected") setSyncState("saved");
-        else if (status === "connecting") setSyncState("saving");
-        else setSyncState("offline");
+        if (status === "connected") {
+          setSyncState("saved");
+          setIsOffline(false);
+        } else if (status === "connecting") {
+          setSyncState("saving");
+        } else {
+          setSyncState("offline");
+          setIsOffline(true);
+          setIsEditorReady(true);
+        }
+      },
+      onSynced: () => {
+        setIsSynced(true);
+        setIsEditorReady(true);
       },
       onAwarenessUpdate: ({ states }) => {
         const users: any[] = [];
@@ -83,14 +96,12 @@ export function Editor({
       hocuspocusProvider.destroy();
       doc.destroy();
     };
-  }, [documentId, token, setSyncState]);
+  }, [documentId, token, setSyncState, setIsEditorReady]);
 
-  if (!provider || !ydoc) {
-    return (
-      <div className="flex items-center justify-center w-full h-full min-h-[1056px]">
-        <p className="text-zinc-500">Connecting to document server...</p>
-      </div>
-    );
+  // The parent DocumentClientLayout handles the full page skeleton overlay.
+  // We just return null until we are ready to mount the actual editor.
+  if (!provider || !ydoc || (!isSynced && !isOffline)) {
+    return null;
   }
 
   return (

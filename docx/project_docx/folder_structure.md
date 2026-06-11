@@ -138,6 +138,7 @@ collab_docx/
 │       │   │   │   │   └── sidebar-doc-list.tsx       # Client component — highlights active document
 │       │   │   │   └── page/
 │       │   │   │       ├── dashboard-header.tsx
+│       │   │   │       ├── document-card.tsx          # Extracted single document preview card
 │       │   │   │       ├── document-list.tsx
 │       │   │   │       └── document-list-skeleton.tsx # Loading skeleton for the dashboard table
 │       │   │   │
@@ -151,9 +152,14 @@ collab_docx/
 │       │   │   ├── components/
 │       │   │   │   ├── document-page.tsx
 │       │   │   │   └── page/
-│       │   │   │       ├── active-users-cluster.tsx # Renders online member avatars
-│       │   │   │       ├── document-context.tsx  # Context Provider — manages sync state
-│       │   │   │       └── document-header.tsx   # Client component — top navigation bar
+│       │   │   │       ├── active-users-cluster.tsx   # Renders online member avatars
+│       │   │   │       ├── document-client-layout.tsx # Layout wrapper for document pages
+│       │   │   │       ├── document-context.tsx       # Context Provider — manages sync state
+│       │   │   │       ├── document-header.tsx        # Client component — top navigation bar
+│       │   │   │       ├── document-members-popover.tsx # Popover displaying full member list
+│       │   │   │       ├── document-rename-dialog.tsx # Dialog for renaming document titles
+│       │   │   │       ├── document-skeleton.tsx      # Skeleton loader for documents
+│       │   │   │       └── document-sync-status.tsx   # UI indicator for save/offline states
 │       │   │   │
 │       │   │   └── hooks/
 │       │   │
@@ -186,8 +192,10 @@ collab_docx/
 │       │   │   │
 │       │   │   ├── components/
 │       │   │   │   ├── accept-invite-button.tsx
+│       │   │   │   ├── create-link-tab.tsx       # Extracted link generation form tab
 │       │   │   │   ├── invite-page.tsx
-│       │   │   │   └── share-dialog.tsx  # Client component — Dialog to generate one-time invite links
+│       │   │   │   ├── send-email-tab.tsx        # Extracted email sending form tab
+│       │   │   │   └── share-dialog.tsx          # Client component — Dialog container for invites
 │       │   │   │
 │       │   │   └── hooks/
 │       │   │
