@@ -54,24 +54,24 @@ export function ShareDialog({ documentId }: { documentId: string }) {
         </div>
 
         <div className="p-6">
-          <Tabs defaultValue="link" className="w-full">
+          <Tabs defaultValue="email" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="link" className="text-[13px]">
-                <LinkIcon className="h-3.5 w-3.5 mr-2" />
-                Create Link
-              </TabsTrigger>
               <TabsTrigger value="email" className="text-[13px]">
                 <Mail className="h-3.5 w-3.5 mr-2" />
                 Send via Email
               </TabsTrigger>
+              <TabsTrigger value="link" className="text-[13px]">
+                <LinkIcon className="h-3.5 w-3.5 mr-2" />
+                Create Link
+              </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="link" className="outline-none">
-              <CreateLinkTab documentId={documentId} />
-            </TabsContent>
 
             <TabsContent value="email" className="outline-none">
               <SendEmailTab />
+            </TabsContent>
+
+            <TabsContent value="link" className="outline-none">
+              <CreateLinkTab documentId={documentId} />
             </TabsContent>
           </Tabs>
         </div>
