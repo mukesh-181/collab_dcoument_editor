@@ -96,10 +96,14 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
           <Button
             onClick={handleCreateLink}
             disabled={isLoading}
-            className="w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-11 font-medium mt-2"
+            className="relative w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-11 font-medium mt-2"
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Generate Link
+            <span className={isLoading ? "opacity-0" : ""}>Generate Link</span>
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+            )}
           </Button>
         </div>
       ) : (

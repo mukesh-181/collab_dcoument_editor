@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,8 +39,9 @@ export function DocumentRenameDialog({
     }
   }, [isOpen, documentTitle]);
 
-  const handleTitleChange = async (formData: FormData) => {
-    const newTitle = (formData.get("title") as string) || documentTitle;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const newTitle = draftTitle;
     if (newTitle.trim() === documentTitle || newTitle.trim() === "") {
       setIsOpen(false);
       return;
@@ -67,7 +68,7 @@ export function DocumentRenameDialog({
         className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <form action={handleTitleChange}>
+        <form onSubmit={handleSubmit}>
           <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
             <DialogHeader>
               <div className="flex items-center gap-3">
@@ -118,9 +119,14 @@ export function DocumentRenameDialog({
             <Button 
               type="submit" 
               disabled={isSaveDisabled}
-              className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-10 px-6 font-medium"
+              className="relative bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-10 px-6 font-medium"
             >
-              {isPending ? "Saving..." : "Save"}
+              <span className={isPending ? "opacity-0" : ""}>Save</span>
+              {isPending && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              )}
             </Button>
           </DialogFooter>
         </form>
