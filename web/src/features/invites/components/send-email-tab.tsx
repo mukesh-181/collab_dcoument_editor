@@ -103,10 +103,17 @@ export function SendEmailTab({ documentId }: { documentId: string }) {
       <Button
         type="submit"
         disabled={isSubmitDisabled}
-        className="w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-11 font-medium mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="relative w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-11 font-medium mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <Send className="mr-2 h-4 w-4" />
-        Send Invitation
+        <span className={isSubmitting ? "opacity-0 flex items-center justify-center" : "flex items-center justify-center"}>
+          <Send className="mr-2 h-4 w-4" />
+          Send Invitation
+        </span>
+        {isSubmitting && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        )}
       </Button>
     </form>
   );
