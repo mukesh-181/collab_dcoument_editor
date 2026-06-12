@@ -164,9 +164,13 @@ export function RegisterForm({ next }: { next?: string }) {
         />
 
         <div className="pt-2">
-          <Button type="submit" className="w-full h-12 text-base bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg font-semibold cursor-pointer hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-200" disabled={isLoading}>
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Create Account
+          <Button type="submit" className="relative w-full h-12 text-base bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg font-semibold cursor-pointer hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-200" disabled={isLoading}>
+            <span className={isLoading ? "opacity-0" : ""}>Create Account</span>
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+            )}
           </Button>
         </div>
       </form>

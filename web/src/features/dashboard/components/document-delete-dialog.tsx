@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { deleteDocument } from "@/features/dashboard/actions/delete-document.action";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface DocumentDeleteDialogProps {
   documentId: string;
@@ -97,9 +98,14 @@ export function DocumentDeleteDialog({
             variant="destructive"
             disabled={isPending}
             onClick={handleDelete}
-            className="shadow-sm rounded-lg h-10 px-6 font-medium bg-red-600 hover:bg-red-700 text-white"
+            className="relative shadow-sm rounded-lg h-10 px-6 font-medium bg-red-600 hover:bg-red-700 text-white"
           >
-            {isPending ? "Deleting..." : "Delete Document"}
+            <span className={isPending ? "opacity-0" : ""}>Delete Document</span>
+            {isPending && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

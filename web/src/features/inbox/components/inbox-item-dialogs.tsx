@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
 
 interface InboxItemDialogsProps {
   isAcceptOpen: boolean;
@@ -53,9 +54,14 @@ export function InboxItemDialogs({
             <AlertDialogAction 
               onClick={(e) => { e.preventDefault(); onAccept(); }} 
               disabled={isLoading} 
-              className="bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              className="relative bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
             >
-              {isLoading ? "Accepting..." : "Accept"}
+              <span className={isLoading ? "opacity-0" : ""}>Accept</span>
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -74,9 +80,14 @@ export function InboxItemDialogs({
             <AlertDialogAction 
               onClick={(e) => { e.preventDefault(); onReject(); }} 
               disabled={isLoading} 
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="relative bg-red-600 text-white hover:bg-red-700"
             >
-              {isLoading ? "Rejecting..." : "Reject"}
+              <span className={isLoading ? "opacity-0" : ""}>Reject</span>
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -95,9 +106,14 @@ export function InboxItemDialogs({
             <AlertDialogAction 
               onClick={(e) => { e.preventDefault(); onDelete(); }} 
               disabled={isLoading} 
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="relative bg-red-600 text-white hover:bg-red-700"
             >
-              {isLoading ? "Deleting..." : "Delete"}
+              <span className={isLoading ? "opacity-0" : ""}>Delete</span>
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
