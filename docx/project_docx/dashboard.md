@@ -11,6 +11,9 @@ When you look at the Dashboard, you're seeing two main things working together: 
 ### Fetching Documents (Server Components)
 When you visit `/dashboard`, the server securely checks who you are and asks Supabase for a list of your documents. Because the server does this *before* it sends the HTML to your browser, you never see a "loading spinner" or a flash of an empty page. It just works instantly. We display these documents in a sleek, professional table-list view.
 
+### Dashboard Scroll Behavior
+The dashboard is intentionally viewport-locked. The outer dashboard shell is fixed to the visible browser window and clips overflow, so the sidebar, account header, page title, and table header stay still. If the user has enough documents to overflow the available space, only the document rows scroll. The row container uses `overscroll-contain` so wheel or trackpad gestures inside the list do not leak into a full-page scroll.
+
 ### Creating & Deleting Documents (Server Actions)
 When you click the "New Document" or "Delete" button, we don't use messy API routes. Instead, we use **Server Actions** (`document.actions.ts`). 
 - **Creating**: The server creates a blank "Untitled Document" in the database and immediately links your user ID to it as the `owner`. Then it instantly redirects you into the editor.

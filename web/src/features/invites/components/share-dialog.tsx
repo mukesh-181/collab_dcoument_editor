@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Share2, Copy, Check, Loader2, AlertCircle } from 'lucide-react'
+import { useState } from "react";
+import { Share2, Link as LinkIcon, Mail } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,71 +9,25 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useDocumentSync } from '@/features/document/components/document-context'
-import { createInviteLink } from '../actions/invite.actions'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDocumentSync } from "@/features/document/components/page/document-context";
+import { CreateLinkTab } from "./create-link-tab";
+import { SendEmailTab } from "./send-email-tab";
 
 export function ShareDialog({ documentId }: { documentId: string }) {
-  const { syncState } = useDocumentSync()
-  const [isOpen, setIsOpen] = useState(false)
-  const [role, setRole] = useState<'viewer' | 'editor'>('viewer')
-  const [inviteLink, setInviteLink] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
-  const [error, setError] = useState('')
+  const { syncState } = useDocumentSync();
+  const [isOpen, setIsOpen] = useState(false);
 
-  const isSavePending = syncState !== 'saved'
-
-  const handleCreateLink = async () => {
-    setIsLoading(true)
-    setError('')
-    try {
-      const token = await createInviteLink(documentId, role)
-      const url = new URL(`/dashboard/invite?token=${token}`, window.location.origin)
-      setInviteLink(url.toString())
-    } catch (err: any) {
-      setError(err.message || 'Failed to create invite link')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(inviteLink)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy text: ', err)
-    }
-  }
-
-  const resetState = (open: boolean) => {
-    setIsOpen(open)
-    if (!open) {
-      setTimeout(() => {
-        setInviteLink('')
-        setError('')
-        setRole('viewer')
-      }, 300) // reset after animation
-    }
-  }
+  const isSavePending = syncState !== "saved";
 
   return (
-    <Dialog open={isOpen} onOpenChange={resetState}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           disabled={isSavePending}
           className="gap-2"
         >
@@ -81,55 +35,48 @@ export function ShareDialog({ documentId }: { documentId: string }) {
           Invite
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Share Document</DialogTitle>
-          <DialogDescription>
-            Create a one-time invite link to add a collaborator.
-          </DialogDescription>
-        </DialogHeader>
-
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium p-3 rounded-md mt-2 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            {error}
-          </div>
-        )}
-
-        {!inviteLink ? (
-          <div className="flex items-center gap-2 mt-4">
-            <Select value={role} onValueChange={(val: 'viewer' | 'editor') => setRole(val)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="viewer">Viewer</SelectItem>
-                <SelectItem value="editor">Editor</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={handleCreateLink} disabled={isLoading} className="flex-1">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Link
-            </Button>
-          </div>
-        ) : (
-          <div className="mt-4 p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg flex flex-col gap-3">
-            <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              One-time link generated successfully
+      
+      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg">
+        <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                <Share2 className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+              </div>
+              <div className="text-left">
+                <DialogTitle className="text-xl font-semibold">Share Document</DialogTitle>
+                <DialogDescription className="mt-1.5 -ml-2 text-[13px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/50 dark:bg-zinc-800/50 px-2 py-1 rounded-md inline-block">
+                  Add collaborators to your document.
+                </DialogDescription>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Input
-                readOnly
-                value={inviteLink}
-                className="flex-1 bg-white dark:bg-zinc-950 font-mono text-xs"
-              />
-              <Button size="icon" variant="secondary" onClick={handleCopy} className="shrink-0">
-                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-          </div>
-        )}
+          </DialogHeader>
+        </div>
+
+        <div className="p-6">
+          <Tabs defaultValue="email" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="email" className="text-[13px]">
+                <Mail className="h-3.5 w-3.5 mr-2" />
+                Send via Email
+              </TabsTrigger>
+              <TabsTrigger value="link" className="text-[13px]">
+                <LinkIcon className="h-3.5 w-3.5 mr-2" />
+                Create Link
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="email" className="outline-none">
+              <SendEmailTab documentId={documentId} />
+            </TabsContent>
+
+            <TabsContent value="link" className="outline-none">
+              <CreateLinkTab documentId={documentId} />
+            </TabsContent>
+          </Tabs>
+        </div>
+
       </DialogContent>
     </Dialog>
-  )
+  );
 }
