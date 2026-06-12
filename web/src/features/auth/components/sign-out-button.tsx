@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { LogOut } from 'lucide-react'
+import { LogOut, Loader2 } from 'lucide-react'
 import { logout } from '@/features/auth/actions/logout.action'
 import {
   Dialog,
@@ -17,6 +17,12 @@ import {
 export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {}) {
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
+
+  const handleSignOut = async () => {
+    setIsPending(true)
+    await logout()
+    // Note: We don't set setIsPending(false) because logout() triggers a page redirect.
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -68,16 +74,19 @@ export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {})
           
           <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1 hidden sm:block" />
           
-          <form action={logout}>
-            <Button 
-              type="submit" 
-              disabled={isPending}
-              onClick={() => setIsPending(true)}
-              className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-10 px-6 font-medium"
-            >
-              {isPending ? 'Signing out...' : 'Sign Out'}
-            </Button>
-          </form>
+          <Button 
+            type="button" 
+            disabled={isPending}
+            onClick={handleSignOut}
+            className="relative bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-10 px-6 font-medium"
+          >
+            <span className={isPending ? "opacity-0" : ""}>Sign Out</span>
+            {isPending && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

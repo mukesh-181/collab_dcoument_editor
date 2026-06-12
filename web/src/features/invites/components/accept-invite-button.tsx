@@ -23,14 +23,12 @@ export function AcceptInviteButton({ token }: { token: string }) {
   }
 
   return (
-    <Button onClick={handleAccept} disabled={isLoading} className="w-full">
-      {isLoading ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Joining...
-        </>
-      ) : (
-        'Accept Invite'
+    <Button onClick={handleAccept} disabled={isLoading} className="relative w-full">
+      <span className={isLoading ? "opacity-0" : ""}>Accept Invite</span>
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
       )}
     </Button>
   )

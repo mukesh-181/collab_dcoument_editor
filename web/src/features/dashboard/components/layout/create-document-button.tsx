@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, FileText } from 'lucide-react'
+import { Plus, FileText, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -23,7 +23,9 @@ export function CreateDocumentButton({ children }: { children?: React.ReactNode 
   const [isPending, setIsPending] = useState(false)
   const router = useRouter()
 
-  async function onSubmit(formData: FormData) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
     setIsPending(true)
     try {
       const newDocId = await createDocument(formData)
@@ -47,7 +49,7 @@ export function CreateDocumentButton({ children }: { children?: React.ReactNode 
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg">
-        <form action={onSubmit}>
+        <form onSubmit={handleSubmit}>
           <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
             <DialogHeader>
               <div className="flex items-center gap-3">
@@ -97,9 +99,14 @@ export function CreateDocumentButton({ children }: { children?: React.ReactNode 
             <Button 
               type="submit" 
               disabled={isPending}
-              className="bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-10 px-6 font-medium"
+              className="relative bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-10 px-6 font-medium"
             >
-              {isPending ? 'Creating...' : 'Create Document'}
+              <span className={isPending ? "opacity-0" : ""}>Create Document</span>
+              {isPending && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              )}
             </Button>
           </DialogFooter>
         </form>
