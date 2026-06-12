@@ -11,7 +11,7 @@ export async function acceptInvite(token: string) {
   // Find the pending invite
   const { data: invite, error: inviteError } = await supabase
     .from('invites')
-    .select('id, document_id, role, status')
+    .select('id, document_id, role, status, expires_at')
     .eq('token', token)
     .single()
 
@@ -21,6 +21,10 @@ export async function acceptInvite(token: string) {
 
   if (invite.status !== 'pending') {
     throw new Error('This invite link has already been used')
+  }
+
+  if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+    throw new Error('This invite link has expired')
   }
 
   // Check if user is already a member

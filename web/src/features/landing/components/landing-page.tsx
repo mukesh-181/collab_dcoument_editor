@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/layout/navbar";
-import { Hero } from "./page/hero";
-import { EditorMockup } from "./page/editor-mockup";
-import { Footer } from "./page/footer";
+import { Hero } from "./hero";
+import { EditorMockup } from "./editor-mockup";
+import { Footer } from "./footer";
 import { User } from "@supabase/supabase-js";
 
 export function LandingPage({ user }: { user: User | null }) {

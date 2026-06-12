@@ -18,7 +18,7 @@ import { createDocument } from '../../actions/create-document.action'
 
 import { useRouter } from 'next/navigation'
 
-export function CreateDocumentButton() {
+export function CreateDocumentButton({ children }: { children?: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
   const router = useRouter()
@@ -39,10 +39,12 @@ export function CreateDocumentButton() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full justify-start bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm font-medium h-10 text-[15px] rounded-lg transition-transform hover:-translate-y-0.5 hover:shadow-md duration-200">
-          <Plus className="mr-2 h-[18px] w-[18px]" />
-          New Document
-        </Button>
+        {children ? children : (
+          <Button variant="ghost" className="w-full justify-start text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium h-9 px-3 rounded-xl transition-all">
+            <Plus className="mr-2.5 h-[16px] w-[16px]" />
+            <span className="text-[13px]">New Document</span>
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg">
         <form action={onSubmit}>
