@@ -1,0 +1,65 @@
+'use client'
+
+import { useEffect, useMemo } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+
+export function InboxRealtimeListener() {
+  const router = useRouter()
+  const supabase = useMemo(() => createClient(), [])
+
+  useEffect(() => {
+    let isMounted = true
+    let channel: ReturnType<typeof supabase.channel>
+
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!isMounted || !user?.email) return
+
+      // Use a unique channel name per mount to completely avoid collision in React Strict Mode
+      const channelName = `inbox-changes-${crypto.randomUUID()}`
+      
+      channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'invites',
+            filter: `email=eq.${user.email}`,
+          },
+          (payload) => {
+            toast.success("You have a new invite!")
+            router.refresh()
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'invites',
+            filter: `email=eq.${user.email}`,
+          },
+          (payload) => {
+            router.refresh()
+          }
+        )
+        
+      channel.subscribe()
+    }
+
+    setupRealtime()
+
+    return () => {
+      isMounted = false
+      if (channel) {
+        supabase.removeChannel(channel)
+      }
+    }
+  }, [supabase, router])
+
+  return null
+}

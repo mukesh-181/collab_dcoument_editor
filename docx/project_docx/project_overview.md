@@ -11,6 +11,7 @@ We are building a real-time collaborative document editor. We've finished the fo
 - **Authentication**: Users can log in using Email/Password or GitHub. We use Supabase to handle the sessions.
 - **Route Protection**: We have a proxy setup that automatically redirects logged-out users away from private pages (like the dashboard) and sends them to the login page.
 - **Dashboard**: A robust, visually-rich interface where users can view, search, and filter their documents in real-time. It features scaled HTML document thumbnails and stacked presence avatars for a premium feel.
+- **Interactive Inbox**: A dedicated, fully persistent UI (`/inbox`) that displays all incoming document invitations, allowing users to securely Accept, Reject, or Delete them while preserving historical status.
 - **Document Access**: We use server-side checks to make sure users can only open documents they are allowed to see.
 - **Rich Text Editor**: We added a text editor using Tiptap and Tailwind's typography plugin. It features real-time collaborative cursors, an offline-resilient sync state, and a custom responsive formatting toolbar.
 - **Mobile Responsiveness**: The entire application is fully responsive, utilizing Shadcn Sheets for slide-out mobile navigation and horizontally scrollable toolbars.
@@ -54,8 +55,8 @@ To prevent the page from flashing a logged-out state before realizing the user i
 
 We group our files by feature rather than putting everything directly into the Next.js `app/` folder.
 
-- **`src/app/`**: This is strictly for URL routing (like `page.tsx` and `layout.tsx`).
-- **`src/features/`**: This is where the actual logic lives. We have folders for `auth`, `dashboard`, and `editor`. 
+- **`src/app/`**: This is strictly for URL routing (like `page.tsx` and `layout.tsx`). We use Route Groups (like `(home)`) to structurally isolate elements like skeleton loaders (`loading.tsx`), ensuring they never trigger unintentionally during deep navigation.
+- **`src/features/`**: This is where the actual logic lives. We have folders for `auth`, `dashboard`, `editor`, `invites`, and `inbox`. 
   - **Single-Responsibility Actions**: Inside each feature's `actions/` folder, every server action has its own dedicated file (e.g., `login.action.ts`, `create-document.action.ts`). This ensures maximum tree-shaking and reduces bundle sizes.
   - **Granular Components & Localized State**: Complex UI components (like the Document Header, Share Dialog, and Editor Toolbar) are deeply decomposed into smaller sub-components (like `document-rename-dialog.tsx`, `create-link-tab.tsx`, or `document-card.tsx`). This localized state approach ensures that typing in a specific form input doesn't trigger unnecessary re-renders of the parent layout shell, drastically improving performance and maintaining strict Single Responsibility Principles (SRP).
 - **`src/components/ui/`**: Reusable Shadcn UI components.
@@ -99,11 +100,12 @@ To ensure the editor feels production-ready, we implemented comprehensive UX saf
 
 We've built a robust sharing system that allows users to invite others to their documents securely.
 
-### One-Time Invite Links
-Instead of generating a generic link that anyone can copy and paste forever, our system uses **one-time use tokens**. 
-1. When you click the "Invite" button, the server generates a unique, random string (a UUID) and saves it in the database as a `pending` invite.
-2. When someone clicks that link, the server checks the database. If the token is still `pending`, it adds them to the document and instantly marks the token as `accepted`. 
-3. If anyone else tries to use that exact same link later, the system will reject them. This ensures you always know exactly who is joining your document.
+### One-Time Invite Links & Bulk Emails
+Instead of generating a generic link that anyone can copy and paste forever, our system uses **one-time use tokens** and **targeted email campaigns**. 
+1. When you use the Invite dialog, you can either generate a single secure link or type multiple email addresses. The system provides immediate, asynchronous database lookups to fetch GitHub avatars and names as you type.
+2. The server generates a unique, random string (a UUID) with a 24-hour expiration for each recipient, saving them in the database as a `pending` invite.
+3. When someone processes the token, the server checks the database. If the token is still `pending`, it adds them to the document and instantly marks the token as `accepted`. 
+4. If anyone else tries to use that exact same link later, the system will reject them. This ensures you always know exactly who is joining your document.
 
 ### Flawless Onboarding
 If you send an invite link to a friend who doesn't even have an account yet, our Edge Proxy handles it perfectly. The proxy sees they are logged out, remembers the exact invite token they were trying to use, redirects them to the signup page, and then automatically bounces them back to process the invite the moment they finish creating their account. They never lose the link.

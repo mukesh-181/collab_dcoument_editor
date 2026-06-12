@@ -67,7 +67,7 @@ export function ShareDialog({ documentId }: { documentId: string }) {
             </TabsList>
 
             <TabsContent value="email" className="outline-none">
-              <SendEmailTab />
+              <SendEmailTab documentId={documentId} />
             </TabsContent>
 
             <TabsContent value="link" className="outline-none">

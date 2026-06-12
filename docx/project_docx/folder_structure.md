@@ -50,14 +50,17 @@ collab_docx/
 │       │   │       └── route.ts        # OAuth callback — exchanges auth code for session (PKCE flow)
 │       │   │
 │       │   ├── dashboard/
+│       │   │   ├── (home)/
+│       │   │   │   ├── loading.tsx         # Instantly rendered Suspense fallback using skeletons
+│       │   │   │   └── page.tsx            # Dashboard home — top navbar + document table list with CRUD actions
 │       │   │   ├── [docId]/
 │       │   │   │   └── page.tsx        # Dynamic document page — displays individual document by ID
 │       │   │   ├── invite/
 │       │   │   │   └── page.tsx        # Intermediate Accept/Cancel invitation screen
-│       │   │   ├── layout.tsx          # Dashboard layout shell — provides global sidebar navigation
-│       │   │   ├── loading.tsx         # Instantly rendered Suspense fallback using skeletons
-│       │   │   └── page.tsx            # Dashboard home — top navbar + document table list with CRUD actions
+│       │   │   └── layout.tsx          # Dashboard layout shell — provides global sidebar navigation
 │       │   │
+│       │   ├── inbox/
+│       │   │   └── page.tsx            # Interactive inbox displaying pending and historical invitations
 │       │   ├── favicon.ico             # Browser tab icon
 │       │   ├── globals.css             # Global styles, Tailwind directives, CSS custom properties
 │       │   ├── layout.tsx              # Root layout — wraps entire app with fonts, metadata, Toaster
@@ -144,6 +147,16 @@ collab_docx/
 │       │   │   │
 │       │   │   └── hooks/
 │       │   │
+│       │   ├── inbox/                    # Inbox feature
+│       │   │   ├── actions/
+│       │   │   │   ├── delete-invite.action.ts
+│       │   │   │   ├── get-inbox.action.ts
+│       │   │   │   └── reject-invite.action.ts
+│       │   │   ├── components/
+│       │   │   │   ├── inbox-item.tsx        # Individual persistent invitation card
+│       │   │   │   └── inbox-list.tsx        # Server component fetching and mapping invites
+│       │   │   └── hooks/
+│       │   │
 │       │   ├── document/               # Document-level operations
 │       │   │   ├── actions/
 │       │   │   │   ├── get-document-by-id.action.ts
@@ -194,8 +207,9 @@ collab_docx/
 │       │   │   │   ├── accept-invite-button.tsx
 │       │   │   │   ├── create-link-tab.tsx       # Extracted link generation form tab
 │       │   │   │   ├── invite-page.tsx
-│       │   │   │   ├── send-email-tab.tsx        # Extracted email sending form tab
-│       │   │   │   └── share-dialog.tsx          # Client component — Dialog container for invites
+│       │   │   │   ├── send-email-tab.tsx        # Bulk email dispatch form
+│       │   │   │   ├── share-dialog.tsx          # Client component — Dialog container for invites
+│       │   │   │   └── user-search-input.tsx     # Debounced, multi-email token input with Github avatars
 │       │   │   │
 │       │   │   └── hooks/
 │       │   │

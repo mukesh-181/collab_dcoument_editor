@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Eye, Edit2 } from "lucide-react";
+import { Send, Eye, Edit2, Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -11,17 +11,21 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { UserSearchInput, SelectedContact } from "./user-search-input";
+import { sendEmailInvites } from "../actions/send-email-invites.action";
 
-export function SendEmailTab() {
+export function SendEmailTab({ documentId }: { documentId: string }) {
   const [emailRole, setEmailRole] = useState<"viewer" | "editor">("viewer");
   const [email, setEmail] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<SelectedContact[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
-  const handleSendEmail = (e: React.FormEvent) => {
+  const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     
     const targetEmails = selectedContacts.map(c => c.email);
     const trimmedEmail = email.trim();
@@ -36,11 +40,20 @@ export function SendEmailTab() {
     
     if (targetEmails.length === 0) return;
     
-    // Email sending will be handled later
-    console.log("Sending emails to:", targetEmails, "with role:", emailRole);
+    setIsSubmitting(true);
+    try {
+      await sendEmailInvites(documentId, targetEmails, emailRole);
+      toast.success(`Successfully sent invitations to ${targetEmails.length} user${targetEmails.length > 1 ? 's' : ''}`);
+      setSelectedContacts([]);
+      setEmail("");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send invitations");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const isSubmitDisabled = selectedContacts.length === 0 && !isValidEmail(email);
+  const isSubmitDisabled = (selectedContacts.length === 0 && !isValidEmail(email)) || isSubmitting;
 
   return (
     <form onSubmit={handleSendEmail} className="space-y-4">

@@ -12,12 +12,42 @@ import {
 import { User } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
+import { useEffect, useState, useMemo } from "react";
+import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action";
+import { createClient } from "@/lib/supabase/client";
 
 export function SidebarContent({ user }: { documents?: any[], user?: User | null }) {
   const pathname = usePathname();
   const avatarUrl = user?.user_metadata?.avatar_url;
   const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User";
   const initial = fullName.charAt(0).toUpperCase();
+
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    if (!user?.email) return;
+
+    // Fetch initial count
+    getUnreadCount().then(setUnreadCount);
+
+    // Setup realtime listener for instant badge updates globally
+    const channelName = `global-inbox-badge-${crypto.randomUUID()}`;
+    const channel = supabase.channel(channelName)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'invites',
+        filter: `email=eq.${user.email}`,
+      }, () => {
+        getUnreadCount().then(setUnreadCount);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.email, supabase]);
 
   const NavItem = ({ icon: Icon, label, href, badge }: any) => {
     const isActive = pathname === href;
@@ -46,8 +76,12 @@ export function SidebarContent({ user }: { documents?: any[], user?: User | null
             {label}
           </span>
         </div>
-        {badge && (
-          <span className="flex h-5 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 px-2 text-[12px] font-medium text-zinc-600 dark:text-zinc-400">
+        {badge !== undefined && (
+          <span className={`flex h-5 items-center justify-center rounded-full px-2 text-[12px] font-bold ${
+            label === 'Inbox'
+              ? 'bg-red-500 text-white dark:bg-red-600'
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+          }`}>
             {badge}
           </span>
         )}
@@ -74,7 +108,7 @@ export function SidebarContent({ user }: { documents?: any[], user?: User | null
           <div className="text-[13px] font-semibold text-zinc-400 px-3 pb-1">
             Discover
           </div>
-          <NavItem icon={Inbox} label="Inbox" href="/inbox" badge="2" />
+          <NavItem icon={Inbox} label="Inbox" href="/inbox" badge={unreadCount > 0 ? unreadCount : undefined} />
           <NavItem icon={LayoutGrid} label="Dashboard" href="/dashboard" />
         </div>
       </div>
