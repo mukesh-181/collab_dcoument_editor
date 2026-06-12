@@ -1,39 +1,124 @@
+'use client'
+
 import Link from "next/link";
-import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
-import { SidebarDocList } from "./sidebar-doc-list";
-import { CreateDocumentButton } from "./create-document-button";
+import { 
+  Settings, 
+  PlusSquare,
+  Inbox,
+  LayoutGrid
+} from "lucide-react";
+import { User } from "@supabase/supabase-js";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SignOutButton } from "@/features/auth/components/sign-out-button";
+import { useEffect, useState, useMemo } from "react";
+import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action";
+import { createClient } from "@/lib/supabase/client";
 
-export function SidebarContent({ documents }: { documents: any[] }) {
-  return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-14 items-center px-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <Image src="/Logo.png" alt="CollabDoc" width={300} height={40} className="h-10 w-auto" style={{ width: "auto" }} priority />
-        </Link>
-      </div>
+export function SidebarContent({ user }: { documents?: any[], user?: User | null }) {
+  const pathname = usePathname();
+  const avatarUrl = user?.user_metadata?.avatar_url;
+  const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User";
+  const initial = fullName.charAt(0).toUpperCase();
 
-      <div className="px-3 pt-4 shrink-0">
-        <CreateDocumentButton />
-        <div className="h-px bg-zinc-200 dark:bg-zinc-800 mx-1 my-4" />
-      </div>
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const supabase = useMemo(() => createClient(), []);
 
-      <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-1">
-        <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 px-3">
-          Your Documents
+  useEffect(() => {
+    if (!user?.email) return;
+
+    // Fetch initial count
+    getUnreadCount().then(setUnreadCount);
+
+    // Setup realtime listener for instant badge updates globally
+    const channelName = `global-inbox-badge-${crypto.randomUUID()}`;
+    const channel = supabase.channel(channelName)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'invites',
+        filter: `email=eq.${user.email}`,
+      }, () => {
+        getUnreadCount().then(setUnreadCount);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.email, supabase]);
+
+  const NavItem = ({ icon: Icon, label, href, badge }: any) => {
+    const isActive = pathname === href;
+    return (
+      <Link
+        href={href}
+        className={`group flex items-center justify-between h-9 px-3 rounded-xl transition-all ${
+          isActive
+            ? 'bg-white shadow-sm ring-1 ring-zinc-200/50 dark:bg-zinc-800 dark:ring-zinc-700/50'
+            : 'hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400'
+        }`}
+      >
+        <div className="flex items-center">
+          <Icon
+            className={`mr-3 h-[18px] w-[18px] shrink-0 ${
+              isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300'
+            }`}
+          />
+          <span
+            className={`text-[14px] ${
+              isActive
+                ? 'text-zinc-900 dark:text-zinc-100 font-semibold'
+                : 'font-medium group-hover:text-zinc-900 dark:group-hover:text-zinc-100'
+            }`}
+          >
+            {label}
+          </span>
         </div>
+        {badge !== undefined && (
+          <span className={`flex h-5 items-center justify-center rounded-full px-2 text-[12px] font-bold ${
+            label === 'Inbox'
+              ? 'bg-red-500 text-white dark:bg-red-600'
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+          }`}>
+            {badge}
+          </span>
+        )}
+      </Link>
+    );
+  };
 
-        <SidebarDocList documents={documents} />
+  return (
+    <div className="flex h-full flex-col p-4">
+      {/* Profile Section */}
+      <div className="flex items-center justify-between shrink-0 mb-5">
+        <Avatar className="h-10 w-10 border border-zinc-200/50 shadow-sm">
+          <AvatarImage src={avatarUrl} />
+          <AvatarFallback className="bg-zinc-100 text-zinc-900">{initial}</AvatarFallback>
+        </Avatar>
+        <SignOutButton iconOnly />
       </div>
 
-      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 shrink-0">
+      <div className="h-px bg-zinc-100 dark:bg-zinc-800/80 shrink-0 mb-5 -mx-4" />
+
+      <div className="flex-1 overflow-y-auto space-y-6 -mx-2 px-2 pb-4">
+        {/* Discover Section */}
+        <div className="space-y-1">
+          <div className="text-[13px] font-semibold text-zinc-400 px-3 pb-1">
+            Discover
+          </div>
+          <NavItem icon={Inbox} label="Inbox" href="/inbox" badge={unreadCount > 0 ? unreadCount : undefined} />
+          <NavItem icon={LayoutGrid} label="Dashboard" href="/dashboard" />
+        </div>
+      </div>
+
+      <div className="shrink-0 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
         <Button
           variant="ghost"
-          size="sm"
-          className="w-full justify-start text-zinc-600 dark:text-zinc-400 font-normal h-8"
+          className="w-full justify-start text-zinc-500 hover:text-zinc-900 font-medium h-9 rounded-lg"
         >
-          <Settings className="mr-2 h-4 w-4 shrink-0 text-zinc-400" />
+          <Settings className="mr-2 h-[18px] w-[18px]" />
           Settings
         </Button>
       </div>

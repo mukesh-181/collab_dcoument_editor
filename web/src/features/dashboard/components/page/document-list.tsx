@@ -1,71 +1,85 @@
-import { FileText, Trash2, MoreHorizontal } from 'lucide-react'
-import Link from 'next/link'
-import { deleteDocument } from '@/features/dashboard/actions/delete-document.action'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import type { DashboardDocument } from "../../types"
-import { DocumentActionMenu } from "../document-action-menu"
+"use client";
 
-export function DocumentList({ documents }: { documents: DashboardDocument[] }) {
+import { Plus, Search } from 'lucide-react'
+import { User } from '@supabase/supabase-js'
+import type { DashboardDocument } from "../../types"
+import { CreateDocumentButton } from "../layout/create-document-button"
+import { MobileSidebar } from '../layout/mobile-sidebar'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { DocumentCard } from './document-card'
+import { useFilteredDocuments } from '../../hooks/use-filtered-documents'
+
+export function DocumentList({ documents, user }: { documents: DashboardDocument[], user?: User | null }) {
+  const { searchQuery, setSearchQuery, filterType, setFilterType, filteredDocuments } = useFilteredDocuments(documents)
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="mb-8 flex shrink-0 justify-between items-end">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Documents</h1>
-          <p className="text-sm text-zinc-500 mt-1 dark:text-zinc-400">Manage your recent projects and collaborations.</p>
+    <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+      <div className="px-6 py-6 max-w-5xl mx-auto w-full space-y-6">
+        
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="lg:hidden">
+              <MobileSidebar documents={documents} user={user} />
+            </div>
+            <h2 className="text-[18px] font-semibold text-zinc-800 dark:text-zinc-200">Documents</h2>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-block text-[13px] text-zinc-500 font-medium mr-2">
+              {filteredDocuments.length} document{filteredDocuments.length !== 1 ? 's' : ''}
+            </span>
+            <div className="relative w-full sm:w-[260px]">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+              <Input
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-[14px]"
+              />
+            </div>
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[170px] h-9 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-[14px]">
+                <SelectValue placeholder="Owned by anyone" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Owned by anyone</SelectItem>
+                <SelectItem value="owned-by-me">Owned by me</SelectItem>
+                <SelectItem value="owned-by-others">Owned by others</SelectItem>
+                <SelectItem value="editor">Editor</SelectItem>
+                <SelectItem value="viewer">Viewer</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {/* Create New Document Card */}
+          <CreateDocumentButton>
+            <div className="group relative flex flex-col h-[240px] bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 rounded-sm hover:border-indigo-500/50 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-all cursor-pointer">
+              <div className="flex-1 flex items-center justify-center bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 rounded-t-sm">
+                <Plus className="w-12 h-12 text-zinc-800 dark:text-zinc-200" strokeWidth={1} />
+              </div>
+              <div className="shrink-0 h-[76px] px-3 flex items-center justify-center rounded-b-sm bg-white dark:bg-zinc-950">
+                <span className="truncate text-[14px] font-medium text-zinc-800 dark:text-zinc-200">Blank document</span>
+              </div>
+            </div>
+          </CreateDocumentButton>
+
+          {/* Recent Documents */}
+          {filteredDocuments.map((doc: any) => {
+            const role = doc.document_members?.[0]?.role || 'viewer'
+            return <DocumentCard key={doc.id} document={doc} role={role} />
+          })}
         </div>
       </div>
-
-      {documents.length === 0 ? (
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto overscroll-contain rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 py-24 text-center dark:border-zinc-800 dark:bg-zinc-900/10">
-          <FileText className="h-8 w-8 text-zinc-400 mb-3" />
-          <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">No documents yet</h3>
-          <p className="mt-1 text-sm text-zinc-500 max-w-sm">You haven&apos;t created any documents. Create one from the sidebar to start writing.</p>
-        </div>
-      ) : (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="grid shrink-0 grid-cols-[1fr_120px_120px_40px] gap-4 border-b border-zinc-200 bg-zinc-50/50 px-4 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/50">
-            <div>Name</div>
-            <div>Role</div>
-            <div>Last Updated</div>
-            <div></div>
-          </div>
-          <div className="min-h-0 flex-1 divide-y divide-zinc-200 overflow-y-auto overscroll-contain dark:divide-zinc-800">
-            {documents.map((doc) => {
-              const deleteAction = deleteDocument.bind(null, doc.id)
-              const role = doc.document_members?.[0]?.role || 'viewer'
-              
-              return (
-                <div key={doc.id} className="grid grid-cols-[1fr_120px_120px_40px] gap-4 px-4 py-4 items-center group hover:bg-zinc-50 dark:hover:bg-zinc-900/50 has-[[data-state=open]]:bg-zinc-50 dark:has-[[data-state=open]]:bg-zinc-900/50 transition-colors">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <FileText className="h-[18px] w-[18px] shrink-0 text-zinc-400" />
-                    <Link href={`/dashboard/${doc.id}`} className="truncate text-[15px] font-medium text-zinc-900 hover:underline dark:text-zinc-100">
-                      {doc.title}
-                    </Link>
-                  </div>
-                  <div className="text-[15px] text-zinc-500 capitalize">
-                    {role}
-                  </div>
-                  <div className="text-[15px] text-zinc-500">
-                    {new Date(doc.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </div>
-                  <div className="flex justify-end">
-                    <DocumentActionMenu
-                      documentId={doc.id}
-                      documentTitle={doc.title}
-                      role={role}
-                    />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

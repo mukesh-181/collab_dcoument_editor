@@ -4,8 +4,9 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { SidebarContent } from "./sidebar-content";
+import { User } from "@supabase/supabase-js";
 
-export function MobileSidebar({ documents }: { documents: any[] }) {
+export function MobileSidebar({ documents, user }: { documents: any[], user?: User | null }) {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -16,7 +17,7 @@ export function MobileSidebar({ documents }: { documents: any[] }) {
       </SheetTrigger>
       <SheetContent side="left" className="w-64 p-0" aria-describedby={undefined}>
         <SheetTitle className="sr-only">Menu</SheetTitle>
-        <SidebarContent documents={documents} />
+        <SidebarContent documents={documents} user={user} />
       </SheetContent>
     </Sheet>
   );
