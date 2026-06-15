@@ -106,7 +106,7 @@ export function DocumentRealtimeListener({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => router.push(ROUTES.DASHBOARD)}>
+            <AlertDialogAction onClick={() => router.push(ROUTES.DASHBOARD)} className="relative bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl font-medium transition-all hover:-translate-y-0.5">
               Return to Dashboard
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -137,6 +137,7 @@ export function DocumentRealtimeListener({
                 setRoleUpdatedDialogOpen(false);
                 window.location.reload();
               }}
+              className="relative bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl font-medium transition-all hover:-translate-y-0.5"
             >
               Acknowledge
             </AlertDialogAction>

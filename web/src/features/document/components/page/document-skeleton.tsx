@@ -6,7 +6,7 @@ export function EditorSkeleton() {
   return (
     <div className="flex flex-col w-full min-h-full">
       {/* Toolbar Skeleton */}
-      <div className="sticky top-0 z-10 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 p-2 flex justify-center shadow-sm">
+      <div className="sticky top-0 z-10 w-full bg-transparent border-b border-zinc-200/50 dark:border-zinc-800/50 p-2 flex justify-center shadow-sm">
         <div className="w-full max-w-[794px]">
           <div className="flex items-center justify-start sm:justify-center gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap scrollbar-hide">
             <Skeleton className="h-8 w-8 rounded-md shrink-0" />
@@ -62,9 +62,9 @@ export function EditorSkeleton() {
 
 export function DocumentSkeleton() {
   return (
-    <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-white dark:bg-zinc-950 w-full">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-transparent w-full">
       {/* Header Skeleton */}
-      <div className="flex items-center justify-between h-14 pr-4 pl-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
+      <div className="flex items-center justify-between h-14 pr-4 pl-2 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-transparent shrink-0">
         <div className="flex items-center gap-2">
           {/* Mobile Sidebar Trigger Skeleton */}
           <Skeleton className="h-8 w-8 rounded-md lg:hidden" />
@@ -101,7 +101,7 @@ export function DocumentSkeleton() {
       </div>
 
       {/* Editor Area Skeleton */}
-      <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-900 min-h-0 flex flex-col w-full">
+      <div className="flex-1 overflow-y-auto bg-transparent min-h-0 flex flex-col w-full">
         <EditorSkeleton />
       </div>
     </div>

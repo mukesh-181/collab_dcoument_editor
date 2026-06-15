@@ -36,7 +36,7 @@ export function ShareDialog({ documentId }: { documentId: string }) {
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg">
+      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-2xl">
         <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
           <DialogHeader>
             <div className="flex items-center gap-3">

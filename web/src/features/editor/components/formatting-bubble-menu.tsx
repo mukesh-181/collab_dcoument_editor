@@ -20,14 +20,14 @@ export function FormattingBubbleMenu() {
         
         return !empty && !hasLinkMark && !hasImage;
       }}
-      className="flex items-center gap-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md rounded-md p-1"
+      className="flex items-center gap-1 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xl rounded-xl p-1.5"
     >
       <TooltipProvider>
         <TooltipWrapper title="Bold">
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`h-7 w-7 flex items-center justify-center rounded-sm hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
-            editor.isActive("bold") ? "bg-zinc-200 dark:bg-zinc-800" : ""
+          className={`h-7 w-7 flex items-center justify-center rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10 ${
+            editor.isActive("bold") ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300" : "text-zinc-700 dark:text-zinc-300"
           }`}
         >
           <Bold className="h-3.5 w-3.5" />
@@ -37,8 +37,8 @@ export function FormattingBubbleMenu() {
       <TooltipWrapper title="Italic">
         <button
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`h-7 w-7 flex items-center justify-center rounded-sm hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
-            editor.isActive("italic") ? "bg-zinc-200 dark:bg-zinc-800" : ""
+          className={`h-7 w-7 flex items-center justify-center rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10 ${
+            editor.isActive("italic") ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300" : "text-zinc-700 dark:text-zinc-300"
           }`}
         >
           <Italic className="h-3.5 w-3.5" />
@@ -48,8 +48,8 @@ export function FormattingBubbleMenu() {
       <TooltipWrapper title="Underline">
         <button
           onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={`h-7 w-7 flex items-center justify-center rounded-sm hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
-            editor.isActive("underline") ? "bg-zinc-200 dark:bg-zinc-800" : ""
+          className={`h-7 w-7 flex items-center justify-center rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10 ${
+            editor.isActive("underline") ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300" : "text-zinc-700 dark:text-zinc-300"
           }`}
         >
           <Underline className="h-3.5 w-3.5" />
@@ -61,8 +61,8 @@ export function FormattingBubbleMenu() {
       <TooltipWrapper title="Highlight">
         <button
           onClick={() => editor.chain().focus().toggleHighlight().run()}
-          className={`h-7 w-7 flex items-center justify-center rounded-sm hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
-            editor.isActive("highlight") ? "bg-zinc-200 dark:bg-zinc-800" : ""
+          className={`h-7 w-7 flex items-center justify-center rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10 ${
+            editor.isActive("highlight") ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300" : "text-zinc-700 dark:text-zinc-300"
           }`}
         >
           <Highlighter className="h-3.5 w-3.5" />

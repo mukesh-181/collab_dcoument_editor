@@ -24,7 +24,7 @@ export function AcceptInviteButton({ token }: { token: string }) {
   }
 
   return (
-    <Button onClick={handleAccept} disabled={isLoading} className="relative w-full">
+    <Button onClick={handleAccept} disabled={isLoading} className="relative w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl font-medium transition-all hover:-translate-y-0.5">
       <span className={isLoading ? "opacity-0" : ""}>Accept Invite</span>
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center">

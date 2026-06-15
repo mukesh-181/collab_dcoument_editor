@@ -84,34 +84,35 @@ export function SendEmailTab({ documentId }: { documentId: string }) {
         <Label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           Role
         </Label>
-        <Select
-          value={emailRole}
-          onValueChange={(val: "viewer" | "editor") => setEmailRole(val)}
-        >
-          <SelectTrigger className="w-full h-11 text-[15px] bg-white dark:bg-zinc-950 rounded-lg">
-            <SelectValue placeholder="Select a role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="viewer">
-              <div className="flex items-center gap-2.5">
-                <Eye className="h-[18px] w-[18px] text-zinc-500" />
-                <span className="text-[15px]">Viewer</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="editor">
-              <div className="flex items-center gap-2.5">
-                <Edit2 className="h-[18px] w-[18px] text-zinc-500" />
-                <span className="text-[15px]">Editor</span>
-              </div>
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center bg-white/80 dark:bg-zinc-900/50 p-1 rounded-full border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm backdrop-blur-md w-full">
+          {[
+            { id: 'viewer', label: 'Viewer', icon: Eye },
+            { id: 'editor', label: 'Editor', icon: Edit2 },
+          ].map(f => {
+            const Icon = f.icon;
+            return (
+              <button
+                type="button"
+                key={f.id}
+                onClick={() => setEmailRole(f.id as "viewer" | "editor")}
+                className={`flex items-center justify-center gap-2 flex-1 py-2 rounded-full text-[13.5px] font-medium transition-all duration-200 ${
+                  emailRole === f.id 
+                    ? "bg-primary/10 dark:bg-primary/20 text-primary shadow-sm" 
+                    : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                }`}
+              >
+                <Icon className="h-[15px] w-[15px]" />
+                {f.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       <Button
         type="submit"
         disabled={isSubmitDisabled}
-        className="relative w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-11 font-medium mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="relative w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl h-11 font-medium mt-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5"
       >
         <span className={isSubmitting ? "opacity-0 flex items-center justify-center" : "flex items-center justify-center"}>
           <Send className="mr-2 h-4 w-4" />

@@ -23,7 +23,7 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
   const avatarUrl = user?.user_metadata?.avatar_url
 
   const Navbar = () => (
-    <header className="h-14 shrink-0 border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
+    <header className="relative z-10 h-14 shrink-0 border-b border-zinc-200/50 bg-white/60 dark:border-zinc-800/50 dark:bg-zinc-950/60 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8 border border-zinc-200 dark:border-zinc-800">
@@ -44,10 +44,12 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
 
   if (!token || typeof token !== 'string') {
     return (
-      <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-950">
+      <div className="flex flex-col h-[100dvh] w-full bg-gradient-to-br from-indigo-50/50 via-white/30 to-purple-50/40 dark:from-indigo-950/30 dark:via-zinc-950/30 dark:to-purple-950/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-2xl p-8 max-w-sm w-full flex flex-col items-center text-center">
+          <div className="relative z-10 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl rounded-[2rem] p-8 max-w-sm w-full flex flex-col items-center text-center overflow-hidden">
+            <div className="absolute inset-0 z-[-1] bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
             <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-4">
                <AlertCircle className="w-6 h-6 text-red-500" />
             </div>
@@ -57,7 +59,7 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-8">
               This invite link is missing or malformed.
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl font-medium transition-all hover:-translate-y-0.5">
               <Link href={ROUTES.DASHBOARD}>Go to Dashboard</Link>
             </Button>
           </div>
@@ -68,10 +70,12 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
 
   if (error) {
     return (
-      <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-950">
+      <div className="flex flex-col h-[100dvh] w-full bg-gradient-to-br from-indigo-50/50 via-white/30 to-purple-50/40 dark:from-indigo-950/30 dark:via-zinc-950/30 dark:to-purple-950/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center p-4">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-2xl p-8 max-w-sm w-full flex flex-col items-center text-center">
+          <div className="relative z-10 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl rounded-[2rem] p-8 max-w-sm w-full flex flex-col items-center text-center overflow-hidden">
+            <div className="absolute inset-0 z-[-1] bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
             <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-4">
               <AlertCircle className="w-6 h-6 text-red-500" />
             </div>
@@ -81,7 +85,7 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-8">
               {error || 'The invite link may have expired or already been used.'}
             </p>
-            <Button asChild className="w-full">
+            <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl font-medium transition-all hover:-translate-y-0.5">
               <Link href={ROUTES.DASHBOARD}>Go to Dashboard</Link>
             </Button>
           </div>
@@ -91,10 +95,12 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
   }
 
   return (
-    <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-950">
+    <div className="flex flex-col h-[100dvh] w-full bg-gradient-to-br from-indigo-50/50 via-white/30 to-purple-50/40 dark:from-indigo-950/30 dark:via-zinc-950/30 dark:to-purple-950/30 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
       <Navbar />
       <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-2xl p-8 max-w-sm w-full flex flex-col items-center text-center">
+        <div className="relative z-10 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl rounded-[2rem] p-8 max-w-sm w-full flex flex-col items-center text-center overflow-hidden">
+          <div className="absolute inset-0 z-[-1] bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
           <div className="w-16 h-16 rounded-full bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mb-6">
             <UserPlus className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
           </div>
@@ -114,10 +120,10 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
               </div>
 
               <div className="flex flex-col gap-3 w-full">
-                <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none">
+                <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl font-medium transition-all hover:-translate-y-0.5 border-none">
                   <Link href={ROUTES.DOCUMENT(inviteDetails?.documentId)}>Go to Document</Link>
                 </Button>
-                <Button asChild variant="outline" className="w-full border-zinc-200 dark:border-zinc-700">
+                <Button asChild variant="outline" className="w-full rounded-xl transition-all hover:-translate-y-0.5 border-zinc-200/60 dark:border-zinc-800/60 bg-white/50 dark:bg-zinc-950/50">
                   <Link href={ROUTES.DASHBOARD}>Return to Dashboard</Link>
                 </Button>
               </div>
@@ -139,7 +145,7 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
 
               <div className="flex flex-col gap-3 w-full">
                 <AcceptInviteButton token={token as string} />
-                <Button asChild variant="outline" className="w-full">
+                <Button asChild variant="outline" className="w-full rounded-xl transition-all hover:-translate-y-0.5 border-zinc-200/60 dark:border-zinc-800/60 bg-white/50 dark:bg-zinc-950/50">
                   <Link href={ROUTES.DASHBOARD}>Cancel</Link>
                 </Button>
               </div>

@@ -24,7 +24,7 @@ export function DocumentPage({
       <DocumentClientLayout>
         <DocumentRealtimeListener documentId={document.id} />
         <DocumentHeader document={document} documents={documents} currentUserRole={currentUserRole} currentUserName={currentUserName} />
-        <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-900 min-h-0">
+        <div className="flex-1 overflow-y-auto relative min-h-0">
           <Editor
             documentId={document.id}
             documentTitle={document.title}

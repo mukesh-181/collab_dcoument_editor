@@ -14,11 +14,11 @@ export function DashboardHeader({ user, documents = [] }: { user: User | null, d
   const avatarUrl = user?.user_metadata?.avatar_url
 
   return (
-    <header className="h-14 shrink-0 border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
+    <header className="h-14 shrink-0 border-b border-zinc-200/50 bg-white/60 dark:border-zinc-800/50 dark:bg-zinc-950/60 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full z-10 sticky top-0">
       <div className="flex items-center gap-4">
         <MobileSidebar documents={documents} user={user} />
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 border border-zinc-200 dark:border-zinc-800">
+          <Avatar className="h-8 w-8 border-2 border-zinc-200 dark:border-zinc-800 shadow-sm">
             <AvatarImage src={avatarUrl} alt={displayName} />
             <AvatarFallback className="bg-zinc-100 text-zinc-900 text-xs font-medium dark:bg-zinc-800 dark:text-zinc-100">{initial}</AvatarFallback>
           </Avatar>

@@ -19,7 +19,7 @@ export async function Navbar() {
         <div className="flex items-center gap-4">
           {user ? (
             <Link href={ROUTES.DASHBOARD}>
-              <Button className="h-11 px-8 text-base bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg font-semibold cursor-pointer hover:-translate-y-0.5 hover:scale-105 transition-all duration-200">Get Started</Button>
+              <Button className="h-11 px-8 text-base rounded-lg font-semibold cursor-pointer hover:scale-105 transition-transform duration-200">Get Started</Button>
             </Link>
           ) : (
             <>
@@ -27,7 +27,7 @@ export async function Navbar() {
                 <Button variant="ghost" className="h-11 px-6 text-base font-semibold text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 rounded-lg cursor-pointer hover:-translate-y-0.5 hover:scale-105 transition-all duration-200">Log in</Button>
               </Link>
               <Link href={`${ROUTES.LOGIN}?tab=register`}>
-                <Button className="h-11 px-8 text-base bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg font-semibold cursor-pointer hover:-translate-y-0.5 hover:scale-105 transition-all duration-200">Sign up</Button>
+                <Button className="h-11 px-8 text-base rounded-lg font-semibold cursor-pointer hover:scale-105 transition-transform duration-200">Sign up</Button>
               </Link>
             </>
           )}

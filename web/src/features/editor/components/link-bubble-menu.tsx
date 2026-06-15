@@ -63,7 +63,7 @@ export function LinkBubbleMenu() {
 
         return true;
       }}
-      className="flex items-center gap-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md rounded-md p-1"
+      className="flex items-center gap-1 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xl rounded-xl p-1.5"
     >
       <TooltipProvider>
         <span 

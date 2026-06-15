@@ -69,7 +69,7 @@ export function DocumentHeader({
   };
 
   return (
-    <div className="flex items-center justify-between h-14 pr-4 pl-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
+    <div className="flex items-center justify-between h-14 pr-4 pl-2 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-transparent shrink-0">
       <div className="flex items-center gap-2">
         <MobileSidebar documents={documents} />
         <Button

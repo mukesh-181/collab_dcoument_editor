@@ -117,7 +117,7 @@ export function Editor({
         editable={currentUserRole !== "viewer"}
         slotBefore={
           currentUserRole !== "viewer" && (
-            <div className="sticky top-0 z-10 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 p-2 flex justify-center shadow-sm">
+            <div className="sticky top-0 z-10 w-full bg-white/80 dark:bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-200/60 dark:border-zinc-800/60 p-2 flex justify-center shadow-sm">
               <div className="w-full max-w-full px-4">
                 <Toolbar documentId={documentId} />
               </div>
