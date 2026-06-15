@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { User } from '@supabase/supabase-js'
+import { ROUTES } from "@/constants/routes";
 
 export function Hero({ user }: { user: User | null }) {
   return (
@@ -14,8 +15,8 @@ export function Hero({ user }: { user: User | null }) {
       </p>
       
       <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <Link href={user ? '/dashboard' : '/login?tab=register'}>
-          <Button className="h-11 px-8 text-base font-medium bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-md transition-all">
+        <Link href={user ? ROUTES.DASHBOARD : `${ROUTES.LOGIN}?tab=register`}>
+          <Button className="h-12 px-8 text-base font-medium shadow-lg hover:shadow-indigo-500/25 rounded-full transition-transform duration-200">
             {user ? 'Go to Dashboard' : 'Start writing for free'}
           </Button>
         </Link>

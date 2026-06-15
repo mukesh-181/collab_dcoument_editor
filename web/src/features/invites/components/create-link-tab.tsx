@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, Loader2, AlertCircle, Eye, Edit2 } from "lucide-react";
+import { Copy, Check, Loader2, AlertCircle, Eye, Edit2, Info } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createInviteLink } from "../actions/create-invite.action";
+import { ROUTES } from "@/constants/routes";
 
 interface CreateLinkTabProps {
   documentId: string;
@@ -31,7 +32,7 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
     try {
       const token = await createInviteLink(documentId, role);
       const url = new URL(
-        `/dashboard/invite?token=${token}`,
+        ROUTES.INVITE(token),
         window.location.origin,
       );
       setInviteLink(url.toString());
@@ -64,39 +65,49 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
       )}
 
       {!inviteLink ? (
+       
         <div className="space-y-4">
+    
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
               Collaborator Role
             </Label>
-            <Select
-              value={role}
-              onValueChange={(val: "viewer" | "editor") => setRole(val)}
-            >
-              <SelectTrigger className="w-full h-11 text-[15px] bg-white dark:bg-zinc-950 rounded-lg">
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="viewer">
-                  <div className="flex items-center gap-2.5">
-                    <Eye className="h-[18px] w-[18px] text-zinc-500" />
-                    <span className="text-[15px]">Viewer</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="editor">
-                  <div className="flex items-center gap-2.5">
-                    <Edit2 className="h-[18px] w-[18px] text-zinc-500" />
-                    <span className="text-[15px]">Editor</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center bg-white/80 dark:bg-zinc-900/50 p-1 rounded-full border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm backdrop-blur-md w-full">
+              {[
+                { id: 'viewer', label: 'Viewer', icon: Eye },
+                { id: 'editor', label: 'Editor', icon: Edit2 },
+              ].map(f => {
+                const Icon = f.icon;
+                return (
+                  <button
+                    type="button"
+                    key={f.id}
+                    onClick={() => setRole(f.id as "viewer" | "editor")}
+                    className={`flex items-center justify-center gap-2 flex-1 py-2 rounded-full text-[13.5px] font-medium transition-all duration-200 ${
+                      role === f.id 
+                        ? "bg-primary/10 dark:bg-primary/20 text-primary shadow-sm" 
+                        : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                    }`}
+                  >
+                    <Icon className="h-[15px] w-[15px]" />
+                    {f.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 p-3 rounded-lg flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+            <p className="text-[12.5px] text-indigo-700 dark:text-indigo-300 leading-relaxed">
+              <strong>Note:</strong> This link is multi-use but will <strong>expire in 24 hours</strong>. If an existing member uses this link, it will redirect them straight to the document without overriding their current role.
+            </p>
           </div>
           
           <Button
             onClick={handleCreateLink}
             disabled={isLoading}
-            className="relative w-full bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-11 font-medium mt-2"
+            className="relative w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl h-11 font-medium mt-2 transition-all hover:-translate-y-0.5"
           >
             <span className={isLoading ? "opacity-0" : ""}>Generate Link</span>
             {isLoading && (

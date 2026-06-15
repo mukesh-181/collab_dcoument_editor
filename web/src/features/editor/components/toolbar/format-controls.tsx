@@ -3,7 +3,8 @@ import {
   Italic,
   Strikethrough,
   Underline,
-  Highlighter,
+  Quote,
+  Code,
 } from "lucide-react";
 import { Editor } from "@tiptap/react";
 import { Toggle } from "@/components/ui/toggle";
@@ -71,18 +72,41 @@ export function FormatControls({ editor }: { editor: Editor }) {
       </TooltipWrapper>
 
       <TooltipWrapper
-        title="Highlight"
-        description="Highlight text with a yellow background."
+        title="Quote"
+        description="Quote selected text or format entire line as blockquote."
       >
         <Toggle
           size="sm"
-          pressed={editor.isActive("highlight")}
-          onPressedChange={() => editor.chain().focus().toggleHighlight().run()}
+          pressed={editor.isActive("blockquote") || editor.isActive("inlineQuote")}
+          onPressedChange={() => {
+            if (!editor.state.selection.empty) {
+              editor.chain().focus().toggleMark('inlineQuote').run();
+            } else {
+              editor.chain().focus().toggleBlockquote().run();
+            }
+          }}
           onMouseDown={(e) => e.preventDefault()}
-          aria-label="Toggle highlight"
+          aria-label="Toggle quote"
           className={toggleClass}
         >
-          <Highlighter className="h-4 w-4" />
+          <Quote className="h-4 w-4" />
+        </Toggle>
+      </TooltipWrapper>
+
+      <TooltipWrapper title="Inline Code" description="Format selection as code.">
+        <Toggle
+          size="sm"
+          pressed={!!editor.schema.marks.code && editor.isActive("code")}
+          onPressedChange={() => {
+            if (editor.schema.marks.code) {
+              editor.chain().focus().toggleMark("code").run();
+            }
+          }}
+          onMouseDown={(e) => e.preventDefault()}
+          aria-label="Toggle inline code"
+          className={toggleClass}
+        >
+          <Code className="h-4 w-4" />
         </Toggle>
       </TooltipWrapper>
     </>

@@ -46,15 +46,15 @@ export function InboxItemDialogs({
           <AlertDialogHeader>
             <AlertDialogTitle>Accept Invitation?</AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to join '{documentTitle}' as an {role}.
+              You are about to join <span className="text-indigo-600 dark:text-indigo-400 font-semibold">'{documentTitle}'</span> as an <span className="text-indigo-600 dark:text-indigo-400 font-semibold capitalize">{role}</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isLoading} className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={(e) => { e.preventDefault(); onAccept(); }} 
               disabled={isLoading} 
-              className="relative bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              className="relative bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl font-medium transition-all hover:-translate-y-0.5"
             >
               <span className={isLoading ? "opacity-0" : ""}>Accept</span>
               {isLoading && (
@@ -76,11 +76,11 @@ export function InboxItemDialogs({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isLoading} className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={(e) => { e.preventDefault(); onReject(); }} 
               disabled={isLoading} 
-              className="relative bg-red-600 text-white hover:bg-red-700"
+              className="relative shadow-md rounded-xl font-medium bg-red-600 hover:bg-red-700 text-white transition-all hover:-translate-y-0.5"
             >
               <span className={isLoading ? "opacity-0" : ""}>Reject</span>
               {isLoading && (
@@ -102,11 +102,11 @@ export function InboxItemDialogs({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isLoading} className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={(e) => { e.preventDefault(); onDelete(); }} 
               disabled={isLoading} 
-              className="relative bg-red-600 text-white hover:bg-red-700"
+              className="relative shadow-md rounded-xl font-medium bg-red-600 hover:bg-red-700 text-white transition-all hover:-translate-y-0.5"
             >
               <span className={isLoading ? "opacity-0" : ""}>Delete</span>
               {isLoading && (

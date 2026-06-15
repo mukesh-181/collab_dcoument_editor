@@ -106,13 +106,20 @@ export function LinkControl({ editor }: { editor: Editor }) {
                   ? "bg-blue-100 text-blue-900 dark:bg-blue-900/50 dark:text-blue-200"
                   : ""
               }`}
+              onMouseDown={(e) => e.preventDefault()}
               aria-label="Set Link"
             >
               <Link2 className="h-4 w-4" />
             </button>
           </PopoverTrigger>
         </TooltipWrapper>
-        <PopoverContent className="w-80 p-3" side="bottom" align="start">
+        <PopoverContent 
+          className="w-80 p-3" 
+          side="bottom" 
+          align="start"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <form onSubmit={handleLinkSubmit} className="flex flex-col gap-3">
             <h4 className="font-medium leading-none text-sm">Add Link</h4>
 
@@ -141,7 +148,6 @@ export function LinkControl({ editor }: { editor: Editor }) {
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
                 className="h-8 text-sm"
-                autoFocus={isTextSelected}
               />
             </div>
 

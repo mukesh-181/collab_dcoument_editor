@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { useDocumentSync } from "@/features/document/components/page/document-context";
 
 export function LinkBubbleMenu() {
   const { editor } = useCurrentEditor();
+  const { currentUserRole } = useDocumentSync();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editUrl, setEditUrl] = useState("");
 
@@ -45,6 +47,7 @@ export function LinkBubbleMenu() {
     <BubbleMenu
       editor={editor}
       shouldShow={({ editor }: any) => {
+        if (currentUserRole === 'viewer') return false;
         if (isEditOpen) return false;
         
         const hasLinkMark = editor.isActive("link");
@@ -63,7 +66,7 @@ export function LinkBubbleMenu() {
 
         return true;
       }}
-      className="flex items-center gap-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md rounded-md p-1"
+      className="flex items-center gap-1 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xl rounded-xl p-1.5"
     >
       <TooltipProvider>
         <span 
@@ -91,14 +94,20 @@ export function LinkBubbleMenu() {
           <Tooltip>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onMouseDown={(e) => e.preventDefault()}>
                   <Edit2 className="h-3 w-3" />
                 </Button>
               </PopoverTrigger>
             </TooltipTrigger>
             <TooltipContent side="top">Edit link</TooltipContent>
           </Tooltip>
-          <PopoverContent className="w-80 p-3" side="top" align="center">
+          <PopoverContent 
+            className="w-80 p-3" 
+            side="top" 
+            align="center"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <form onSubmit={handleSaveEdit} className="flex flex-col gap-3">
               <h4 className="font-medium leading-none text-sm">Edit Link</h4>
               <div className="flex flex-col gap-1">
@@ -108,7 +117,6 @@ export function LinkBubbleMenu() {
                   value={editUrl}
                   onChange={(e) => setEditUrl(e.target.value)}
                   className="h-8 text-sm"
-                  autoFocus
                 />
               </div>
               <div className="flex justify-end gap-2 mt-1">

@@ -12,6 +12,15 @@ import { InboxItemDialogs } from "./inbox-item-dialogs";
 import { acceptInvite } from "@/features/invites/actions/accept-invite.action";
 import { rejectInvite } from "@/features/invites/actions/reject-invite.action";
 import { deleteInvite } from "@/features/invites/actions/delete-invite.action";
+import { ROUTES } from "@/constants/routes";
+import { getInitials } from "@/utils/string-utils";
+import {
+  getUserName,
+  getUserImage,
+  getUserEmail,
+  getUserRole,
+  USER_FALLBACKS,
+} from "@/utils/user-utils";
 
 export function InboxItem({ invite }: { invite: any }) {
   const router = useRouter();
@@ -21,14 +30,20 @@ export function InboxItem({ invite }: { invite: any }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const [isExpiredLocal, setIsExpiredLocal] = useState(() => {
-    return invite.status === 'expired' || (invite.expires_at && new Date(invite.expires_at) < new Date());
+    return (
+      invite.status === "expired" ||
+      (invite.expires_at && new Date(invite.expires_at) < new Date())
+    );
   });
 
   useEffect(() => {
-    if (invite.status === 'pending' && invite.expires_at && !isExpiredLocal) {
+    if (invite.status === "pending" && invite.expires_at && !isExpiredLocal) {
       const msUntilExpiry = new Date(invite.expires_at).getTime() - Date.now();
       if (msUntilExpiry > 0) {
-        const timeout = setTimeout(() => setIsExpiredLocal(true), msUntilExpiry);
+        const timeout = setTimeout(
+          () => setIsExpiredLocal(true),
+          msUntilExpiry,
+        );
         return () => clearTimeout(timeout);
       } else {
         setIsExpiredLocal(true);
@@ -40,9 +55,9 @@ export function InboxItem({ invite }: { invite: any }) {
   const timeStr = format(new Date(invite.created_at), "hh:mm a");
   const dateStr = format(new Date(invite.created_at), "dd/MM/yyyy");
 
-  const inviterEmail = invite.documents?.owner?.email || "";
-  const inviterName = invite.documents?.owner?.name || (inviterEmail ? inviterEmail.split('@')[0] : "Anonymous User");
-  const inviterImage = invite.documents?.owner?.image || "";
+  const inviterEmail = getUserEmail(invite.documents?.owner?.email);
+  const inviterName = getUserName(invite.documents?.owner?.name, inviterEmail);
+  const inviterImage = getUserImage(invite.documents?.owner?.image);
   const documentTitle = invite.documents?.title || "Untitled Document";
 
   const handleAccept = async () => {
@@ -88,17 +103,22 @@ export function InboxItem({ invite }: { invite: any }) {
   };
 
   return (
-    <div className={`py-5 px-5 bg-white dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm transition-colors group relative ${isExpiredLocal && invite.status === 'pending' ? 'bg-zinc-50/50 dark:bg-zinc-900/20' : 'hover:border-zinc-300 dark:hover:border-zinc-700'}`}>
-      
-      <div className={`flex gap-4 items-center ${isExpiredLocal && invite.status === 'pending' ? 'opacity-50 grayscale-[0.3]' : ''}`}>
-        <Avatar className="w-10 h-10 shrink-0 border border-zinc-200 dark:border-zinc-800">
-          <AvatarImage src={inviterImage} alt={inviterName} />
-          <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium">
-            {inviterName.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        
-        <div className="flex flex-col flex-1 min-w-0 pr-28">
+    <div
+      className={`py-5 px-5 bg-gradient-to-b from-white/80 to-indigo-50/60 dark:from-zinc-950/80 dark:to-indigo-950/40 backdrop-blur-md border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-sm transition-all duration-300 group relative overflow-hidden ${isExpiredLocal && invite.status === "pending" ? "opacity-75 grayscale-[0.5]" : "hover:border-indigo-500/30 hover:shadow-md hover:-translate-y-0.5"}`}
+    >
+      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
+      <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-between">
+        <div
+          className={`flex gap-4 items-start sm:items-center flex-1 min-w-0 ${isExpiredLocal && invite.status === "pending" ? "opacity-50 grayscale-[0.3]" : ""}`}
+        >
+          <Avatar className="w-10 h-10 shrink-0 border-2 border-white dark:border-zinc-800 shadow-sm mt-1 sm:mt-0">
+            <AvatarImage src={inviterImage} alt={inviterName} />
+            <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium text-xs">
+              {getInitials(inviterName, inviterEmail)}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex flex-col flex-1 min-w-0">
           <div className="flex items-center gap-2.5 mb-1">
             <span className="font-semibold text-[16px] text-zinc-900 dark:text-zinc-100 truncate">
               {inviterName}
@@ -106,40 +126,93 @@ export function InboxItem({ invite }: { invite: any }) {
             {inviterEmail && (
               <>
                 <div className="h-[18px] w-[1px] bg-zinc-300 dark:bg-zinc-700 shrink-0" />
-                <span className="text-[14px] text-zinc-500 truncate">
+                <span className="text-[13px] text-zinc-500 truncate">
                   {inviterEmail}
                 </span>
               </>
             )}
           </div>
-          
-          <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
-            Invitation to join <span className="font-semibold">'{documentTitle}'</span> with <span className="font-semibold capitalize">{invite.role}</span> access
-          </span>
-          
-          {invite.status === 'pending' && !isExpiredLocal && (
+
+          {invite.status === "exited" ? (
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                {invite.token}
+              </span>{" "}
+              has exited from{" "}
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                '{documentTitle}'
+              </span>
+              .
+            </span>
+          ) : invite.status === "removed" ? (
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
+              You have been removed from{" "}
+              <span className="font-semibold">'{documentTitle}'</span> by{" "}
+              <span className="font-semibold">{inviterName}</span>
+            </span>
+          ) : invite.status === "role_updated" ? (
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1 flex flex-col">
+              <span>
+                Your role for{" "}
+                <span className="font-semibold">'{documentTitle}'</span> has
+                been updated to{" "}
+                <span className="font-semibold capitalize">{invite.role}</span>{" "}
+                by <span className="font-semibold">{inviterName}</span>.
+              </span>
+            </span>
+          ) : (
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
+              Invitation to join{" "}
+              <span className="font-semibold">'{documentTitle}'</span> with{" "}
+              <span className="font-semibold capitalize">{invite.role}</span>{" "}
+              access
+            </span>
+          )}
+
+          {invite.status === "pending" && !isExpiredLocal && (
             <span className="text-[12px]  text-red-500 dark:text-zinc-400">
               This invitation will expire in 24 hours.
             </span>
           )}
         </div>
       </div>
-
-      <div className="absolute top-4 right-4 flex items-center gap-3">
-        <div className={`flex items-center gap-3 ${isExpiredLocal && invite.status === 'pending' ? 'opacity-50 grayscale-[0.3]' : ''}`}>
-          {invite.status === 'accepted' && (
+        
+      <div className="flex flex-col items-start sm:items-end justify-between gap-4 shrink-0 sm:min-w-[200px] mt-2 sm:mt-0">
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex items-center gap-3 ${isExpiredLocal && invite.status === "pending" ? "opacity-50 grayscale-[0.3]" : ""}`}
+            >
+          {invite.status === "accepted" && (
             <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
               <CheckCircle2 className="w-3 h-3 mr-1" />
               Accepted
             </span>
           )}
-          {invite.status === 'rejected' && (
+          {invite.status === "rejected" && (
             <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400">
               <XCircle className="w-3 h-3 mr-1" />
               Rejected
             </span>
           )}
-          {isExpiredLocal && invite.status === 'pending' && (
+          {invite.status === "removed" && (
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400">
+              <XCircle className="w-3 h-3 mr-1" />
+              Access Revoked
+            </span>
+          )}
+          {invite.status === "exited" && (
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800/10 dark:text-zinc-400">
+              <XCircle className="w-3 h-3 mr-1" />
+              Member Left
+            </span>
+          )}
+          {invite.status === "role_updated" && (
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+              <CheckCircle2 className="w-3 h-3 mr-1" />
+              Role Updated
+            </span>
+          )}
+          {isExpiredLocal && invite.status === "pending" && (
             <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800/10 dark:text-zinc-400">
               <XCircle className="w-3 h-3 mr-1" />
               Expired
@@ -157,10 +230,10 @@ export function InboxItem({ invite }: { invite: any }) {
           </div>
         </div>
 
-        {(invite.status !== 'pending' || isExpiredLocal) && (
-          <Button 
-            size="sm" 
-            variant="ghost" 
+        {(invite.status !== "pending" || isExpiredLocal) && (
+          <Button
+            size="sm"
+            variant="ghost"
             className="h-7 w-7 p-0 ml-1 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50"
             onClick={() => setIsDeleteOpen(true)}
             disabled={isLoading}
@@ -169,43 +242,40 @@ export function InboxItem({ invite }: { invite: any }) {
           </Button>
         )}
       </div>
-        
-      {invite.status === 'pending' && !isExpiredLocal && (
-        <div className="absolute bottom-4 right-4 flex flex-col items-end">
-          <div className="flex items-center gap-2.5">
-            <Button 
-              size="sm" 
-              variant="outline" 
+
+        {invite.status === "pending" && !isExpiredLocal && (
+          <div className="flex items-center justify-end gap-2.5 w-full mt-1">
+            <Button
+              size="sm"
+              variant="outline"
               className="h-7 w-[84px] text-xs border-zinc-200 dark:border-zinc-700"
               onClick={() => setIsRejectOpen(true)}
               disabled={isLoading}
             >
               Reject
             </Button>
-            <Button 
-              size="sm" 
-              className="h-7 w-[84px] text-xs bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900"
+            <Button
+              size="sm"
+              className="h-7 w-[84px] text-xs bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-sm"
               onClick={() => setIsAcceptOpen(true)}
               disabled={isLoading}
             >
               Accept
             </Button>
           </div>
-        </div>
-      )}
+        )}
 
-      {invite.status === 'accepted' && (
-        <div className="absolute bottom-4 right-4 flex flex-col items-end">
-          <Button 
-            size="sm" 
-            className="h-7 px-4 text-xs bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900"
-            onClick={() => router.push(`/dashboard/${invite.document_id}`)}
+        {invite.status === "accepted" && (
+          <Button
+            size="sm"
+            className="h-7 px-4 text-xs bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-sm"
+            onClick={() => router.push(ROUTES.DOCUMENT(invite.document_id))}
           >
             Go to Document
             <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       <InboxItemDialogs
         isAcceptOpen={isAcceptOpen}
@@ -221,6 +291,7 @@ export function InboxItem({ invite }: { invite: any }) {
         onReject={handleReject}
         onDelete={handleDelete}
       />
+      </div>
     </div>
   );
 }

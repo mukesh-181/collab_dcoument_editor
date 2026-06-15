@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { ROUTES } from "@/constants/routes";
 
 export async function updateDocumentTitle(documentId: string, title: string) {
   const supabase = await createClient()
@@ -33,6 +34,6 @@ export async function updateDocumentTitle(documentId: string, title: string) {
     throw new Error('Failed to update document title')
   }
 
-  revalidatePath(`/dashboard/${documentId}`)
-  revalidatePath('/dashboard')
+  revalidatePath(ROUTES.DOCUMENT(documentId))
+  revalidatePath(ROUTES.DASHBOARD)
 }

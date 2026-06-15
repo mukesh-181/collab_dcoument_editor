@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
 
 import { useState } from 'react'
+import { ROUTES } from "@/constants/routes";
 
 export function OAuthButtons() {
   const supabase = createClient()
@@ -13,12 +14,12 @@ export function OAuthButtons() {
   const handleOAuth = async (provider: 'github') => {
     setIsLoading(true)
     const url = new URL(location.href)
-    const next = url.searchParams.get('next') || '/dashboard'
+    const next = url.searchParams.get('next') || ROUTES.DASHBOARD
 
     await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${location.origin}/auth/callback?next=${next}`,
+        redirectTo: `${location.origin}${ROUTES.AUTH_CALLBACK}?next=${next}`,
       },
     })
     // No need to setIsLoading(false) because the page will redirect

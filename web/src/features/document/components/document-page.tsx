@@ -1,6 +1,7 @@
 import { DocumentHeader } from "@/features/document/components/page/document-header";
 import { DocumentProvider } from "@/features/document/components/page/document-context";
 import { DocumentClientLayout } from "@/features/document/components/page/document-client-layout";
+import { DocumentRealtimeListener } from "@/features/document/components/page/document-realtime-listener";
 import { Editor } from "@/features/editor/components/editor";
 
 interface DocumentPageProps {
@@ -19,13 +20,14 @@ export function DocumentPage({
   token,
 }: DocumentPageProps) {
   return (
-    <DocumentProvider>
+    <DocumentProvider initialRole={currentUserRole}>
       <DocumentClientLayout>
-        <DocumentHeader document={document} documents={documents} currentUserRole={currentUserRole} />
-        <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-900 min-h-0">
+        <DocumentRealtimeListener documentId={document.id} />
+        <DocumentHeader document={document} documents={documents} currentUserName={currentUserName} />
+        <div className="flex-1 overflow-y-auto relative min-h-0">
           <Editor
             documentId={document.id}
-            currentUserRole={currentUserRole}
+            documentTitle={document.title}
             currentUserName={currentUserName}
             token={token}
           />

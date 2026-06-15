@@ -61,6 +61,7 @@ collab_docx/
 │       │   │
 │       │   ├── inbox/
 │       │   │   └── page.tsx            # Interactive inbox displaying pending and historical invitations
+│       │   ├── not-found.tsx           # Custom 404 error page for unmatched routes
 │       │   ├── favicon.ico             # Browser tab icon
 │       │   ├── globals.css             # Global styles, Tailwind directives, CSS custom properties
 │       │   ├── layout.tsx              # Root layout — wraps entire app with fonts, metadata, Toaster
@@ -151,16 +152,24 @@ collab_docx/
 │       │   │   ├── actions/
 │       │   │   │   ├── delete-invite.action.ts
 │       │   │   │   ├── get-inbox.action.ts
+│       │   │   │   ├── get-unread-count.action.ts
 │       │   │   │   └── reject-invite.action.ts
 │       │   │   ├── components/
+│       │   │   │   ├── inbox-client-list.tsx # Client component for instant filter rendering
+│       │   │   │   ├── inbox-item-dialogs.tsx# Dialogs for Accept/Reject/Delete logic
 │       │   │   │   ├── inbox-item.tsx        # Individual persistent invitation card
-│       │   │   │   └── inbox-list.tsx        # Server component fetching and mapping invites
+│       │   │   │   ├── inbox-list.tsx        # Server component fetching and passing invites
+│       │   │   │   ├── inbox-realtime-listener.tsx # Realtime badge and list updates
+│       │   │   │   └── inbox-skeleton.tsx    # Loading skeleton for the inbox
 │       │   │   └── hooks/
 │       │   │
 │       │   ├── document/               # Document-level operations
 │       │   │   ├── actions/
 │       │   │   │   ├── get-document-by-id.action.ts
-│       │   │   │   └── get-document-content.action.ts
+│       │   │   │   ├── get-document-content.action.ts
+│       │   │   │   ├── leave-document.action.ts
+│       │   │   │   ├── remove-member.action.ts
+│       │   │   │   └── update-member-role.action.ts
 │       │   │   │
 │       │   │   ├── components/
 │       │   │   │   ├── document-page.tsx
@@ -177,10 +186,14 @@ collab_docx/
 │       │   │   └── hooks/
 │       │   │
 │       │   ├── editor/                 # Rich text editor feature
+│       │   │   ├── actions/
+│       │   │   │   └── upload-image.action.ts # Server action for persisting images to Supabase
 │       │   │   ├── components/
 │       │   │   │   ├── editor.tsx      # EditorProvider wrapper with Pageless A4 layout and all extensions
+│       │   │   │   ├── formatting-bubble-menu.tsx # Floating menu for bold/italic/color
 │       │   │   │   ├── link-bubble-menu.tsx
 │       │   │   │   ├── offline-banner.tsx # Warning displayed when WebSocket disconnects
+│       │   │   │   ├── slash-menu-list.tsx # Popover list for slash commands
 │       │   │   │   ├── toolbar/
 │       │   │   │   │   ├── alignment-controls.tsx
 │       │   │   │   │   ├── color-control.tsx
@@ -189,11 +202,15 @@ collab_docx/
 │       │   │   │   │   ├── heading-controls.tsx
 │       │   │   │   │   ├── history-controls.tsx
 │       │   │   │   │   ├── image-control.tsx
-│       │   │   │   │   └── link-control.tsx
+│       │   │   │   │   ├── link-control.tsx
+│       │   │   │   │   ├── list-controls.tsx
+│       │   │   │   │   └── table-control.tsx
 │       │   │   │   └── toolbar.tsx     # Composer layout for all toolbar controls
 │       │   │   │
 │       │   │   ├── extensions/
-│       │   │   │   └── font-size.ts    # Custom Tiptap extension — applies inline px font sizes
+│       │   │   │   ├── font-size.ts    # Custom Tiptap extension — applies inline px font sizes
+│       │   │   │   ├── resizable-image.tsx # Custom extension for drag-to-resize images
+│       │   │   │   └── slash-command.tsx # Custom extension enabling '/' keyboard triggers
 │       │   │   │
 │       │   │   └── hooks/
 │       │   │
@@ -201,7 +218,9 @@ collab_docx/
 │       │   │   ├── actions/
 │       │   │   │   ├── accept-invite.action.ts
 │       │   │   │   ├── create-invite.action.ts
-│       │   │   │   └── get-invite-details.action.ts
+│       │   │   │   ├── get-invite-details.action.ts
+│       │   │   │   ├── search-users.action.ts
+│       │   │   │   └── send-email-invites.action.ts
 │       │   │   │
 │       │   │   ├── components/
 │       │   │   │   ├── accept-invite-button.tsx
@@ -221,21 +240,21 @@ collab_docx/
 │       │               ├── footer.tsx
 │       │               └── hero.tsx
 │       │
-│       ├── lib/                        # Core utilities and third-party client setup
-│       │   ├── constants/
-│       │   │   └── env.ts              # Centralized, strictly-typed environment variables
-│       │   │
-│       │   ├── supabase/               # Supabase client factory (3 environments)
-│       │   │   ├── client.ts           # Browser client — reads cookies via document.cookie
-│       │   │   ├── proxy.ts            # Edge client — refreshes expired sessions on every request
-│       │   │   └── server.ts           # Server client — reads cookies via next/headers
-│       │   │
-│       │   ├── utils/
-│       │   └── utils.ts                # cn() helper — merges Tailwind classes via clsx + twMerge
-│       │
-│       ├── store/                      # (Empty) Reserved for Zustand/global state management
-│       ├── types/                      # (Empty) Reserved for shared TypeScript type definitions
-│       └── utils/                      # (Empty) Reserved for standalone utility functions
+│       ├── constants/
+│       │   │   └── routes.ts           # Unified registry for all application routes
+│       │   ├── lib/                        # Core utilities and third-party client setup
+│       │   │   ├── constants/
+│       │   │   │   └── env.ts              # Centralized, strictly-typed environment variables
+│       │   │   ├── supabase/               # Supabase client factory (3 environments)
+│       │   │   │   ├── client.ts           # Browser client — reads cookies via document.cookie
+│       │   │   │   ├── proxy.ts            # Edge client — refreshes expired sessions on every request
+│       │   │   │   └── server.ts           # Server client — reads cookies via next/headers
+│       │   │   └── utils.ts                # cn() helper — merges Tailwind classes via clsx + twMerge
+│       │   ├── store/                      # (Empty) Reserved for Zustand/global state management
+│       │   ├── types/                      # (Empty) Reserved for shared TypeScript type definitions
+│       │   └── utils/                      # Shared utility and configuration files
+│       │       ├── editor-config.ts    # Centralized Tiptap extensions and editorProps config
+│       │       └── string-utils.ts     # General string helpers (e.g., getInitials)
 ```
 
 ---
