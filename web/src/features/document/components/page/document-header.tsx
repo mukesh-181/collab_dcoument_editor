@@ -17,6 +17,8 @@ import { DocumentRenameDialog } from "./document-rename-dialog";
 import { DocumentSyncStatus } from "./document-sync-status";
 import { DocumentMembersPopover } from "./document-members-popover";
 import { ROUTES } from "@/constants/routes";
+import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
+
 
 interface DocumentHeaderProps {
   document: {
@@ -42,7 +44,7 @@ export function DocumentHeader({
   document,
   documents = [],
   currentUserRole = "viewer",
-  currentUserName = "Unknown",
+  currentUserName = USER_FALLBACKS.NAME,
 }: DocumentHeaderProps) {
   const [title, setTitle] = useState(document.title);
   const [isLeaving, startLeaving] = useTransition();

@@ -28,7 +28,16 @@ export function DocumentList({ documents, user }: { documents: DashboardDocument
             <div className="lg:hidden">
               <MobileSidebar documents={documents} user={user} />
             </div>
-            <h2 className="text-[18px] font-semibold text-zinc-800 dark:text-zinc-200">Documents</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-[18px] font-semibold text-zinc-800 dark:text-zinc-200">Documents</h2>
+              <div className="h-5 w-[1px] bg-zinc-300 dark:bg-zinc-700 hidden sm:block" />
+              <span className="text-[15px] font-medium text-zinc-500 hidden sm:block">
+                {filterType === 'all' ? 'All' : 
+                 filterType === 'owned-by-me' ? 'Owned by me' : 
+                 filterType === 'owned-by-others' ? 'Owned by others' : 
+                 filterType === 'editor' ? 'Editor' : 'Viewer'}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -47,10 +56,10 @@ export function DocumentList({ documents, user }: { documents: DashboardDocument
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-[170px] h-9 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-[14px]">
-                <SelectValue placeholder="Owned by anyone" />
+                <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Owned by anyone</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="owned-by-me">Owned by me</SelectItem>
                 <SelectItem value="owned-by-others">Owned by others</SelectItem>
                 <SelectItem value="editor">Editor</SelectItem>

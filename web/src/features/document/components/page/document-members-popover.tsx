@@ -9,6 +9,8 @@ import { removeMemberAction } from "../../actions/remove-member.action";
 import { updateMemberRoleAction } from "../../actions/update-member-role.action";
 import { toast } from "sonner";
 import { getInitials } from "@/utils/string-utils";
+import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
+
 
 
 interface DocumentMembersPopoverProps {
@@ -62,7 +64,7 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
               className="w-8 h-8 border-2 border-white dark:border-zinc-950 transition-transform group-hover:scale-105"
             >
               <AvatarImage
-                src={member.user.image || ""}
+                src={getUserImage(member.user.image)}
                 alt={member.user.name || "User"}
               />
               <AvatarFallback className="text-[10px]">
@@ -99,7 +101,7 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
               <div className="flex items-center space-x-3 overflow-hidden">
                 <Avatar className="w-9 h-9 border border-zinc-200 dark:border-zinc-800 shrink-0 shadow-sm">
                   <AvatarImage
-                    src={member.user.image || ""}
+                    src={getUserImage(member.user.image)}
                     alt={member.user.name || "User"}
                   />
                   <AvatarFallback>
@@ -108,7 +110,7 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
                   <span className="text-[14px] font-medium text-zinc-900 dark:text-zinc-50 truncate leading-snug">
-                    {member.user.name || (member.user.email ? member.user.email.split('@')[0] : "Anonymous User")}
+                    {getUserName(member.user.name, member.user.email)}
                   </span>
                   <span className="text-[12px] text-zinc-500 dark:text-zinc-400 truncate leading-snug">
                     {member.user.email}

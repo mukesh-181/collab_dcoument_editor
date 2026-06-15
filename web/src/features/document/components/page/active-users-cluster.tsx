@@ -5,6 +5,8 @@ import { useDocumentSync } from "./document-context";
 import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getInitials } from "@/utils/string-utils";
+import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
+
 
 
 export function ActiveUsersCluster() {
@@ -25,9 +27,9 @@ export function ActiveUsersCluster() {
               className="w-8 h-8 transition-transform hover:scale-105 shadow-sm"
               style={{ border: `2px solid ${activeUser.user.color || "#e4e4e7"}` }}
             >
-              <AvatarImage src={activeUser.user.image || ""} alt={activeUser.user.name || "User"} />
+              <AvatarImage src={getUserImage(activeUser.user.image)} alt={getUserName(activeUser.user.name)} />
               <AvatarFallback className="text-[10px] bg-white text-zinc-900 font-medium">
-                {(activeUser.user.name || "?").charAt(0).toUpperCase()}
+                {getInitials(activeUser.user.name)}
               </AvatarFallback>
             </Avatar>
           </TooltipWrapper>

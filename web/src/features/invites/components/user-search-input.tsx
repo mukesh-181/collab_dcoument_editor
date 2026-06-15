@@ -5,6 +5,8 @@ import { X, Search, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { searchUsersByEmail } from "../actions/search-users.action";
 import { getInitials } from "@/utils/string-utils";
+import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
+
 
 
 export interface UserSearchResult {
@@ -233,7 +235,7 @@ export function UserSearchInput({
               </Avatar>
               <div className="flex flex-col flex-1 min-w-0">
                 <span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate">
-                  {user.name || (user.email ? user.email.split('@')[0] : "Anonymous User")}
+                  {getUserName(user.name, user.email)}
                 </span>
                 <span className="text-[11px] text-zinc-500 truncate">{user.email}</span>
               </div>

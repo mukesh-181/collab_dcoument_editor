@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
+
 
 export async function getInviteDetails(token: string, userId?: string) {
   const supabase = await createClient()
@@ -51,7 +53,7 @@ export async function getInviteDetails(token: string, userId?: string) {
 
   return {
     documentTitle: documentInfo?.title || 'Unknown Document',
-    ownerName: ownerInfo?.name || 'Unknown User',
+    ownerName: getUserName(ownerInfo?.name),
     role: invite.role,
     documentId: invite.document_id,
     isAlreadyMember

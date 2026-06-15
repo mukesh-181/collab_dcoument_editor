@@ -14,6 +14,8 @@ import { rejectInvite } from "@/features/invites/actions/reject-invite.action";
 import { deleteInvite } from "@/features/invites/actions/delete-invite.action";
 import { ROUTES } from "@/constants/routes";
 import { getInitials } from "@/utils/string-utils";
+import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
+
 
 
 export function InboxItem({ invite }: { invite: any }) {
@@ -43,9 +45,9 @@ export function InboxItem({ invite }: { invite: any }) {
   const timeStr = format(new Date(invite.created_at), "hh:mm a");
   const dateStr = format(new Date(invite.created_at), "dd/MM/yyyy");
 
-  const inviterEmail = invite.documents?.owner?.email || "";
-  const inviterName = invite.documents?.owner?.name || (inviterEmail ? inviterEmail.split('@')[0] : "Anonymous User");
-  const inviterImage = invite.documents?.owner?.image || "";
+  const inviterEmail = getUserEmail(invite.documents?.owner?.email);
+  const inviterName = getUserName(invite.documents?.owner?.name, inviterEmail);
+  const inviterImage = getUserImage(invite.documents?.owner?.image);
   const documentTitle = invite.documents?.title || "Untitled Document";
 
   const handleAccept = async () => {
@@ -109,7 +111,7 @@ export function InboxItem({ invite }: { invite: any }) {
             {inviterEmail && (
               <>
                 <div className="h-[18px] w-[1px] bg-zinc-300 dark:bg-zinc-700 shrink-0" />
-                <span className="text-[14px] text-zinc-500 truncate">
+                <span className="text-[13px] text-zinc-500 truncate">
                   {inviterEmail}
                 </span>
               </>
@@ -122,14 +124,12 @@ export function InboxItem({ invite }: { invite: any }) {
             </span>
           ) : invite.status === 'removed' ? (
             <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
-              You have been removed from <span className="font-semibold">'{documentTitle}'</span> by <span className="font-semibold">{inviterName}</span> so you can't access this document onwards.
+              You have been removed from <span className="font-semibold">'{documentTitle}'</span> by <span className="font-semibold">{inviterName}</span>
             </span>
           ) : invite.status === 'role_updated' ? (
             <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1 flex flex-col">
               <span>Your role for <span className="font-semibold">'{documentTitle}'</span> has been updated to <span className="font-semibold capitalize">{invite.role}</span> by <span className="font-semibold">{inviterName}</span>.</span>
-              <span className="text-[12px] mt-1 text-zinc-500">
-                {invite.role === 'viewer' ? 'Now you can only view this document and not make any changes.' : 'Now you can edit this document.'}
-              </span>
+            
             </span>
           ) : (
             <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
