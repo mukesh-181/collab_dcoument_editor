@@ -28,13 +28,20 @@ export function SendEmailTab({ documentId }: { documentId: string }) {
     if (isSubmitting) return;
     
     const targetEmails = selectedContacts.map(c => c.email);
-    const trimmedEmail = email.trim();
+    const rawEmails = email.split(/[,\s]+/).map(e => e.trim()).filter(Boolean);
+    let newlyAdded: SelectedContact[] = [];
+
+    // Add pending inputs if they are valid emails
+    for (const trimmed of rawEmails) {
+      if (isValidEmail(trimmed) && !targetEmails.includes(trimmed)) {
+        targetEmails.push(trimmed);
+        newlyAdded.push({ id: crypto.randomUUID(), email: trimmed, name: null, image: null, isCustom: true });
+      }
+    }
     
-    // Add pending input if it's a valid email
-    if (trimmedEmail && isValidEmail(trimmedEmail) && !targetEmails.includes(trimmedEmail)) {
-      targetEmails.push(trimmedEmail);
-      // Auto-convert to pill so user sees it was included
-      setSelectedContacts([...selectedContacts, { id: crypto.randomUUID(), email: trimmedEmail, name: null, image: null, isCustom: true }]);
+    if (newlyAdded.length > 0) {
+      // Auto-convert to pills so user sees they were included
+      setSelectedContacts([...selectedContacts, ...newlyAdded]);
       setEmail("");
     }
     
@@ -53,7 +60,8 @@ export function SendEmailTab({ documentId }: { documentId: string }) {
     }
   };
 
-  const isSubmitDisabled = (selectedContacts.length === 0 && !isValidEmail(email)) || isSubmitting;
+  const hasValidPendingEmail = email.split(/[,\s]+/).map(e => e.trim()).some(isValidEmail);
+  const isSubmitDisabled = (selectedContacts.length === 0 && !hasValidPendingEmail) || isSubmitting;
 
   return (
     <form onSubmit={handleSendEmail} className="space-y-4">

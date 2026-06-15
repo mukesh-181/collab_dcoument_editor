@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { acceptInvite } from '../actions/accept-invite.action'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import { ROUTES } from "@/constants/routes";
 
 export function AcceptInviteButton({ token }: { token: string }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -14,7 +15,7 @@ export function AcceptInviteButton({ token }: { token: string }) {
     setIsLoading(true)
     try {
       const documentId = await acceptInvite(token)
-      router.push(`/dashboard/${documentId}`)
+      router.push(ROUTES.DOCUMENT(documentId))
     } catch (error) {
       console.error(error)
       // If it fails on click, reload the page to let the server-side error page take over

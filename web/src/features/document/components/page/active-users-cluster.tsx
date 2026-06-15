@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useDocumentSync } from "./document-context";
 import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { getInitials } from "@/utils/string-utils";
+
 
 export function ActiveUsersCluster() {
   const { activeUsers } = useDocumentSync();

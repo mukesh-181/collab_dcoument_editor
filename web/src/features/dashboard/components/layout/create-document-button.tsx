@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label'
 import { createDocument } from '../../actions/create-document.action'
 
 import { useRouter } from 'next/navigation'
+import { ROUTES } from "@/constants/routes";
 
 export function CreateDocumentButton({ children }: { children?: React.ReactNode }) {
   const [open, setOpen] = useState(false)
@@ -30,7 +31,7 @@ export function CreateDocumentButton({ children }: { children?: React.ReactNode 
     try {
       const newDocId = await createDocument(formData)
       setOpen(false)
-      router.push(`/dashboard/${newDocId}`)
+      router.push(ROUTES.DOCUMENT(newDocId))
     } catch (error) {
       console.error(error)
     } finally {

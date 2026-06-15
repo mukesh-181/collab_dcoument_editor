@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createInviteLink } from "../actions/create-invite.action";
+import { ROUTES } from "@/constants/routes";
 
 interface CreateLinkTabProps {
   documentId: string;
@@ -31,7 +32,7 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
     try {
       const token = await createInviteLink(documentId, role);
       const url = new URL(
-        `/dashboard/invite?token=${token}`,
+        ROUTES.INVITE(token),
         window.location.origin,
       );
       setInviteLink(url.toString());

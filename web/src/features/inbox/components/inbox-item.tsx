@@ -12,6 +12,9 @@ import { InboxItemDialogs } from "./inbox-item-dialogs";
 import { acceptInvite } from "@/features/invites/actions/accept-invite.action";
 import { rejectInvite } from "@/features/invites/actions/reject-invite.action";
 import { deleteInvite } from "@/features/invites/actions/delete-invite.action";
+import { ROUTES } from "@/constants/routes";
+import { getInitials } from "@/utils/string-utils";
+
 
 export function InboxItem({ invite }: { invite: any }) {
   const router = useRouter();
@@ -94,7 +97,7 @@ export function InboxItem({ invite }: { invite: any }) {
         <Avatar className="w-10 h-10 shrink-0 border border-zinc-200 dark:border-zinc-800">
           <AvatarImage src={inviterImage} alt={inviterName} />
           <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium">
-            {inviterName.charAt(0).toUpperCase()}
+            {getInitials(inviterName, inviterEmail)}
           </AvatarFallback>
         </Avatar>
         
@@ -113,9 +116,26 @@ export function InboxItem({ invite }: { invite: any }) {
             )}
           </div>
           
-          <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
-            Invitation to join <span className="font-semibold">'{documentTitle}'</span> with <span className="font-semibold capitalize">{invite.role}</span> access
-          </span>
+          {invite.status === 'exited' ? (
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{invite.token}</span> has exited from <span className="font-semibold text-zinc-900 dark:text-zinc-100">'{documentTitle}'</span>.
+            </span>
+          ) : invite.status === 'removed' ? (
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
+              You have been removed from <span className="font-semibold">'{documentTitle}'</span> by <span className="font-semibold">{inviterName}</span> so you can't access this document onwards.
+            </span>
+          ) : invite.status === 'role_updated' ? (
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1 flex flex-col">
+              <span>Your role for <span className="font-semibold">'{documentTitle}'</span> has been updated to <span className="font-semibold capitalize">{invite.role}</span> by <span className="font-semibold">{inviterName}</span>.</span>
+              <span className="text-[12px] mt-1 text-zinc-500">
+                {invite.role === 'viewer' ? 'Now you can only view this document and not make any changes.' : 'Now you can edit this document.'}
+              </span>
+            </span>
+          ) : (
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
+              Invitation to join <span className="font-semibold">'{documentTitle}'</span> with <span className="font-semibold capitalize">{invite.role}</span> access
+            </span>
+          )}
           
           {invite.status === 'pending' && !isExpiredLocal && (
             <span className="text-[12px]  text-red-500 dark:text-zinc-400">
@@ -137,6 +157,24 @@ export function InboxItem({ invite }: { invite: any }) {
             <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400">
               <XCircle className="w-3 h-3 mr-1" />
               Rejected
+            </span>
+          )}
+          {invite.status === 'removed' && (
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400">
+              <XCircle className="w-3 h-3 mr-1" />
+              Access Revoked
+            </span>
+          )}
+          {invite.status === 'exited' && (
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800/10 dark:text-zinc-400">
+              <XCircle className="w-3 h-3 mr-1" />
+              Member Left
+            </span>
+          )}
+          {invite.status === 'role_updated' && (
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+              <CheckCircle2 className="w-3 h-3 mr-1" />
+              Role Updated
             </span>
           )}
           {isExpiredLocal && invite.status === 'pending' && (
@@ -199,7 +237,7 @@ export function InboxItem({ invite }: { invite: any }) {
           <Button 
             size="sm" 
             className="h-7 px-4 text-xs bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900"
-            onClick={() => router.push(`/dashboard/${invite.document_id}`)}
+            onClick={() => router.push(ROUTES.DOCUMENT(invite.document_id))}
           >
             Go to Document
             <ArrowRight className="w-3.5 h-3.5 ml-1.5" />

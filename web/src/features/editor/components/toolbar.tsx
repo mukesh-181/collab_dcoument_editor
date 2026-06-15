@@ -13,8 +13,13 @@ import { ColorControl } from "./toolbar/color-control";
 import { LinkControl } from "./toolbar/link-control";
 import { ImageControl } from "./toolbar/image-control";
 import { AlignmentControls } from "./toolbar/alignment-controls";
+import { ListControls } from "./toolbar/list-controls";
+import { FontFamilyControl } from "./toolbar/font-family-control";
+import { HighlightControl } from "./toolbar/highlight-control";
+import { TableControl } from "./toolbar/table-control";
 
-export function Toolbar() {
+
+export function Toolbar({ documentId }: { documentId: string }) {
   const { editor } = useCurrentEditor();
   const [, forceUpdate] = useState(0);
 
@@ -39,7 +44,7 @@ export function Toolbar() {
 
   return (
     <TooltipProvider>
-      <div className="flex items-center justify-start sm:justify-center gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap scrollbar-hide">
+      <div className="editor-toolbar-container flex items-center justify-start gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap">
         <HistoryControls editor={editor} />
         
         <Separator
@@ -54,6 +59,12 @@ export function Toolbar() {
           className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700"
         />
 
+        <Separator
+          orientation="vertical"
+          className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700"
+        />
+
+        <FontFamilyControl editor={editor} />
         <FontSizeControl editor={editor} />
 
         <Separator
@@ -63,6 +74,7 @@ export function Toolbar() {
 
         <FormatControls editor={editor} />
         <ColorControl editor={editor} />
+        <HighlightControl editor={editor} />
 
         <Separator
           orientation="vertical"
@@ -70,7 +82,15 @@ export function Toolbar() {
         />
 
         <LinkControl editor={editor} />
-        <ImageControl editor={editor} />
+        <ImageControl editor={editor} documentId={documentId} />
+        <TableControl editor={editor} />
+
+        <Separator
+          orientation="vertical"
+          className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700"
+        />
+
+        <ListControls editor={editor} />
 
         <Separator
           orientation="vertical"

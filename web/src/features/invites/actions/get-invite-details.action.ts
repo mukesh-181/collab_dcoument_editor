@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 
-export async function getInviteDetails(token: string) {
+export async function getInviteDetails(token: string, userId?: string) {
   const supabase = await createClient()
 
   const { data: invite, error } = await supabase
@@ -11,6 +11,7 @@ export async function getInviteDetails(token: string) {
       id,
       status,
       role,
+      document_id,
       documents (
         title,
         owner:users!documents_owner_id_fkey (
@@ -25,8 +26,23 @@ export async function getInviteDetails(token: string) {
     throw new Error('Invalid invite link')
   }
 
-  if (invite.status !== 'pending') {
-    throw new Error('This invite link has already been used')
+  let isAlreadyMember = false
+
+  if (userId) {
+    const { data: existingMember } = await supabase
+      .from('document_members')
+      .select('role')
+      .eq('document_id', invite.document_id)
+      .eq('user_id', userId)
+      .single()
+
+    if (existingMember) {
+      isAlreadyMember = true
+    }
+  }
+
+  if (invite.status !== 'pending' && !isAlreadyMember) {
+    throw new Error('This invite link has already been used or expired.')
   }
 
   // Handle potentially nested array returns from Supabase joins
@@ -36,6 +52,8 @@ export async function getInviteDetails(token: string) {
   return {
     documentTitle: documentInfo?.title || 'Unknown Document',
     ownerName: ownerInfo?.name || 'Unknown User',
-    role: invite.role
+    role: invite.role,
+    documentId: invite.document_id,
+    isAlreadyMember
   }
 }

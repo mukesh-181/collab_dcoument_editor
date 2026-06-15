@@ -7,7 +7,7 @@ export function EditorSkeleton() {
     <div className="flex flex-col w-full min-h-full">
       {/* Toolbar Skeleton */}
       <div className="sticky top-0 z-10 w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 p-2 flex justify-center shadow-sm">
-        <div className="w-full max-w-[816px]">
+        <div className="w-full max-w-[794px]">
           <div className="flex items-center justify-start sm:justify-center gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap scrollbar-hide">
             <Skeleton className="h-8 w-8 rounded-md shrink-0" />
             <Skeleton className="h-8 w-8 rounded-md shrink-0" />
@@ -43,7 +43,7 @@ export function EditorSkeleton() {
       </div>
 
       {/* Page Skeleton */}
-      <div className="editor-page-bg max-w-[816px] w-full min-h-[1056px] mx-auto bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md px-4 sm:px-16 py-8 sm:py-20 my-4 sm:my-8">
+      <div className="max-w-[794px] w-full min-h-[1123px] mx-auto bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md px-16 py-20 my-8 rounded-sm">
         <Skeleton className="h-10 w-[60%] mb-8" />
         <Skeleton className="h-4 w-full mb-4" />
         <Skeleton className="h-4 w-[95%] mb-4" />

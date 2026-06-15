@@ -5,6 +5,9 @@ import { FileSpreadsheet } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DocumentActionMenu } from "../document-action-menu";
 import { useDocumentPreview } from "../../hooks/use-document-preview";
+import { ROUTES } from "@/constants/routes";
+import { getInitials } from "@/utils/string-utils";
+
 
 // Sub-component to safely and efficiently render the rich text preview
 function DocumentPreview({ json }: { json: any }) {
@@ -32,7 +35,7 @@ export function DocumentCard({ document, role }: DocumentCardProps) {
   return (
     <div className="group relative flex flex-col h-[240px] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-sm hover:border-indigo-500/50 transition-all hover:shadow-md">
       {/* Thumbnail Preview */}
-      <Link href={`/dashboard/${document.id}`} className="flex-1 block rounded-t-sm outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 relative overflow-hidden bg-white dark:bg-zinc-950">
+      <Link href={ROUTES.DOCUMENT(document.id)} className="flex-1 block rounded-t-sm outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 relative overflow-hidden bg-white dark:bg-zinc-950">
         <DocumentPreview json={document.previewJson} />
         
         {/* Avatars Overlay (Bottom Right) */}
@@ -42,7 +45,7 @@ export function DocumentCard({ document, role }: DocumentCardProps) {
               <Avatar key={member.user.id} className="w-6 h-6 border-[1.5px] border-white dark:border-zinc-950 relative shadow-sm" style={{ zIndex: 10 - i }}>
                 <AvatarImage src={member.user.image || undefined} />
                 <AvatarFallback className="text-[9px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium">
-                  {(member.user.name || member.user.email || "?").charAt(0).toUpperCase()}
+                  {getInitials(member.user.name, member.user.email)}
                 </AvatarFallback>
               </Avatar>
             ))}
@@ -60,7 +63,7 @@ export function DocumentCard({ document, role }: DocumentCardProps) {
 
       {/* Card Footer */}
       <div className="shrink-0 h-[76px] px-3 py-2.5 flex flex-col justify-between border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-b-sm">
-        <Link href={`/dashboard/${document.id}`} className="truncate text-[14px] font-medium text-zinc-800 dark:text-zinc-200 hover:text-indigo-600 dark:hover:text-indigo-400 block outline-none">
+        <Link href={ROUTES.DOCUMENT(document.id)} className="truncate text-[14px] font-medium text-zinc-800 dark:text-zinc-200 hover:text-indigo-600 dark:hover:text-indigo-400 block outline-none">
           {document.title}
         </Link>
         <div className="flex items-center justify-between mt-1">

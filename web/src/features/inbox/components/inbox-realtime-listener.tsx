@@ -31,7 +31,14 @@ export function InboxRealtimeListener() {
             filter: `email=eq.${user.email}`,
           },
           (payload) => {
-            toast.success("You have a new invite!")
+            const invite = payload.new as any;
+            if (invite.status === 'removed') {
+              toast.error("Your access was revoked for a document.");
+            } else if (invite.status === 'role_updated') {
+              toast.info("Your role was updated for a document.");
+            } else {
+              toast.success("You have a new invite!");
+            }
             router.refresh()
           }
         )

@@ -2,7 +2,14 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Users, Pencil, Eye } from "lucide-react";
+import { Users, Pencil, Eye, MoreVertical, ShieldAlert, UserMinus, ShieldCheck } from "lucide-react";
+import { useTransition, useState } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { removeMemberAction } from "../../actions/remove-member.action";
+import { updateMemberRoleAction } from "../../actions/update-member-role.action";
+import { toast } from "sonner";
+import { getInitials } from "@/utils/string-utils";
+
 
 interface DocumentMembersPopoverProps {
   members?: {
@@ -14,13 +21,39 @@ interface DocumentMembersPopoverProps {
       email: string;
     };
   }[];
+  documentId: string;
+  currentUserRole?: string;
 }
 
-export function DocumentMembersPopover({ members }: DocumentMembersPopoverProps) {
+export function DocumentMembersPopover({ members, documentId, currentUserRole }: DocumentMembersPopoverProps) {
+  const [isPending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
+
+  const handleRoleUpdate = (memberId: string, memberEmail: string, newRole: string) => {
+    startTransition(async () => {
+      const result = await updateMemberRoleAction(documentId, memberId, memberEmail, newRole);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(`Role updated to ${newRole}`);
+      }
+    });
+  };
+
+  const handleRemove = (memberId: string, memberEmail: string) => {
+    startTransition(async () => {
+      const result = await removeMemberAction(documentId, memberId, memberEmail);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Member removed successfully");
+      }
+    });
+  };
   if (!members || members.length === 0) return null;
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button className="flex items-center -space-x-2 mr-2 focus:outline-none cursor-pointer group">
           {members.map((member) => (
@@ -33,7 +66,7 @@ export function DocumentMembersPopover({ members }: DocumentMembersPopoverProps)
                 alt={member.user.name || "User"}
               />
               <AvatarFallback className="text-[10px]">
-                {(member.user.name || member.user.email || "?").charAt(0).toUpperCase()}
+                {getInitials(member.user.name, member.user.email)}
               </AvatarFallback>
             </Avatar>
           ))}
@@ -70,7 +103,7 @@ export function DocumentMembersPopover({ members }: DocumentMembersPopoverProps)
                     alt={member.user.name || "User"}
                   />
                   <AvatarFallback>
-                    {(member.user.name || member.user.email || "?").charAt(0).toUpperCase()}
+                    {getInitials(member.user.name, member.user.email)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
@@ -92,6 +125,43 @@ export function DocumentMembersPopover({ members }: DocumentMembersPopoverProps)
                   {member.role}
                 </span>
               </div>
+              
+              {currentUserRole === "owner" && member.role !== "owner" && (
+                <div className="ml-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button 
+                        disabled={isPending}
+                        className="p-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-500 transition-colors focus:outline-none disabled:opacity-50"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {member.role === 'viewer' && (
+                        <DropdownMenuItem onClick={() => handleRoleUpdate(member.user.id, member.user.email, 'editor')}>
+                          <ShieldCheck className="mr-2 h-4 w-4" />
+                          <span>Make Editor</span>
+                        </DropdownMenuItem>
+                      )}
+                      {member.role === 'editor' && (
+                        <DropdownMenuItem onClick={() => handleRoleUpdate(member.user.id, member.user.email, 'viewer')}>
+                          <ShieldAlert className="mr-2 h-4 w-4" />
+                          <span>Make Viewer</span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => handleRemove(member.user.id, member.user.email)}
+                        className="text-red-600 dark:text-red-400 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                      >
+                        <UserMinus className="mr-2 h-4 w-4" />
+                        <span>Remove Access</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
           ))}
         </div>

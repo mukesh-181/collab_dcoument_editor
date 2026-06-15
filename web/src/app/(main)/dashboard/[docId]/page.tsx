@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+import { NoPermissionPage } from '@/features/document/components/page/no-permission-page'
 import { getDocumentById } from '@/features/document/actions/get-document-by-id.action'
 import { DocumentPage } from '@/features/document/components/document-page'
 import { createClient } from '@/lib/supabase/server'
@@ -10,7 +10,7 @@ export default async function Page(props: { params: Promise<{ docId: string }> }
   const document = await getDocumentById(params.docId)
   
   if (!document) {
-    redirect('/dashboard')
+    return <NoPermissionPage />
   }
 
   const supabase = await createClient()

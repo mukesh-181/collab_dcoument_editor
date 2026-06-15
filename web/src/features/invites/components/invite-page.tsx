@@ -5,6 +5,9 @@ import { AcceptInviteButton } from '@/features/invites/components/accept-invite-
 import { SignOutButton } from '@/features/auth/components/sign-out-button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User } from '@supabase/supabase-js'
+import { ROUTES } from "@/constants/routes";
+import { getInitials } from "@/utils/string-utils";
+
 
 interface InvitePageProps {
   token: string | string[] | undefined
@@ -55,7 +58,7 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
               This invite link is missing or malformed.
             </p>
             <Button asChild className="w-full">
-              <Link href="/dashboard">Go to Dashboard</Link>
+              <Link href={ROUTES.DASHBOARD}>Go to Dashboard</Link>
             </Button>
           </div>
         </div>
@@ -79,7 +82,7 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
               {error || 'The invite link may have expired or already been used.'}
             </p>
             <Button asChild className="w-full">
-              <Link href="/dashboard">Go to Dashboard</Link>
+              <Link href={ROUTES.DASHBOARD}>Go to Dashboard</Link>
             </Button>
           </div>
         </div>
@@ -96,25 +99,52 @@ export function InvitePage({ token, user, inviteDetails, error }: InvitePageProp
             <UserPlus className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
           </div>
           
-          <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-            You've been invited!
-          </h1>
-          
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
-            <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviteDetails?.ownerName}</span> has invited you to join the document as a <span className="capitalize font-semibold text-zinc-900 dark:text-zinc-100">{inviteDetails?.role}</span>.
-          </p>
+          {inviteDetails?.isAlreadyMember ? (
+            <>
+              <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                Already a Member
+              </h1>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
+                You are already a member of this document.
+              </p>
+              
+              <div className="flex items-center justify-center gap-3 w-full p-4 bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-100 dark:border-zinc-800 rounded-lg mb-8">
+                <FileText className="w-5 h-5 text-indigo-500" />
+                <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{inviteDetails?.documentTitle}</span>
+              </div>
 
-          <div className="flex items-center justify-center gap-3 w-full p-4 bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-100 dark:border-zinc-800 rounded-lg mb-8">
-            <FileText className="w-5 h-5 text-indigo-500" />
-            <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{inviteDetails?.documentTitle}</span>
-          </div>
+              <div className="flex flex-col gap-3 w-full">
+                <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none">
+                  <Link href={ROUTES.DOCUMENT(inviteDetails?.documentId)}>Go to Document</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full border-zinc-200 dark:border-zinc-700">
+                  <Link href={ROUTES.DASHBOARD}>Return to Dashboard</Link>
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                You've been invited!
+              </h1>
+              
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviteDetails?.ownerName}</span> has invited you to join the document as a <span className="capitalize font-semibold text-zinc-900 dark:text-zinc-100">{inviteDetails?.role}</span>.
+              </p>
 
-          <div className="flex flex-col gap-3 w-full">
-            <AcceptInviteButton token={token as string} />
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/dashboard">Cancel</Link>
-            </Button>
-          </div>
+              <div className="flex items-center justify-center gap-3 w-full p-4 bg-zinc-50 dark:bg-zinc-950/50 border border-zinc-100 dark:border-zinc-800 rounded-lg mb-8">
+                <FileText className="w-5 h-5 text-indigo-500" />
+                <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{inviteDetails?.documentTitle}</span>
+              </div>
+
+              <div className="flex flex-col gap-3 w-full">
+                <AcceptInviteButton token={token as string} />
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={ROUTES.DASHBOARD}>Cancel</Link>
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

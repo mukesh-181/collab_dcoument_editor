@@ -8,9 +8,15 @@ import { Separator } from "@/components/ui/separator";
 import { ShareDialog } from "@/features/invites/components/share-dialog";
 import { ActiveUsersCluster } from "./active-users-cluster";
 import { MobileSidebar } from "@/features/dashboard/components/layout/mobile-sidebar";
+import { leaveDocumentAction } from "@/features/document/actions/leave-document.action";
+import { LogOut } from "lucide-react";
+import { toast } from "sonner";
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { DocumentRenameDialog } from "./document-rename-dialog";
 import { DocumentSyncStatus } from "./document-sync-status";
 import { DocumentMembersPopover } from "./document-members-popover";
+import { ROUTES } from "@/constants/routes";
 
 interface DocumentHeaderProps {
   document: {
@@ -29,14 +35,36 @@ interface DocumentHeaderProps {
   };
   documents?: any[];
   currentUserRole?: string;
+  currentUserName?: string;
 }
 
 export function DocumentHeader({
   document,
   documents = [],
   currentUserRole = "viewer",
+  currentUserName = "Unknown",
 }: DocumentHeaderProps) {
   const [title, setTitle] = useState(document.title);
+  const [isLeaving, startLeaving] = useTransition();
+  const router = useRouter();
+
+  const handleLeave = () => {
+    startLeaving(async () => {
+      const ownerMember = document.all_members?.find((m) => m.role === "owner");
+      if (!ownerMember) {
+        toast.error("Could not find document owner");
+        return;
+      }
+      
+      const result = await leaveDocumentAction(document.id, ownerMember.user.email, currentUserName);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("You have left the document");
+        router.push(ROUTES.DASHBOARD);
+      }
+    });
+  };
 
   return (
     <div className="flex items-center justify-between h-14 pr-4 pl-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
@@ -48,7 +76,7 @@ export function DocumentHeader({
           asChild
           className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
         >
-          <Link href="/dashboard">
+          <Link href={ROUTES.DASHBOARD}>
             <ArrowLeft className="h-4 w-4" />
             <span className="sr-only">Back to Dashboard</span>
           </Link>
@@ -87,11 +115,25 @@ export function DocumentHeader({
         <ActiveUsersCluster />
 
         {/* Member Avatars Popover */}
-        <DocumentMembersPopover members={document.all_members} />
+        <DocumentMembersPopover members={document.all_members} documentId={document.id} currentUserRole={currentUserRole} />
 
         {/* Invite Button */}
-        {currentUserRole !== "viewer" && (
+        {currentUserRole === "owner" && (
           <ShareDialog documentId={document.id} />
+        )}
+
+        {/* Leave Document Button */}
+        {currentUserRole !== "owner" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLeave}
+            disabled={isLeaving}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 px-2"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            <span className="text-[13px]">Leave</span>
+          </Button>
         )}
       </div>
     </div>

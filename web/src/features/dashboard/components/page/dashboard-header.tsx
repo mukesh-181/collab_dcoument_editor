@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { User } from '@supabase/supabase-js'
 import { MobileSidebar } from '../layout/mobile-sidebar'
 import { SignOutButton } from '@/features/auth/components/sign-out-button'
+import { getInitials } from "@/utils/string-utils";
+
 
 export function DashboardHeader({ user, documents = [] }: { user: User | null, documents?: any[] }) {
   const rawName = user?.user_metadata?.full_name || user?.user_metadata?.username || user?.email || 'User'

@@ -15,6 +15,9 @@ import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { useEffect, useState, useMemo } from "react";
 import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action";
 import { createClient } from "@/lib/supabase/client";
+import { ROUTES } from "@/constants/routes";
+import { getInitials } from "@/utils/string-utils";
+
 
 export function SidebarContent({ user }: { documents?: any[], user?: User | null }) {
   const pathname = usePathname();
@@ -108,8 +111,8 @@ export function SidebarContent({ user }: { documents?: any[], user?: User | null
           <div className="text-[13px] font-semibold text-zinc-400 px-3 pb-1">
             Discover
           </div>
-          <NavItem icon={Inbox} label="Inbox" href="/inbox" badge={unreadCount > 0 ? unreadCount : undefined} />
-          <NavItem icon={LayoutGrid} label="Dashboard" href="/dashboard" />
+          <NavItem icon={Inbox} label="Inbox" href={ROUTES.INBOX} badge={unreadCount > 0 ? unreadCount : undefined} />
+          <NavItem icon={LayoutGrid} label="Dashboard" href={ROUTES.DASHBOARD} />
         </div>
       </div>
 
