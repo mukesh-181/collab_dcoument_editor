@@ -56,11 +56,14 @@ export async function acceptInvite(token: string) {
     throw new Error('Failed to join the document')
   }
 
-  // Mark the invite as accepted
-  await supabase
-    .from('invites')
-    .update({ status: 'accepted' })
-    .eq('id', invite.id)
+  // Mark the invite as accepted ONLY if it's an email invite (single-use).
+  // General links (email is null) remain pending so they can be used multiple times until expiry.
+  if (invite.email) {
+    await supabase
+      .from('invites')
+      .update({ status: 'accepted' })
+      .eq('id', invite.id)
+  }
 
   return invite.document_id
 }

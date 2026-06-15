@@ -11,9 +11,9 @@ export function DocumentClientLayout({
   const { isEditorReady } = useDocumentSync();
 
   return (
-    <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden bg-white dark:bg-zinc-950">
+    <div className="relative flex flex-col flex-1 min-h-0 overflow-hidden bg-transparent">
       {!isEditorReady && (
-        <div className="absolute inset-0 z-50 bg-white dark:bg-zinc-950 flex flex-col">
+        <div className="absolute inset-0 z-50 bg-transparent flex flex-col">
           <DocumentSkeleton />
         </div>
       )}

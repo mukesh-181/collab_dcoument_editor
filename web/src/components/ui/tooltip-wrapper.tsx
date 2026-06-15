@@ -13,7 +13,7 @@ export const TooltipWrapper = ({
 }: {
   children: React.ReactNode;
   title: string;
-  description: string;
+  description?: string;
 }) => (
   <Tooltip delayDuration={300}>
     <TooltipTrigger asChild>
@@ -24,9 +24,11 @@ export const TooltipWrapper = ({
       className="flex flex-col gap-1 max-w-[200px] z-[100]"
     >
       <span className="font-semibold text-xs">{title}</span>
-      <span className="text-zinc-300 text-[10px] leading-tight">
-        {description}
-      </span>
+      {description && (
+        <span className="text-zinc-300 text-[10px] leading-tight">
+          {description}
+        </span>
+      )}
     </TooltipContent>
   </Tooltip>
 );

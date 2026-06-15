@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { ROUTES } from "@/constants/routes";
 
 export async function createDocument(formData: FormData) {
   const supabase = await createClient()
@@ -47,6 +48,6 @@ export async function createDocument(formData: FormData) {
   }
 
   // 4. Return the new document ID
-  revalidatePath('/dashboard')
+  revalidatePath(ROUTES.DASHBOARD)
   return document.id
 }

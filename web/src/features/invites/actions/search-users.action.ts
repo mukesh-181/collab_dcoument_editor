@@ -13,7 +13,7 @@ export async function searchUsersByEmail(query: string) {
     .from('users')
     .select('id, name, email, image')
     .ilike('email', `%${query}%`)
-    .limit(5)
+    .limit(7)
 
   if (error) {
     console.error('Error searching users:', error)

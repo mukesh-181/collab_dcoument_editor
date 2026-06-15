@@ -75,7 +75,7 @@ export function DocumentRenameDialog({
           <span className="sr-only">Rename document</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg">
+      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-2xl">
         <form onSubmit={handleSubmit}>
           <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
             <DialogHeader>
@@ -104,7 +104,7 @@ export function DocumentRenameDialog({
                 value={draftTitle}
                 onChange={(e) => setDraftTitle(e.target.value)}
                 onFocus={(e) => e.target.select()}
-                className="h-11 px-4 text-[15px] rounded-lg border-zinc-200 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:focus-visible:ring-zinc-600 shadow-sm bg-white dark:bg-zinc-950"
+                className="h-11 px-4 text-[15px] rounded-xl border-zinc-200/60 focus-visible:ring-indigo-500/50 dark:border-zinc-800/60 dark:focus-visible:ring-indigo-500/50 shadow-sm bg-white/50 dark:bg-zinc-950/50"
                 autoFocus
                 required
               />
@@ -127,7 +127,7 @@ export function DocumentRenameDialog({
             <Button 
               type="submit" 
               disabled={isSaveDisabled}
-              className="relative bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm rounded-lg h-10 px-6 font-medium"
+              className="relative bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl h-10 px-6 font-medium transition-all hover:-translate-y-0.5"
             >
               <span className={isPending ? "opacity-0" : ""}>Save</span>
               {isPending && (
