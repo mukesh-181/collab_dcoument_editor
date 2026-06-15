@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Send, Eye, Edit2, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Send, Eye, Edit2, Loader2, Info, Lightbulb } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -15,7 +15,17 @@ import { toast } from "sonner";
 import { UserSearchInput, SelectedContact } from "./user-search-input";
 import { sendEmailInvites } from "../actions/send-email-invites.action";
 
-export function SendEmailTab({ documentId }: { documentId: string }) {
+export function SendEmailTab({ 
+  documentId,
+  allMembers = [],
+  invites = [],
+  onInviteSent
+}: { 
+  documentId: string;
+  allMembers?: any[];
+  invites?: any[];
+  onInviteSent?: (newInvites: any[]) => void;
+}) {
   const [emailRole, setEmailRole] = useState<"viewer" | "editor">("viewer");
   const [email, setEmail] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<SelectedContact[]>([]);
@@ -33,7 +43,10 @@ export function SendEmailTab({ documentId }: { documentId: string }) {
 
     // Add pending inputs if they are valid emails
     for (const trimmed of rawEmails) {
-      if (isValidEmail(trimmed) && !targetEmails.includes(trimmed)) {
+      const isMem = allMembers.some(m => m.user?.email?.toLowerCase() === trimmed.toLowerCase());
+      const isInv = invites.some(inv => inv.status === 'pending' && inv.email?.toLowerCase() === trimmed.toLowerCase() && new Date(inv.expires_at) > new Date());
+      
+      if (isValidEmail(trimmed) && !targetEmails.includes(trimmed) && !isMem && !isInv) {
         targetEmails.push(trimmed);
         newlyAdded.push({ id: crypto.randomUUID(), email: trimmed, name: null, image: null, isCustom: true });
       }
@@ -51,6 +64,15 @@ export function SendEmailTab({ documentId }: { documentId: string }) {
     try {
       await sendEmailInvites(documentId, targetEmails, emailRole);
       toast.success(`Successfully sent invitations to ${targetEmails.length} user${targetEmails.length > 1 ? 's' : ''}`);
+      
+      // Instantly block them from being selected again without a page reload
+      const newPendingInvites = targetEmails.map(e => ({
+        email: e,
+        status: 'pending',
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Fake expiry for immediate UI update
+      }));
+      if (onInviteSent) onInviteSent(newPendingInvites);
+      
       setSelectedContacts([]);
       setEmail("");
     } catch (error: any) {
@@ -60,7 +82,13 @@ export function SendEmailTab({ documentId }: { documentId: string }) {
     }
   };
 
-  const hasValidPendingEmail = email.split(/[,\s]+/).map(e => e.trim()).some(isValidEmail);
+  const hasValidPendingEmail = email.split(/[,\s]+/).map(e => e.trim()).some(e => {
+    if (!isValidEmail(e)) return false;
+    const isMem = allMembers.some(m => m.user?.email?.toLowerCase() === e.toLowerCase());
+    const isInv = invites.some(inv => inv.status === 'pending' && inv.email?.toLowerCase() === e.toLowerCase() && new Date(inv.expires_at) > new Date());
+    return !isMem && !isInv;
+  });
+  
   const isSubmitDisabled = (selectedContacts.length === 0 && !hasValidPendingEmail) || isSubmitting;
 
   return (
@@ -74,10 +102,15 @@ export function SendEmailTab({ documentId }: { documentId: string }) {
           onContactsChange={setSelectedContacts}
           emailQuery={email}
           onEmailQueryChange={setEmail}
+          allMembers={allMembers}
+          invites={invites}
         />
-        <p className="text-[12.5px] text-zinc-500 dark:text-zinc-400 mt-2 leading-relaxed">
-          Create link if email is not registered with us.
-        </p>
+        <div className="flex items-center gap-1.5 mt-3 px-2.5 py-2 rounded-md bg-zinc-100/60 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-700/50 w-fit">
+          <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+          <p className="text-[12px] text-zinc-600 dark:text-zinc-300 font-medium leading-none">
+            Don't know their email? Use the <span className="text-zinc-900 dark:text-zinc-100 font-semibold">Create Link</span> tab above.
+          </p>
+        </div>
       </div>
       
       <div className="space-y-2">
@@ -107,6 +140,13 @@ export function SendEmailTab({ documentId }: { documentId: string }) {
             )
           })}
         </div>
+      </div>
+
+      <div className="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 p-3 rounded-lg flex items-start gap-2.5">
+        <Info className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+        <p className="text-[12.5px] text-indigo-700 dark:text-indigo-300 leading-relaxed">
+          <strong>Note:</strong> Existing members and users with pending invites are automatically excluded to prevent duplicates.
+        </p>
       </div>
 
       <Button

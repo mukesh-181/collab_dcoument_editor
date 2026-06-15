@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ShieldAlert, UserMinus } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
+import { useDocumentSync } from "./document-context";
+import { toast } from "sonner";
 
 interface DocumentRealtimeListenerProps {
   documentId: string;
@@ -24,10 +26,9 @@ export function DocumentRealtimeListener({
 }: DocumentRealtimeListenerProps) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
+  const { setCurrentUserRole } = useDocumentSync();
 
   const [removedDialogOpen, setRemovedDialogOpen] = useState(false);
-  const [roleUpdatedDialogOpen, setRoleUpdatedDialogOpen] = useState(false);
-  const [newRole, setNewRole] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -58,8 +59,8 @@ export function DocumentRealtimeListener({
             if (invite.status === "removed") {
               setRemovedDialogOpen(true);
             } else if (invite.status === "role_updated") {
-              setNewRole(invite.role);
-              setRoleUpdatedDialogOpen(true);
+              setCurrentUserRole(invite.role);
+              toast.success(`Your role was updated to ${invite.role}. ${invite.role === 'editor' ? 'You can now edit the document.' : 'You can no longer edit the document.'}`);
             }
           }
         )
@@ -108,38 +109,6 @@ export function DocumentRealtimeListener({
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => router.push(ROUTES.DASHBOARD)} className="relative bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl font-medium transition-all hover:-translate-y-0.5">
               Return to Dashboard
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={roleUpdatedDialogOpen} onOpenChange={setRoleUpdatedDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-blue-500" />
-              Role Updated
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Your role for this document has been updated to{" "}
-              <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">
-                {newRole}
-              </span>
-              .{" "}
-              {newRole === "viewer"
-                ? "You can now only view this document and not make any changes."
-                : "You can now edit this document."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={() => {
-                setRoleUpdatedDialogOpen(false);
-                window.location.reload();
-              }}
-              className="relative bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl font-medium transition-all hover:-translate-y-0.5"
-            >
-              Acknowledge
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

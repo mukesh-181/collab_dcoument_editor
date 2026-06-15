@@ -1,11 +1,12 @@
 import { Editor } from "@tiptap/react";
+import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 const FONT_SIZES = [
   "8px",
@@ -24,6 +25,8 @@ const FONT_SIZES = [
 ];
 
 export function FontSizeControl({ editor }: { editor: Editor }) {
+  const [open, setOpen] = useState(false);
+
   const getCurrentFontSize = () => {
     const inlineSize = editor.getAttributes("textStyle").fontSize;
     if (inlineSize) return inlineSize;
@@ -37,23 +40,37 @@ export function FontSizeControl({ editor }: { editor: Editor }) {
 
   return (
     <div className="flex items-center ml-1 mr-1">
-      <Select
-        value={getCurrentFontSize()}
-        onValueChange={(value) => {
-          editor.chain().focus().setFontSize(value).run();
-        }}
-      >
-        <SelectTrigger className="h-8 w-20 text-xs font-medium focus:ring-0 focus:ring-offset-0">
-          <SelectValue placeholder="Size" />
-        </SelectTrigger>
-        <SelectContent position="popper">
+      <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onMouseDown={(e) => e.preventDefault()}
+            className="h-8 w-20 px-2 text-xs font-medium justify-between hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          >
+            <span className="truncate">{getCurrentFontSize()}</span>
+            <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          className="w-20 min-w-0 max-h-[300px] overflow-y-auto"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           {FONT_SIZES.map((size) => (
-            <SelectItem key={size} value={size} className="text-xs">
+            <div 
+              key={size} 
+              className="text-xs justify-center relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1.5 px-2 outline-hidden select-none hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              onClick={() => {
+                editor.chain().focus().setFontSize(size).run();
+                setOpen(false);
+              }}
+            >
               {size}
-            </SelectItem>
+            </div>
           ))}
-        </SelectContent>
-      </Select>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

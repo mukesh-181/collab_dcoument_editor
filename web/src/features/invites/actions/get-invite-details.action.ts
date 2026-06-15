@@ -44,7 +44,11 @@ export async function getInviteDetails(token: string, userId?: string) {
   }
 
   if (invite.status !== 'pending' && !isAlreadyMember) {
-    throw new Error('This invite link has already been used or expired.')
+    throw new Error('This invite link has already been used.')
+  }
+
+  if (invite.expires_at && new Date(invite.expires_at) < new Date() && !isAlreadyMember) {
+    throw new Error('This invite link has expired.')
   }
 
   // Handle potentially nested array returns from Supabase joins

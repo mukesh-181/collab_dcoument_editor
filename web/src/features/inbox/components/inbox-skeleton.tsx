@@ -22,7 +22,7 @@ export function InboxSkeleton() {
         
         <div className="flex flex-col gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex flex-col sm:flex-row gap-4 p-5 sm:p-6 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl shadow-sm relative overflow-hidden transition-all group/item">
+            <div key={i} className="flex flex-col sm:flex-row gap-4 py-5 px-5 bg-gradient-to-b from-white/80 to-indigo-50/60 dark:from-zinc-950/80 dark:to-indigo-950/40 backdrop-blur-md border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-sm relative overflow-hidden transition-all duration-300">
               <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
               <div className="relative z-10 flex gap-4 w-full items-center">
                 <Skeleton className="w-12 h-12 rounded-full shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />

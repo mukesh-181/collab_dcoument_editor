@@ -21,6 +21,7 @@ export function HighlightControl({ editor }: { editor: Editor }) {
         <input
           type="color"
           value={currentHighlightColor}
+          onMouseDown={(e) => e.preventDefault()}
           onChange={(e) => {
             const newColor = e.target.value;
             editor.chain().focus().setHighlight({ color: newColor }).run();

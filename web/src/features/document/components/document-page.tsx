@@ -20,15 +20,14 @@ export function DocumentPage({
   token,
 }: DocumentPageProps) {
   return (
-    <DocumentProvider>
+    <DocumentProvider initialRole={currentUserRole}>
       <DocumentClientLayout>
         <DocumentRealtimeListener documentId={document.id} />
-        <DocumentHeader document={document} documents={documents} currentUserRole={currentUserRole} currentUserName={currentUserName} />
+        <DocumentHeader document={document} documents={documents} currentUserName={currentUserName} />
         <div className="flex-1 overflow-y-auto relative min-h-0">
           <Editor
             documentId={document.id}
             documentTitle={document.title}
-            currentUserRole={currentUserRole}
             currentUserName={currentUserName}
             token={token}
           />

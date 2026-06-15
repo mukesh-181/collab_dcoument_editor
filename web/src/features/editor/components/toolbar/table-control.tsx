@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -21,8 +21,10 @@ interface TableControlProps {
 }
 
 export function TableControl({ editor }: TableControlProps) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
@@ -42,80 +44,119 @@ export function TableControl({ editor }: TableControlProps) {
         <TooltipContent>Table</TooltipContent>
       </Tooltip>
 
-      <DropdownMenuContent align="start" className="w-48">
-        <DropdownMenuItem
-          onClick={() =>
+      <DropdownMenuContent 
+        align="start" 
+        className="w-48 p-1"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <div
+          onClick={() => {
             editor
               .chain()
               .focus()
               .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-              .run()
-          }
+              .run();
+            setOpen(false);
+          }}
+          className="relative flex w-full cursor-default items-center gap-1.5 rounded-md px-2 py-1.5 text-sm outline-hidden select-none hover:bg-zinc-100 dark:hover:bg-zinc-800"
         >
           <Table className="h-4 w-4 mr-2" />
           Insert Table (3x3)
-        </DropdownMenuItem>
+        </div>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().addRowBefore().run()}
-          disabled={!editor.isActive("table")}
+        <div
+          onClick={() => {
+            if (editor.isActive("table")) {
+              editor.chain().focus().addRowBefore().run();
+              setOpen(false);
+            }
+          }}
+          className={`relative flex w-full cursor-default items-center gap-1.5 rounded-md px-2 py-1.5 text-sm outline-hidden select-none ${!editor.isActive("table") ? "opacity-50 pointer-events-none" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
         >
           <Rows className="h-4 w-4 mr-2" />
           Add Row Before
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().addRowAfter().run()}
-          disabled={!editor.isActive("table")}
+        </div>
+        <div
+          onClick={() => {
+            if (editor.isActive("table")) {
+              editor.chain().focus().addRowAfter().run();
+              setOpen(false);
+            }
+          }}
+          className={`relative flex w-full cursor-default items-center gap-1.5 rounded-md px-2 py-1.5 text-sm outline-hidden select-none ${!editor.isActive("table") ? "opacity-50 pointer-events-none" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Row After
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().deleteRow().run()}
-          disabled={!editor.isActive("table")}
-          className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50"
+        </div>
+        <div
+          onClick={() => {
+            if (editor.isActive("table")) {
+              editor.chain().focus().deleteRow().run();
+              setOpen(false);
+            }
+          }}
+          className={`relative flex w-full cursor-default items-center gap-1.5 rounded-md px-2 py-1.5 text-sm outline-hidden select-none ${!editor.isActive("table") ? "opacity-50 pointer-events-none" : "text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"}`}
         >
           <Trash2 className="h-4 w-4 mr-2" />
           Delete Row
-        </DropdownMenuItem>
+        </div>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().addColumnBefore().run()}
-          disabled={!editor.isActive("table")}
+        <div
+          onClick={() => {
+            if (editor.isActive("table")) {
+              editor.chain().focus().addColumnBefore().run();
+              setOpen(false);
+            }
+          }}
+          className={`relative flex w-full cursor-default items-center gap-1.5 rounded-md px-2 py-1.5 text-sm outline-hidden select-none ${!editor.isActive("table") ? "opacity-50 pointer-events-none" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
         >
           <Columns className="h-4 w-4 mr-2" />
           Add Column Before
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().addColumnAfter().run()}
-          disabled={!editor.isActive("table")}
+        </div>
+        <div
+          onClick={() => {
+            if (editor.isActive("table")) {
+              editor.chain().focus().addColumnAfter().run();
+              setOpen(false);
+            }
+          }}
+          className={`relative flex w-full cursor-default items-center gap-1.5 rounded-md px-2 py-1.5 text-sm outline-hidden select-none ${!editor.isActive("table") ? "opacity-50 pointer-events-none" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Column After
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().deleteColumn().run()}
-          disabled={!editor.isActive("table")}
-          className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50"
+        </div>
+        <div
+          onClick={() => {
+            if (editor.isActive("table")) {
+              editor.chain().focus().deleteColumn().run();
+              setOpen(false);
+            }
+          }}
+          className={`relative flex w-full cursor-default items-center gap-1.5 rounded-md px-2 py-1.5 text-sm outline-hidden select-none ${!editor.isActive("table") ? "opacity-50 pointer-events-none" : "text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"}`}
         >
           <Trash2 className="h-4 w-4 mr-2" />
           Delete Column
-        </DropdownMenuItem>
+        </div>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().deleteTable().run()}
-          disabled={!editor.isActive("table")}
-          className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50"
+        <div
+          onClick={() => {
+            if (editor.isActive("table")) {
+              editor.chain().focus().deleteTable().run();
+              setOpen(false);
+            }
+          }}
+          className={`relative flex w-full cursor-default items-center gap-1.5 rounded-md px-2 py-1.5 text-sm outline-hidden select-none ${!editor.isActive("table") ? "opacity-50 pointer-events-none" : "text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"}`}
         >
           <Trash2 className="h-4 w-4 mr-2" />
           Delete Table
-        </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

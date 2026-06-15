@@ -17,7 +17,6 @@ import { EditorSkeleton } from "@/features/document/components/page/document-ske
 interface EditorProps {
   documentId: string;
   documentTitle?: string;
-  currentUserRole?: string;
   currentUserName: string;
   token: string;
 }
@@ -34,14 +33,23 @@ function EditorFocusListener() {
   return null;
 }
 
+function EditorRoleSync({ role }: { role: string }) {
+  const { editor } = useCurrentEditor();
+  useEffect(() => {
+    if (editor && !editor.isDestroyed) {
+      editor.setEditable(role !== "viewer");
+    }
+  }, [editor, role]);
+  return null;
+}
+
 export function Editor({
   documentId,
   documentTitle = "Untitled Document",
-  currentUserRole = "viewer",
   currentUserName,
   token,
 }: EditorProps) {
-  const { setSyncState, setActiveUsers, setIsEditorReady } = useDocumentSync();
+  const { setSyncState, setActiveUsers, setIsEditorReady, currentUserRole } = useDocumentSync();
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
   const [isSynced, setIsSynced] = useState(false);
@@ -116,13 +124,11 @@ export function Editor({
       <EditorProvider
         editable={currentUserRole !== "viewer"}
         slotBefore={
-          currentUserRole !== "viewer" && (
-            <div className="sticky top-0 z-10 w-full bg-white/80 dark:bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-200/60 dark:border-zinc-800/60 p-2 flex justify-center shadow-sm">
-              <div className="w-full max-w-full px-4">
-                <Toolbar documentId={documentId} />
-              </div>
+          <div className={`sticky top-0 z-10 w-full bg-white/80 dark:bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-200/60 dark:border-zinc-800/60 p-2 flex justify-center shadow-sm ${currentUserRole === "viewer" ? "hidden" : ""}`}>
+            <div className="w-full max-w-full px-4">
+              <Toolbar documentId={documentId} />
             </div>
-          )
+          </div>
         }
                 extensions={getEditorExtensions({ documentId, ydoc, provider, currentUserName })}
         editorProps={{
@@ -162,13 +168,10 @@ export function Editor({
           }
         }}
       >
-        {currentUserRole !== "viewer" && (
-          <>
-            <LinkBubbleMenu />
-            <FormattingBubbleMenu />
-          </>
-        )}
+        <LinkBubbleMenu />
+        <FormattingBubbleMenu />
         <EditorFocusListener />
+        <EditorRoleSync role={currentUserRole} />
       </EditorProvider>
     </div>
   );

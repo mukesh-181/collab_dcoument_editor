@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, Loader2, AlertCircle, Eye, Edit2 } from "lucide-react";
+import { Copy, Check, Loader2, AlertCircle, Eye, Edit2, Info } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -65,7 +65,9 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
       )}
 
       {!inviteLink ? (
+       
         <div className="space-y-4">
+    
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
               Collaborator Role
@@ -93,6 +95,13 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
                 )
               })}
             </div>
+          </div>
+
+          <div className="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 p-3 rounded-lg flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+            <p className="text-[12.5px] text-indigo-700 dark:text-indigo-300 leading-relaxed">
+              <strong>Note:</strong> This link is multi-use but will <strong>expire in 24 hours</strong>. If an existing member uses this link, it will redirect them straight to the document without overriding their current role.
+            </p>
           </div>
           
           <Button

@@ -116,6 +116,7 @@ const ResizableImageNode = (props: NodeViewProps) => {
       as="span"
       className={`group relative inline-block ${selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
       style={{ display: 'inline-block', lineHeight: 0 }}
+      data-drag-handle
     >
       <img
         ref={imgRef}
@@ -129,7 +130,7 @@ const ResizableImageNode = (props: NodeViewProps) => {
           width: width ? `${width}px` : 'auto',
           height: height ? `${height}px` : 'auto',
         }}
-        draggable={false} // Prevent native drag to allow our custom resize logic
+        draggable={true}
       />
       {selected && (
         <>

@@ -3,9 +3,11 @@ import { Bold, Italic, Underline, Highlighter } from "lucide-react";
 import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
 import { Separator } from "@/components/ui/separator";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useDocumentSync } from "@/features/document/components/page/document-context";
 
 export function FormattingBubbleMenu() {
   const { editor } = useCurrentEditor();
+  const { currentUserRole } = useDocumentSync();
 
   if (!editor) return null;
 
@@ -14,6 +16,7 @@ export function FormattingBubbleMenu() {
       editor={editor}
       tippyOptions={{ duration: 100, placement: "top" }}
       shouldShow={({ editor, state }) => {
+        if (currentUserRole === 'viewer') return false;
         const { empty } = state.selection;
         const hasLinkMark = editor.isActive("link");
         const hasImage = editor.isActive("image");
