@@ -1,4 +1,4 @@
-import { ENV } from '@/lib/constants/env'
+import { ENV } from '@/constants/env'
 import { createBrowserClient } from '@supabase/ssr'
 
 export function createClient() {

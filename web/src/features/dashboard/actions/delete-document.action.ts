@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { ROUTES } from "@/constants/routes";
 
 export async function deleteDocument(documentId: string) {
   const supabase = await createClient()
@@ -32,5 +33,5 @@ export async function deleteDocument(documentId: string) {
     throw new Error('Failed to delete document')
   }
 
-  revalidatePath('/dashboard')
+  revalidatePath(ROUTES.DASHBOARD)
 }

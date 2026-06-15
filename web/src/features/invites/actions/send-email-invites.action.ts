@@ -33,27 +33,58 @@ export async function sendEmailInvites(documentId: string, emails: string[], rol
     throw new Error('You do not have permission to invite users to this document')
   }
 
-  // Fetch existing pending invites for the selected emails
+  // 1. Check if any of these emails belong to users who are ALREADY members
+  const { data: registeredUsers } = await supabase
+    .from('users')
+    .select('id, email')
+    .in('email', emailsToProcess)
+    
+  let memberEmails = new Set<string>()
+  if (registeredUsers && registeredUsers.length > 0) {
+    const { data: existingMembers } = await supabase
+      .from('document_members')
+      .select('user_id')
+      .eq('document_id', documentId)
+      .in('user_id', registeredUsers.map(u => u.id))
+      
+    if (existingMembers && existingMembers.length > 0) {
+      const memberUserIds = new Set(existingMembers.map(m => m.user_id))
+      registeredUsers.forEach(u => {
+        if (memberUserIds.has(u.id)) {
+          memberEmails.add(u.email.toLowerCase())
+        }
+      })
+    }
+  }
+
+  // 2. Fetch existing pending invites for the selected emails
   const { data: existingInvites } = await supabase
     .from('invites')
-    .select('email, role, expires_at')
+    .select('email, expires_at')
     .eq('document_id', documentId)
-    .in('status', ['pending', 'accepted'])
+    .eq('status', 'pending')
     .in('email', emailsToProcess)
 
   const now = new Date()
 
-  // Filter out emails that already have an active invite or are members
+  // 3. Filter out emails that are already members or have an active pending invite
   const finalEmailsToInvite = emailsToProcess.filter((email) => {
+    const emailLower = email.toLowerCase()
+    
+    // Already a member
+    if (memberEmails.has(emailLower)) return false
+    
+    // Has active pending invite
     const existing = existingInvites?.find(
-      (inv) => inv.email.toLowerCase() === email.toLowerCase()
+      (inv) => inv.email.toLowerCase() === emailLower
     )
     if (existing) {
       const expiresAt = new Date(existing.expires_at)
       if (expiresAt > now) {
-        return false // Active invite for same document exists
+        return false 
       }
     }
+    
     return true
   })
 

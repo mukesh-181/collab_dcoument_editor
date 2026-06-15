@@ -23,13 +23,17 @@ export async function createInviteLink(documentId: string, role: 'viewer' | 'edi
   // Generate a unique token
   const token = crypto.randomUUID()
 
+  const expiresAt = new Date()
+  expiresAt.setHours(expiresAt.getHours() + 24)
+
   const { data, error } = await supabase
     .from('invites')
     .insert({
       document_id: documentId,
       role: role,
       token: token,
-      status: 'pending'
+      status: 'pending',
+      expires_at: expiresAt.toISOString()
     })
     .select('token')
     .single()

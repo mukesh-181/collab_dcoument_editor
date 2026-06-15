@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { FileText } from 'lucide-react'
 
 import { DocumentActionMenu } from '../document-action-menu'
+import { ROUTES } from "@/constants/routes";
 
 export function SidebarDocList({ documents }: { documents: any[] }) {
   const pathname = usePathname()
@@ -16,7 +17,7 @@ export function SidebarDocList({ documents }: { documents: any[] }) {
   return (
     <div className="space-y-0.5">
       {documents.map((doc: any) => {
-        const isActive = pathname === `/dashboard/${doc.id}`
+        const isActive = pathname === ROUTES.DOCUMENT(doc.id)
         const role = doc.document_members?.[0]?.role || 'viewer'
 
         return (
@@ -29,7 +30,7 @@ export function SidebarDocList({ documents }: { documents: any[] }) {
             }`}
           >
             <Link
-              href={`/dashboard/${doc.id}`}
+              href={ROUTES.DOCUMENT(doc.id)}
               className="flex-1 min-w-0 h-full flex items-center rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600"
             >
               <FileText

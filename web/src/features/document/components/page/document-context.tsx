@@ -20,17 +20,20 @@ interface DocumentContextType {
   setActiveUsers: (users: ActiveUser[]) => void
   isEditorReady: boolean
   setIsEditorReady: (ready: boolean) => void
+  currentUserRole: string
+  setCurrentUserRole: (role: string) => void
 }
 
 const DocumentContext = createContext<DocumentContextType | undefined>(undefined)
 
-export function DocumentProvider({ children }: { children: ReactNode }) {
+export function DocumentProvider({ children, initialRole = 'viewer' }: { children: ReactNode, initialRole?: string }) {
   const [syncState, setSyncState] = useState<SyncState>('saved')
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([])
   const [isEditorReady, setIsEditorReady] = useState(false)
+  const [currentUserRole, setCurrentUserRole] = useState(initialRole)
   
   return (
-    <DocumentContext.Provider value={{ syncState, setSyncState, activeUsers, setActiveUsers, isEditorReady, setIsEditorReady }}>
+    <DocumentContext.Provider value={{ syncState, setSyncState, activeUsers, setActiveUsers, isEditorReady, setIsEditorReady, currentUserRole, setCurrentUserRole }}>
       {children}
     </DocumentContext.Provider>
   )

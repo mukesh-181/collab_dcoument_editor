@@ -15,7 +15,7 @@ We are building a real-time collaborative document editor. We've finished the fo
 - **Document Access**: We use server-side checks to make sure users can only open documents they are allowed to see.
 - **Rich Text Editor**: We added a text editor using Tiptap and Tailwind's typography plugin. It features real-time collaborative cursors, an offline-resilient sync state, and a custom responsive formatting toolbar.
 - **Mobile Responsiveness**: The entire application is fully responsive, utilizing Shadcn Sheets for slide-out mobile navigation and horizontally scrollable toolbars.
-- **UI & Styling**: The interface is built with Tailwind CSS v4 and Shadcn UI components, including premium Skeleton loading states to prevent layout shifts.
+- **UI & Styling**: The interface is built with Tailwind CSS v4 and Shadcn UI components. We implemented an opacity-based CSS layout trick to render "zero-jitter" loading spinners across all interactive buttons (authentication, document creation, and invitations), completely preventing visually jarring layout shifts.
 
 ---
 
@@ -57,10 +57,11 @@ We group our files by feature rather than putting everything directly into the N
 
 - **`src/app/`**: This is strictly for URL routing (like `page.tsx` and `layout.tsx`). We use Route Groups (like `(home)`) to structurally isolate elements like skeleton loaders (`loading.tsx`), ensuring they never trigger unintentionally during deep navigation.
 - **`src/features/`**: This is where the actual logic lives. We have folders for `auth`, `dashboard`, `editor`, `invites`, and `inbox`. 
-  - **Single-Responsibility Actions**: Inside each feature's `actions/` folder, every server action has its own dedicated file (e.g., `login.action.ts`, `create-document.action.ts`). This ensures maximum tree-shaking and reduces bundle sizes.
-  - **Granular Components & Localized State**: Complex UI components (like the Document Header, Share Dialog, and Editor Toolbar) are deeply decomposed into smaller sub-components (like `document-rename-dialog.tsx`, `create-link-tab.tsx`, or `document-card.tsx`). This localized state approach ensures that typing in a specific form input doesn't trigger unnecessary re-renders of the parent layout shell, drastically improving performance and maintaining strict Single Responsibility Principles (SRP).
+  - **Single-Responsibility Actions**: Inside each feature's `actions/` folder, every server action has its own dedicated file (e.g., `login.action.ts`, `leave-document.action.ts`). This ensures maximum tree-shaking and reduces bundle sizes.
+  - **Granular Components & Localized State**: Complex UI components (like the Document Header, Share Dialog, and Editor Toolbar) are deeply decomposed into smaller sub-components.
 - **`src/components/ui/`**: Reusable Shadcn UI components.
-- **`src/lib/constants/env.ts`**: A centralized configuration file exporting strictly-typed environment variables, so we never access `process.env` randomly throughout the app.
+- **`src/constants/`**: Central registry for application-wide constants, such as `routes.ts` containing the unified `ROUTES` object (preventing hardcoded URL strings) and `env.ts` for typed environment variables.
+- **`src/utils/`**: Shared helper functions (like `string-utils.ts` for avatar initials) and pure configuration objects (like `editor-config.ts` for Tiptap).
 - **`src/lib/supabase/`**: This contains our three Supabase clients. We need three because Next.js runs code in three different places: the browser (`client.ts`), the server (`server.ts`), and the Edge network (`proxy.ts`).
 
 By separating the URL routing from the feature logic, the codebase stays predictable and easy to manage.
@@ -81,6 +82,14 @@ Making the formatting toolbar work smoothly required a few specific setups:
 1. **Transaction listener**: We force the toolbar to re-render every time the cursor moves so the dropdowns and buttons always reflect the correct formatting.
 2. **Preventing focus loss**: We added `e.preventDefault()` to the toolbar buttons. This stops the browser from moving focus away from the editor when you click a button, which prevents the editor from forgetting your formatting choices.
 3. **Tracking text context**: The color picker and font size dropdown dynamically read the actual attributes of the text you are clicking on (`editor.getAttributes("textStyle")`). This ensures the toolbar accurately reflects the formatting of the text currently under your cursor.
+
+### Advanced Formatting & Features
+We significantly expanded the Tiptap capabilities to match a premium editor experience:
+1. **Core Elements**: Fully integrated interactive Tables (with row/col insertion), Bullet/Numbered Lists, and collaboratively synced Task Lists (checkboxes).
+2. **Workflow Speed (Slash Commands)**: Implemented a custom `/` command listener that mounts a floating popover menu at the cursor, allowing users to instantly insert Headings, Lists, Images, or Tables without using the mouse.
+3. **Contextual Bubble Menu**: Built a floating formatting bubble menu that appears directly over highlighted text, providing rapid access to Bold, Italic, Underline, and Highlight styles.
+4. **Persistent Image Uploads**: To solve the issue of ephemeral `blob:` URLs breaking in collaborative sessions, we routed image uploads through a Next.js Server Action. Images are securely uploaded to a Supabase storage bucket, and a permanent public URL is injected into the document, ensuring flawless synchronization across all connected users.
+
 
 ### Saving, Renaming, and Real-Time Sync (Phase 7)
 We completely ripped out our initial manual "REST-style" auto-save and upgraded to an industry-standard real-time collaborative engine:
@@ -113,6 +122,12 @@ If you send an invite link to a friend who doesn't even have an account yet, our
 ### Intermediate Invite Screen
 Before instantly dropping a user into a document, we show an intermediate invitation card (`/dashboard/invite`). This card securely fetches the document title, the inviter's name, and the specific role granted by the link. It gives the user a clear "Accept" or "Cancel" choice, and its layout is seamlessly integrated into the main dashboard shell (sidebar and top navbar included) for a cohesive experience.
 
+### Interactive Inbox & Invitation Management
+Users have access to a fully dedicated `/inbox` interface to manage all received invitations. 
+1. **Dynamic Filtering**: The inbox relies on a client-side component (`inbox-client-list.tsx`) that uses `useMemo` to provide instantaneous, zero-latency filtering (Pending, Accepted, Rejected, Expired). Expiration logic is calculated on the fly, so invitations age into "Expired" naturally without a page refresh.
+2. **Persistent History**: When users Accept or Reject an invitation, the invite is not immediately deleted from the database. Instead, the UI dynamically replaces the action buttons with "Accepted" or "Rejected" badges, allowing users to keep a historical log of their document invites. Users can explicitly click a Trash icon to run a permanent `DELETE` action when they want to clean up their inbox.
+3. **Smart Email De-duplication**: On the backend, the email dispatch system is completely error-proof. It automatically strips out "self-invites" (users inviting themselves) and checks the database for active, pending invitations or existing memberships. If an owner attempts to invite a user who already has a pending invite or is already a member, the system silently ignores the duplicate request while continuing to process the valid ones without crashing the bulk dispatch.
+
 ### Member Visibility
 In the document header, all active members are displayed as a cluster of overlapping avatars. To see exactly who has access, you can click anywhere on the avatar group. This opens a unified, scrollable list showing each member's profile picture, full name, email address, and their specific role (Owner, Editor, or Viewer).
 
@@ -123,3 +138,16 @@ When a `viewer` opens a document:
 2. The "Invite" button completely disappears from their header, so they can't invite others. They also lose the ability to rename the document.
 3. We send a strict `editable=false` command deep into the Tiptap editor engine. This natively disables all keyboard inputs and prevents them from accidentally modifying the local content.
 4. Finally, we completely hide the formatting toolbar and the link editing popups. This gives them a clean, distraction-free reading experience that feels like viewing a published article rather than an active editing app.
+
+---
+
+## 7. Multi-Page Document Pagination
+
+We implemented a Google Docs-style multi-page layout to display the document's content split across discrete pages instead of a single long page.
+
+### Visual Page Breaks
+- We integrated the `tiptap-pagination-plus` extension.
+- The editor is styled with a standard A4 format (width `794px` and height `1123px`), with standard margins (top/bottom `72px`, left/right `64px`).
+- Page breaks are visually rendered as realistic gaps between pages, complete with page counters in the footer. The document title is removed from the top header of the pages for a cleaner appearance.
+- Text content wrapping and calculations are performed in the browser. We added the `max-w-none` class to the ProseMirror container to override Tailwind CSS Typography's default max-width limits, ensuring content wraps correctly and page height calculations align with the physical layout boundaries.
+

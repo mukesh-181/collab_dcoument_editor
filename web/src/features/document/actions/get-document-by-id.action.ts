@@ -13,7 +13,8 @@ export async function getDocumentById(documentId: string) {
     .select(`
       *,
       document_members!inner(role),
-      all_members:document_members(role, user:users(id, name, image, email))
+      all_members:document_members(role, user:users(id, name, image, email)),
+      invites(email, status, expires_at)
     `)
     .eq('id', documentId)
     .eq('is_deleted', false)

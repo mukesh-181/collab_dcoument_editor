@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
+import { ROUTES } from "@/constants/routes";
 import {
   Form,
   FormControl,
@@ -42,7 +43,7 @@ export function LoginForm({ next }: { next?: string }) {
         toast.error(result.error)
       } else {
         toast.success('Successfully logged in!')
-        router.push(next || '/dashboard')
+        router.push(next || ROUTES.DASHBOARD)
       }
     } catch (error) {
       toast.error('An unexpected error occurred')

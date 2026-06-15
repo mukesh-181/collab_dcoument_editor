@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Share2, Link as LinkIcon, Mail } from "lucide-react";
 import {
   Dialog,
@@ -16,9 +16,32 @@ import { useDocumentSync } from "@/features/document/components/page/document-co
 import { CreateLinkTab } from "./create-link-tab";
 import { SendEmailTab } from "./send-email-tab";
 
-export function ShareDialog({ documentId }: { documentId: string }) {
+export function ShareDialog({ 
+  documentId,
+  allMembers = [],
+  invites = []
+}: { 
+  documentId: string;
+  allMembers?: any[];
+  invites?: any[];
+}) {
   const { syncState } = useDocumentSync();
   const [isOpen, setIsOpen] = useState(false);
+  const [localInvites, setLocalInvites] = useState(invites || []);
+
+  useEffect(() => {
+    setLocalInvites(prev => {
+      // Merge any new invites from the server without wiping our local instant cache
+      const existingEmails = new Set(prev.map(i => i?.email?.toLowerCase()).filter(Boolean));
+      const incomingInvites = invites || [];
+      const newFromServer = incomingInvites.filter((i: any) => i?.email && !existingEmails.has(i.email.toLowerCase()));
+      
+      if (newFromServer.length > 0) {
+        return [...prev, ...newFromServer];
+      }
+      return prev;
+    });
+  }, [invites]);
 
   const isSavePending = syncState !== "saved";
 
@@ -36,8 +59,8 @@ export function ShareDialog({ documentId }: { documentId: string }) {
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg">
-        <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
+      <DialogContent className="sm:max-w-[425px] p-0 border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-2xl overflow-visible">
+        <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800 rounded-t-2xl">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm">
@@ -67,7 +90,12 @@ export function ShareDialog({ documentId }: { documentId: string }) {
             </TabsList>
 
             <TabsContent value="email" className="outline-none">
-              <SendEmailTab documentId={documentId} />
+              <SendEmailTab 
+                documentId={documentId} 
+                allMembers={allMembers}
+                invites={localInvites}
+                onInviteSent={(newPendingInvites) => setLocalInvites(prev => [...prev, ...newPendingInvites])}
+              />
             </TabsContent>
 
             <TabsContent value="link" className="outline-none">

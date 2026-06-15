@@ -18,7 +18,7 @@ export default async function Page({
 
   if (token && typeof token === 'string') {
     try {
-      inviteDetails = await getInviteDetails(token)
+      inviteDetails = await getInviteDetails(token, user?.id)
     } catch (e: any) {
       error = e.message || 'The invite link may have expired or already been used.'
     }

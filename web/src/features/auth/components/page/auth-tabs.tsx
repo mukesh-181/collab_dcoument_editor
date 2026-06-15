@@ -22,7 +22,7 @@ export function AuthTabs({
   const activeTab = defaultTab === "register" ? "register" : "login";
 
   return (
-    <Card className="w-full max-w-md border-zinc-200 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 bg-white rounded-xl">
+    <Card className="w-full max-w-md bg-white/80 dark:bg-zinc-950/70 backdrop-blur-xl border-zinc-200/60 shadow-2xl dark:border-zinc-800/60 rounded-2xl">
       <Tabs defaultValue={activeTab} className="w-full">
         <CardHeader className="space-y-1.5 text-center pb-8">
           <CardTitle className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -36,7 +36,7 @@ export function AuthTabs({
           <TabsList className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] mb-8 bg-transparent  dark:border-zinc-800 p-1 rounded-lg h-14">
             <TabsTrigger
               value="login"
-              className="h-full rounded-md text-base font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 data-[state=active]:bg-zinc-900 dark:data-[state=active]:bg-zinc-50 data-[state=active]:text-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm transition-all duration-200"
+              className="h-full rounded-md text-base font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 data-[state=active]:bg-indigo-600 dark:data-[state=active]:bg-indigo-600 data-[state=active]:text-white dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all duration-200"
             >
               Sign In
             </TabsTrigger>
@@ -48,7 +48,7 @@ export function AuthTabs({
             </div>
             <TabsTrigger
               value="register"
-              className="h-full rounded-md text-base font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 data-[state=active]:bg-zinc-900 dark:data-[state=active]:bg-zinc-50 data-[state=active]:text-white dark:data-[state=active]:text-zinc-900 data-[state=active]:shadow-sm transition-all duration-200"
+              className="h-full rounded-md text-base font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 data-[state=active]:bg-indigo-600 dark:data-[state=active]:bg-indigo-600 data-[state=active]:text-white dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all duration-200"
             >
               Register
             </TabsTrigger>

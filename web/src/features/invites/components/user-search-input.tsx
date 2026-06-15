@@ -4,6 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Search, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { searchUsersByEmail } from "../actions/search-users.action";
+import { getInitials } from "@/utils/string-utils";
+import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
+
+
 
 export interface UserSearchResult {
   id: string;
@@ -25,6 +29,8 @@ interface UserSearchInputProps {
   onContactsChange: (contacts: SelectedContact[]) => void;
   emailQuery: string;
   onEmailQueryChange: (email: string) => void;
+  allMembers?: any[];
+  invites?: any[];
 }
 
 const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
@@ -33,7 +39,9 @@ export function UserSearchInput({
   selectedContacts,
   onContactsChange,
   emailQuery,
-  onEmailQueryChange 
+  onEmailQueryChange,
+  allMembers = [],
+  invites = []
 }: UserSearchInputProps) {
   const [results, setResults] = useState<UserSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -72,14 +80,14 @@ export function UserSearchInput({
   }, [emailQuery, selectedContacts]);
 
   const handleAddCustomEmail = async () => {
-    const trimmed = emailQuery.trim().replace(/,$/, '');
-    if (isValidEmail(trimmed)) {
-      // Clear input immediately to prevent spamming Enter
-      onEmailQueryChange("");
-      setResults([]);
-      setIsDropdownOpen(false);
-
-      if (!selectedContactsRef.current.some(c => c.email === trimmed)) {
+    const rawEmails = emailQuery.split(/[,\s]+/).map(e => e.trim()).filter(Boolean);
+    let newContacts: SelectedContact[] = [];
+    
+    for (const trimmed of rawEmails) {
+      const isMem = allMembers.some(m => m.user?.email?.toLowerCase() === trimmed.toLowerCase());
+      const isInv = invites.some(inv => inv.status === 'pending' && inv.email?.toLowerCase() === trimmed.toLowerCase() && new Date(inv.expires_at) > new Date());
+      
+      if (isValidEmail(trimmed) && !selectedContactsRef.current.some(c => c.email === trimmed) && !newContacts.some(c => c.email === trimmed) && !isMem && !isInv) {
         // Try to find a matching registered user from our current search results
         let matchedUser = results.find(u => u.email.toLowerCase() === trimmed.toLowerCase());
         
@@ -97,15 +105,23 @@ export function UserSearchInput({
         }
         
         if (matchedUser) {
-          // Use the ref to ensure we don't overwrite changes made during the async gap
-          onContactsChange([...selectedContactsRef.current, matchedUser]);
+          newContacts.push(matchedUser);
         } else {
-          onContactsChange([
-            ...selectedContactsRef.current, 
-            { id: crypto.randomUUID(), email: trimmed, name: null, image: null, isCustom: true }
-          ]);
+          newContacts.push({ id: crypto.randomUUID(), email: trimmed, name: null, image: null, isCustom: true });
         }
       }
+    }
+    
+    if (newContacts.length > 0) {
+      onEmailQueryChange("");
+      setResults([]);
+      setIsDropdownOpen(false);
+      onContactsChange([...selectedContactsRef.current, ...newContacts]);
+    } else if (rawEmails.length === 1 && isValidEmail(rawEmails[0])) {
+      // If it was a single valid email but already selected, just clear input
+      onEmailQueryChange("");
+      setResults([]);
+      setIsDropdownOpen(false);
     }
   };
 
@@ -206,32 +222,55 @@ export function UserSearchInput({
       </div>
 
       {isDropdownOpen && results.length > 0 && (
-        <div className="absolute z-50 top-full mt-1 w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg overflow-hidden py-1 max-h-[240px] overflow-y-auto">
-          {results.map((user) => (
-            <button
-              key={user.id}
-              type="button"
-              onMouseDown={(e) => {
-                // Prevent focus from leaving the input so onBlur doesn't fire prematurely
-                e.preventDefault();
-                handleUserSelect(user);
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors text-left"
-            >
-              <Avatar className="h-8 w-8 shrink-0 border border-zinc-200 dark:border-zinc-800">
-                <AvatarImage src={user.image || undefined} />
-                <AvatarFallback className="text-[11px] font-medium bg-zinc-100 dark:bg-zinc-800">
-                  {(user.name || user.email || "?").charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col flex-1 min-w-0">
-                <span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate">
-                  {user.name || (user.email ? user.email.split('@')[0] : "Anonymous User")}
-                </span>
-                <span className="text-[11px] text-zinc-500 truncate">{user.email}</span>
-              </div>
-            </button>
-          ))}
+        <div 
+          className="absolute z-50 top-full mt-1 w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg overflow-y-auto py-1 max-h-[400px] custom-scrollbar"
+        >
+          {results.map((user) => {
+            const isMem = allMembers.some(m => m.user?.email?.toLowerCase() === user.email.toLowerCase());
+            const isInv = invites.some(inv => inv.status === 'pending' && inv.email?.toLowerCase() === user.email.toLowerCase() && new Date(inv.expires_at) > new Date());
+            const isDisabled = isMem || isInv;
+
+            return (
+              <button
+                key={user.id}
+                type="button"
+                disabled={isDisabled}
+                onMouseDown={(e) => {
+                  // Prevent focus from leaving the input so onBlur doesn't fire prematurely
+                  e.preventDefault();
+                  if (!isDisabled) {
+                    handleUserSelect(user);
+                  }
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
+                  isDisabled ? "opacity-50 cursor-not-allowed bg-zinc-50 dark:bg-zinc-900/50" : "hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                }`}
+              >
+                <Avatar className={`h-8 w-8 shrink-0 border border-zinc-200 dark:border-zinc-800 ${isDisabled ? 'grayscale' : ''}`}>
+                  <AvatarImage src={user.image || undefined} />
+                  <AvatarFallback className="text-[11px] font-medium bg-zinc-100 dark:bg-zinc-800">
+                    {getInitials(user.name, user.email)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                    {getUserName(user.name, user.email)}
+                  </span>
+                  <span className="text-[11px] text-zinc-500 truncate">{user.email}</span>
+                </div>
+                {isMem && (
+                  <span className="text-[10px] shrink-0 bg-zinc-200/50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-1.5 py-0.5 rounded font-medium">
+                    Member
+                  </span>
+                )}
+                {isInv && (
+                  <span className="text-[10px] shrink-0 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded font-medium">
+                    Invited
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
