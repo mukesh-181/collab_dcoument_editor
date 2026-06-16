@@ -122,7 +122,7 @@ export function SendEmailTab({
         <Label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           Role
         </Label>
-        <div className="flex items-center bg-white/80 dark:bg-zinc-900/50 p-1 rounded-full border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm backdrop-blur-md w-full">
+        <div className="flex items-center bg-muted p-1 rounded-full border border-border shadow-sm w-full">
           {[
             { id: 'viewer', label: 'Viewer', icon: Eye },
             { id: 'editor', label: 'Editor', icon: Edit2 },
@@ -135,8 +135,8 @@ export function SendEmailTab({
                 onClick={() => setEmailRole(f.id as "viewer" | "editor")}
                 className={`flex items-center justify-center gap-2 flex-1 py-2 rounded-full text-[13.5px] font-medium transition-all duration-200 ${
                   emailRole === f.id 
-                    ? "bg-primary/10 dark:bg-primary/20 text-primary shadow-sm" 
-                    : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 }`}
               >
                 <Icon className="h-[15px] w-[15px]" />
@@ -146,49 +146,49 @@ export function SendEmailTab({
           })}
         </div>
       </div>
-      <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+      <div className="pt-4 mt-2 border-t border-border">
         <div className="flex items-center gap-2 mb-2 px-1">
-          <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">People with access</h4>
-          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 px-1 text-[10px] font-bold text-zinc-500 dark:text-zinc-400">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">People with access</h4>
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-muted px-1 text-[10px] font-bold text-muted-foreground">
             {sortedMembers.length + pendingInvites.length}
           </span>
         </div>
-        <div className="max-h-[150px] overflow-y-auto pr-2 space-y-1 scrollbar-thin scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700 dark:hover:scrollbar-thumb-zinc-600 scrollbar-track-transparent">
+        <div className="max-h-[180px] overflow-y-auto pr-2 space-y-1 bg-muted/30 p-2 rounded-xl border border-border/50 scrollbar-thin scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700 dark:hover:scrollbar-thumb-zinc-600 scrollbar-track-transparent">
           {sortedMembers.map((member) => (
-            <div key={member.user.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors">
+            <div key={member.user.id} className="flex items-center justify-between p-2 bg-card hover:bg-accent border border-transparent hover:border-border rounded-lg transition-all shadow-sm">
               <div className="flex items-center space-x-3 overflow-hidden">
-                <Avatar className="w-8 h-8 border border-zinc-200 dark:border-zinc-800 shrink-0">
+                <Avatar className="w-8 h-8 border border-border shrink-0">
                   <AvatarImage src={getUserImage(member.user.image)} />
                   <AvatarFallback className="text-[10px]">{getInitials(member.user.name, member.user.email)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate leading-snug">{getUserName(member.user.name, member.user.email)}</span>
-                  <span className="text-[11px] text-zinc-500 truncate leading-snug">{member.user.email}</span>
+                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{getUserName(member.user.name, member.user.email)}</span>
+                  <span className="text-[11px] text-muted-foreground truncate leading-snug">{member.user.email}</span>
                 </div>
               </div>
               <div className={`ml-3 shrink-0 text-[11px] font-medium capitalize px-2 py-0.5 border rounded-md ${
                 member.role === 'owner' 
-                  ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/50'
+                  ? 'bg-purple-400/15 text-purple-500 border-purple-500/30'
                   : member.role === 'editor'
-                  ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/50'
-                  : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50'
+                  ? 'bg-blue-400/15 text-blue-500 border-blue-500/30'
+                  : 'bg-gray-400/15 text-gray-500 border-gray-500/30'
               }`}>
                 {member.role}
               </div>
             </div>
           ))}
           {pendingInvites.map((inv, idx) => (
-            <div key={inv.id || idx} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors">
+            <div key={inv.id || idx} className="flex items-center justify-between p-2 bg-card hover:bg-accent border border-transparent hover:border-border rounded-lg transition-all shadow-sm">
               <div className="flex items-center space-x-3 overflow-hidden">
-                <Avatar className="w-8 h-8 border border-zinc-200 dark:border-zinc-800 shrink-0">
-                  <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-[10px]">{getInitials(null, inv.email)}</AvatarFallback>
+                <Avatar className="w-8 h-8 border border-border shrink-0">
+                  <AvatarFallback className="bg-muted text-[10px]">{getInitials(null, inv.email)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate leading-snug">{inv.email}</span>
-                  <span className="text-[11px] text-zinc-500 truncate leading-snug">Pending Invite</span>
+                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{inv.email}</span>
+                  <span className="text-[11px] text-muted-foreground truncate leading-snug">Pending Invite</span>
                 </div>
               </div>
-              <div className="ml-3 shrink-0 text-[11px] text-zinc-500 font-medium px-2 py-0.5 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/50 dark:border-zinc-800/50 rounded-md border-dashed">
+              <div className="ml-3 shrink-0 text-[11px] font-medium px-2 py-0.5 bg-emerald-300/15 text-emerald-800 border border-emerald-500/30 rounded-md border-dashed">
                 Invited
               </div>
             </div>

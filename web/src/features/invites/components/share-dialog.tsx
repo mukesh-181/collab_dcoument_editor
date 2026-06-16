@@ -59,16 +59,16 @@ export function ShareDialog({
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-[425px] p-0 border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-2xl overflow-visible">
-        <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800 rounded-t-2xl">
+      <DialogContent className="sm:max-w-[425px] p-0 border-border rounded-2xl shadow-2xl overflow-visible">
+        <div className="p-6 rounded-t-2xl">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                <Share2 className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background border border-border shadow-sm">
+                <Share2 className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="text-left">
                 <DialogTitle className="text-xl font-semibold">Share Document</DialogTitle>
-                <DialogDescription className="mt-1.5 -ml-2 text-[13px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/50 dark:bg-zinc-800/50 px-2 py-1 rounded-md inline-block">
+                <DialogDescription className="mt-1.5 text-[13px] font-medium text-muted-foreground">
                   Add collaborators to your document.
                 </DialogDescription>
               </div>

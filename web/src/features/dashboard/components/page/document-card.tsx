@@ -41,9 +41,9 @@ interface DocumentCardProps {
 
 function getRoleBadge(role: string) {
   const styles: Record<string, string> = {
-    owner: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
-    editor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-    viewer: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
+    owner: "bg-purple-400/15 text-purple-500 border-purple-500/30",
+    editor: "bg-blue-400/15 text-blue-500 border-blue-500/30",
+    viewer: "bg-gray-400/15 text-gray-500 border-gray-500/30",
   };
   return styles[role] || styles.viewer;
 }

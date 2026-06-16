@@ -68,7 +68,15 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
   });
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover 
+      open={open} 
+      onOpenChange={(newOpen) => {
+        setOpen(newOpen);
+        if (!newOpen) {
+          setOpenMenuId(null);
+        }
+      }}
+    >
       <PopoverTrigger asChild>
         <button className="flex items-center -space-x-2 mr-2 focus:outline-none cursor-pointer group">
           {sortedMembers.map((member) => (
@@ -131,23 +139,23 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
                 </div>
               </div>
               {member.role === "owner" ? (
-                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 cursor-default select-none">
-                  <Crown className="h-3 w-3 text-amber-600 dark:text-amber-400" />
-                  <span className="text-[11px] font-medium text-amber-700 dark:text-amber-400 capitalize">
+                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-400/15 text-purple-500 border border-purple-500/30 cursor-default select-none">
+                  <Crown className="h-3 w-3" />
+                  <span className="text-[11px] font-medium capitalize">
                     {member.role}
                   </span>
                 </div>
               ) : member.role === "editor" ? (
-                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 cursor-default select-none">
-                  <Pencil className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
-                  <span className="text-[11px] font-medium text-indigo-700 dark:text-indigo-400 capitalize">
+                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-400/15 text-blue-500 border border-blue-500/30 cursor-default select-none">
+                  <Pencil className="h-3 w-3" />
+                  <span className="text-[11px] font-medium capitalize">
                     {member.role}
                   </span>
                 </div>
               ) : (
-                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 cursor-default select-none">
-                  <Eye className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 capitalize">
+                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-400/15 text-gray-500 border border-gray-500/30 cursor-default select-none">
+                  <Eye className="h-3 w-3" />
+                  <span className="text-[11px] font-medium capitalize">
                     {member.role}
                   </span>
                 </div>

@@ -73,7 +73,7 @@ export function SidebarContent({
           <Icon
             className={`mr-3 h-[18px] w-[18px] shrink-0 ${
               isActive
-                ? "text-indigo-600 dark:text-indigo-400"
+                ? "text-primary"
                 : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
             }`}
           />
@@ -91,7 +91,7 @@ export function SidebarContent({
           <span
             className={`flex h-5 items-center justify-center rounded-full px-2 text-[12px] font-bold ${
               label === "Inbox"
-                ? "bg-red-500 text-white dark:bg-red-600"
+                ? "bg-primary text-primary-foreground"
                 : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
             }`}
           >

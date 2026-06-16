@@ -58,33 +58,33 @@ export function CreateDocumentButton({ children }: { children?: React.ReactNode 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px] p-6 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl gap-6">
+      <DialogContent className="sm:max-w-[480px] p-6 border border-border rounded-2xl shadow-xl gap-6">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           
           <div className="flex flex-col gap-1.5">
-            <DialogTitle className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">Create a new document</DialogTitle>
-            <DialogDescription className="text-sm text-zinc-500 dark:text-zinc-400">
+            <DialogTitle className="text-xl font-bold tracking-tight text-foreground">Create a new document</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
               Give it a title and pick an icon. You can change these later.
             </DialogDescription>
           </div>
           
           <div className="flex flex-col gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">
+              <Label htmlFor="title" className="text-[15px] font-semibold text-foreground">
                 Title
               </Label>
               <Input
                 id="title"
                 name="title"
                 placeholder="Untitled"
-                className="h-11 px-3.5 text-[15px] rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus-visible:ring-1 focus-visible:ring-indigo-500 shadow-sm"
+                className="h-11 px-3.5 text-[15px] rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-purple-500 shadow-sm"
                 autoFocus
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">
+              <Label className="text-[15px] font-semibold text-foreground">
                 Icon
               </Label>
               <div className="flex flex-wrap gap-2 pt-1">
@@ -95,8 +95,8 @@ export function CreateDocumentButton({ children }: { children?: React.ReactNode 
                     onClick={() => setSelectedIcon(icon)}
                     className={`flex items-center justify-center w-10 h-10 rounded-xl text-xl transition-all ${
                       selectedIcon === icon
-                        ? 'bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/30 dark:border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.1)] dark:shadow-[0_0_10px_rgba(99,102,241,0.2)]'
-                        : 'border border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800/50'
+                        ? 'bg-purple-500/10 border border-purple-500/30 shadow-[0_0_10px_rgba(109,74,255,0.1)]'
+                        : 'border border-transparent hover:bg-accent'
                     }`}
                   >
                     {icon}
@@ -120,7 +120,7 @@ export function CreateDocumentButton({ children }: { children?: React.ReactNode 
             <Button 
               type="submit" 
               disabled={isPending}
-              className="relative bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm rounded-xl h-10 px-5 font-semibold transition-all border-0"
+              className="relative bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm rounded-xl h-10 px-5 font-semibold transition-all border-0"
             >
               <span className={isPending ? "opacity-0" : ""}>Create document</span>
               {isPending && (

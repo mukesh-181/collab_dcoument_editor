@@ -89,7 +89,7 @@ export function DocumentList({
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-y-auto relative">
-      <div className="relative z-10 px-6 py-8 max-w-6xl mx-auto w-full flex flex-col min-h-full">
+      <div className="relative z-10 px-6 py-8 max-w-6xl mx-auto w-full flex flex-col grow">
         {/* Header Row */}
         <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 mb-8 shrink-0">
           <div className="space-y-1 shrink-0">
@@ -140,12 +140,12 @@ export function DocumentList({
                   placeholder="Search docs"
                   value={localSearch}
                   onChange={(e) => setLocalSearch(e.target.value)}
-                  className="pl-9 h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-[14px] rounded-xl focus-visible:ring-indigo-500 shadow-sm w-full"
+                  className="pl-9 h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-[14px] rounded-xl focus-visible:ring-purple-500 shadow-sm w-full"
                 />
               </div>
               
               <CreateDocumentButton>
-                <button className="flex items-center gap-2 h-10 px-5 bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-semibold rounded-xl shadow-sm transition-colors whitespace-nowrap">
+                <button className="flex items-center gap-2 h-10 px-5 bg-primary hover:bg-primary/90 text-primary-foreground text-[14px] font-semibold rounded-xl shadow-sm transition-colors whitespace-nowrap">
                   <Plus className="w-4 h-4" strokeWidth={2.5} />
                   Create
                 </button>
@@ -167,7 +167,7 @@ export function DocumentList({
 
           {isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-              <Loader2 className="w-10 h-10 text-indigo-600 dark:text-indigo-400 animate-spin" />
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
             </div>
           )}
         </div>
