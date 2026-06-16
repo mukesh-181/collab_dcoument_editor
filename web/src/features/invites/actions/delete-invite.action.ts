@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 
+import { revalidatePath } from 'next/cache'
+
 export async function deleteInvite(inviteId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -25,5 +27,7 @@ export async function deleteInvite(inviteId: string) {
 
   if (error) throw new Error('Failed to delete invite')
   
+  revalidatePath('/dashboard/inbox')
+  revalidatePath('/dashboard')
   return { success: true }
 }

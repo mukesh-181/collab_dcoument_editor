@@ -22,7 +22,7 @@ import {
   USER_FALLBACKS,
 } from "@/utils/user-utils";
 
-export function InboxItem({ invite }: { invite: any }) {
+export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?: (updates: any) => void }) {
   const router = useRouter();
   const [isAcceptOpen, setIsAcceptOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
@@ -65,6 +65,7 @@ export function InboxItem({ invite }: { invite: any }) {
     try {
       await acceptInvite(invite.token);
       toast.success("Invitation accepted!");
+      if (onItemUpdate) onItemUpdate({ status: 'accepted' });
       router.refresh();
     } catch (e: any) {
       toast.error(e.message || "Failed to accept invite");
@@ -79,6 +80,7 @@ export function InboxItem({ invite }: { invite: any }) {
     try {
       await rejectInvite(invite.id);
       toast.success("Invitation rejected.");
+      if (onItemUpdate) onItemUpdate({ status: 'rejected' });
       router.refresh();
     } catch (e: any) {
       toast.error(e.message || "Failed to reject invite");
@@ -93,6 +95,7 @@ export function InboxItem({ invite }: { invite: any }) {
     try {
       await deleteInvite(invite.id);
       toast.success("Invitation removed.");
+      if (onItemUpdate) onItemUpdate({ _deleted: true }); // special flag to remove it
       router.refresh();
     } catch (e: any) {
       toast.error(e.message || "Failed to remove invite");

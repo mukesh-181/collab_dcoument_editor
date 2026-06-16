@@ -10,7 +10,7 @@ import { Toolbar } from "./toolbar";
 import { LinkBubbleMenu } from "./link-bubble-menu";
 import { FormattingBubbleMenu } from "./formatting-bubble-menu";
 import { useDocumentSync } from "@/features/document/components/page/document-context";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { OfflineBanner } from "./offline-banner";
 import { EditorSkeleton } from "@/features/document/components/page/document-skeleton";
 
@@ -96,7 +96,12 @@ export function Editor({
             users.push({ clientId: state.clientId, user: state.user });
           }
         });
-        setActiveUsers(users);
+        
+        setActiveUsers((prev) => {
+          const prevString = JSON.stringify(prev);
+          const newString = JSON.stringify(users);
+          return prevString === newString ? prev : users;
+        });
       },
     });
 
@@ -107,6 +112,16 @@ export function Editor({
       doc.destroy();
     };
   }, [documentId, token, setSyncState, setIsEditorReady]);
+
+  const editorProps = useMemo(() => editorPropsConfig, []);
+
+  const extensions = useMemo(
+    () => {
+      if (!provider || !ydoc) return [];
+      return getEditorExtensions({ documentId, ydoc, provider, currentUserName });
+    },
+    [documentId, ydoc, provider, currentUserName]
+  );
 
   // The parent DocumentClientLayout handles the full page skeleton overlay.
   // We just return null until we are ready to mount the actual editor.
@@ -134,43 +149,9 @@ export function Editor({
             </div>
           </div>
         }
-                extensions={getEditorExtensions({ documentId, ydoc, provider, currentUserName })}
-        editorProps={{
-          ...editorPropsConfig,
-        }}
+        extensions={extensions}
+        editorProps={editorProps}
         immediatelyRender={false}
-        onUpdate={({ editor }) => {
-          if (editor.isActive("link")) {
-            const { empty, $from } = editor.state.selection;
-            if (empty) {
-              const isLinkBefore = $from.nodeBefore?.marks.some(
-                (mark: any) => mark.type.name === "link",
-              );
-              const isLinkAfter = $from.nodeAfter?.marks.some(
-                (mark: any) => mark.type.name === "link",
-              );
-              if (!isLinkBefore && !isLinkAfter) {
-                editor.commands.unsetLink();
-              }
-            }
-          }
-        }}
-        onSelectionUpdate={({ editor }) => {
-          if (editor.isActive("link")) {
-            const { empty, $from } = editor.state.selection;
-            if (empty) {
-              const isLinkBefore = $from.nodeBefore?.marks.some(
-                (mark: any) => mark.type.name === "link",
-              );
-              const isLinkAfter = $from.nodeAfter?.marks.some(
-                (mark: any) => mark.type.name === "link",
-              );
-              if (!isLinkBefore && !isLinkAfter) {
-                editor.commands.unsetLink();
-              }
-            }
-          }
-        }}
       >
         <LinkBubbleMenu />
         <FormattingBubbleMenu />

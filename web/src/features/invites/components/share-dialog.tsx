@@ -30,17 +30,7 @@ export function ShareDialog({
   const [localInvites, setLocalInvites] = useState(invites || []);
 
   useEffect(() => {
-    setLocalInvites(prev => {
-      // Merge any new invites from the server without wiping our local instant cache
-      const existingEmails = new Set(prev.map(i => i?.email?.toLowerCase()).filter(Boolean));
-      const incomingInvites = invites || [];
-      const newFromServer = incomingInvites.filter((i: any) => i?.email && !existingEmails.has(i.email.toLowerCase()));
-      
-      if (newFromServer.length > 0) {
-        return [...prev, ...newFromServer];
-      }
-      return prev;
-    });
+    setLocalInvites(invites || []);
   }, [invites]);
 
   const isSavePending = syncState !== "saved";

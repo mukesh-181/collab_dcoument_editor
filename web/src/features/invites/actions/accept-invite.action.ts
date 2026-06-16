@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 export async function acceptInvite(token: string) {
   const supabase = await createClient()
@@ -65,5 +66,7 @@ export async function acceptInvite(token: string) {
       .eq('id', invite.id)
   }
 
+  revalidatePath('/dashboard/inbox')
+  revalidatePath('/dashboard')
   return invite.document_id
 }

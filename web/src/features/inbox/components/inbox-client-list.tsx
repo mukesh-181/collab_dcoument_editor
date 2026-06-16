@@ -24,13 +24,26 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
 
+  const fetchFiltered = useCallback(async () => {
+    setIsFilterLoading(true);
+    try {
+      const { data, count } = await getInbox(0, 15, filter);
+      setInvites(data);
+      setTotalCount(count);
+      setPage(0);
+      setHasMore(data.length === 15);
+    } finally {
+      setIsFilterLoading(false);
+    }
+  }, [filter]);
+
   // Load new items when filter changes
   useEffect(() => {
     // Skip if it's the initial load with "all" (already have initialInvites)
     if (filter === "all" && page === 0 && invites === initialInvites) return;
-
+    
     let isMounted = true;
-    const fetchFiltered = async () => {
+    const fetch = async () => {
       setIsFilterLoading(true);
       try {
         const { data, count } = await getInbox(0, 15, filter);
@@ -45,8 +58,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
       }
     };
     
-    fetchFiltered();
-    
+    fetch();
     return () => { isMounted = false; };
   }, [filter]);
 
@@ -92,7 +104,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-y-auto relative">
       <div className="relative z-10 px-6 py-8 max-w-4xl mx-auto w-full space-y-6">
-        <InboxRealtimeListener />
+        <InboxRealtimeListener onNewEvent={fetchFiltered} />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-3">
@@ -171,7 +183,17 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
               const isTrigger = index === invites.length - 4;
               return (
                 <div key={invite.id} ref={isTrigger ? triggerRef : null}>
-                  <InboxItem invite={invite} />
+                  <InboxItem 
+                    invite={invite} 
+                    onItemUpdate={(updates) => {
+                      setInvites(prev => {
+                        if (updates._deleted) {
+                          return prev.filter(i => i.id !== invite.id);
+                        }
+                        return prev.map(i => i.id === invite.id ? { ...i, ...updates } : i);
+                      });
+                    }}
+                  />
                 </div>
               );
             })}
