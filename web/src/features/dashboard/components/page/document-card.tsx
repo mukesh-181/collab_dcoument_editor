@@ -12,7 +12,10 @@ import { getInitials } from "@/utils/string-utils";
 function DocumentPreview({ json }: { json: any }) {
   const html = useDocumentPreview(json);
 
-  if (!html) {
+  // Tiptap often generates <p></p> or <p><br></p> for completely empty documents
+  const isVisuallyEmpty = !html || html.trim() === '' || html === '<p></p>' || html === '<p><br></p>';
+
+  if (isVisuallyEmpty) {
     return (
       <div className="flex items-center justify-center h-full">
         <FileText className="w-10 h-10 text-zinc-200 dark:text-zinc-800" strokeWidth={1} />

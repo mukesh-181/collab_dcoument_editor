@@ -471,7 +471,8 @@ pre code {
   z-index: 20;
 }
 
-.prose .resize-cursor {
+.prose.resize-cursor,
+.resize-cursor {
   cursor: col-resize;
 }
 

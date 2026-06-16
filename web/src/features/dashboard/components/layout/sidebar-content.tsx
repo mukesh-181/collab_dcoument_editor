@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Settings, PlusSquare, Inbox, LayoutGrid, FileText } from "lucide-react";
@@ -105,12 +106,16 @@ export function SidebarContent({
     <div className="flex h-full flex-col p-4">
       {/* Brand Header */}
       <div className="flex items-center gap-2 mb-6 px-2 mt-2">
-        <div className="bg-indigo-600 rounded-lg p-1.5 flex items-center justify-center">
-          <FileText className="h-5 w-5 text-white" />
-        </div>
-        <span className="text-xl font-bold bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400 bg-clip-text text-transparent tracking-tight">
-          CollabDoc
-        </span>
+        <Link href={ROUTES.HOME} className="cursor-pointer hover:opacity-80 transition-opacity">
+          <Image 
+            src="/logo-final.png" 
+            alt="CollabDoc" 
+            width={130} 
+            height={36} 
+            className="object-contain" 
+            priority 
+          />
+        </Link>
       </div>
 
       {/* Profile Section */}

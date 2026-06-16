@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Inbox, LayoutGrid, FileText } from "lucide-react";
 import { User } from "@supabase/supabase-js";
@@ -94,13 +95,15 @@ export function DashboardHeader({ user }: { user: User | null }) {
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/70 backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/70 supports-[backdrop-filter]:bg-white/60">
       <div className="flex h-14 items-center px-6 gap-8 max-w-7xl mx-auto">
         {/* Brand */}
-        <Link href={ROUTES.HOME} className="flex items-center gap-2 mr-4">
-          <div className="bg-indigo-600 rounded-lg p-1 flex items-center justify-center">
-            <FileText className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-lg font-bold bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400 bg-clip-text text-transparent tracking-tight">
-            CollabDoc
-          </span>
+        <Link href={ROUTES.DASHBOARD} className="flex items-center gap-2 mr-4 cursor-pointer transition-opacity">
+          <Image 
+            src="/logo-final.png" 
+            alt="CollabDoc" 
+            width={150} 
+            height={32} 
+            className="object-contain" 
+            priority 
+          />
         </Link>
 
         {/* Navigation */}

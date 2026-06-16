@@ -10,10 +10,17 @@ export async function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-indigo-100/50 bg-indigo-50/50 backdrop-blur-xl dark:border-indigo-900/30 dark:bg-indigo-950/30 supports-[backdrop-filter]:bg-indigo-50/40 transition-all duration-300">
-      <div className="flex h-16 w-full items-center justify-between px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="flex h-16 w-full items-center justify-between px-6 md:px-10 lg:px-12">
         <div className="flex items-center gap-3">
-          <Link href={ROUTES.HOME} className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-            <Image src="/Logo.png" alt="CollabDoc" width={300} height={40} className="h-10 w-auto object-contain" priority />
+          <Link href={ROUTES.HOME} className="flex items-center gap-3 cursor-pointer transition-opacity">
+            <Image 
+              src="/logo-final.png" 
+              alt="CollabDoc" 
+              width={180} 
+              height={50} 
+              className="object-contain" 
+             priority 
+            />
           </Link>
         </div>
         <div className="flex items-center gap-4">

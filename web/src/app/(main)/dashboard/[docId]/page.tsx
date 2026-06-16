@@ -23,7 +23,7 @@ export default async function Page(props: { params: Promise<{ docId: string }> }
   const currentUserName = getUserName(currentUserMember?.user?.name, user?.email);
   // Extract the current user's role from the filtered document_members array
   const currentUserRole = document.document_members?.[0]?.role || 'viewer'
-  const documents = await getUserDocuments()
+  const { documents } = await getUserDocuments()
 
   return (
     <DocumentPage 

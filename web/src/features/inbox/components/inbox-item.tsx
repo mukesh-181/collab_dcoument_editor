@@ -104,7 +104,7 @@ export function InboxItem({ invite }: { invite: any }) {
 
   return (
     <div
-      className={`py-5 px-5 bg-gradient-to-b from-white/80 to-indigo-50/60   backdrop-blur-md border border-zinc-200/60  rounded-2xl shadow-sm transition-all duration-300 group relative overflow-hidden ${isExpiredLocal && invite.status === "pending" ? "opacity-75 grayscale-[0.5]" : "hover:border-indigo-500/30 hover:shadow-md hover:-translate-y-0.5"}`}
+      className={`py-5 px-5 bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm transition-all duration-300 group relative overflow-hidden ${isExpiredLocal && invite.status === "pending" ? "opacity-75 grayscale-[0.5]" : "hover:border-indigo-500/40 dark:hover:border-indigo-500/40 hover:shadow-md hover:-translate-y-0.5"}`}
     >
       <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] pointer-events-none mix-blend-overlay"></div>
       <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-between">
@@ -120,13 +120,13 @@ export function InboxItem({ invite }: { invite: any }) {
 
           <div className="flex flex-col flex-1 min-w-0">
           <div className="flex items-center gap-2.5 mb-1">
-            <span className="font-semibold text-[16px] text-zinc-900 truncate">
+            <span className="font-semibold text-[16px] text-zinc-900 dark:text-zinc-100 truncate">
               {inviterName}
             </span>
             {inviterEmail && (
               <>
-                <div className="h-[18px] w-[1px] bg-zinc-300 shrink-0" />
-                <span className="text-[13px] text-zinc-500 truncate">
+                <div className="h-[18px] w-[1px] bg-zinc-300 dark:bg-zinc-700 shrink-0" />
+                <span className="text-[13px] text-zinc-500 dark:text-zinc-400 truncate">
                   {inviterEmail}
                 </span>
               </>
@@ -134,37 +134,37 @@ export function InboxItem({ invite }: { invite: any }) {
           </div>
 
           {invite.status === "exited" ? (
-            <span className="text-[14px] text-zinc-700 mb-1">
-              <span className="font-semibold text-zinc-900">
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
                 {invite.token}
               </span>{" "}
               has exited from{" "}
-              <span className="font-semibold text-zinc-900">
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
                 '{documentTitle}'
               </span>
               .
             </span>
           ) : invite.status === "removed" ? (
-            <span className="text-[14px] text-zinc-700 mb-1">
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
               You have been removed from{" "}
-              <span className="font-semibold">'{documentTitle}'</span> by{" "}
-              <span className="font-semibold">{inviterName}</span>
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">'{documentTitle}'</span> by{" "}
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterName}</span>
             </span>
           ) : invite.status === "role_updated" ? (
-            <span className="text-[14px] text-zinc-700 mb-1 flex flex-col">
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1 flex flex-col">
               <span>
                 Your role for{" "}
-                <span className="font-semibold">'{documentTitle}'</span> has
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100">'{documentTitle}'</span> has
                 been updated to{" "}
-                <span className="font-semibold capitalize">{invite.role}</span>{" "}
-                by <span className="font-semibold">{inviterName}</span>.
+                <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span>{" "}
+                by <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterName}</span>.
               </span>
             </span>
           ) : (
-            <span className="text-[14px] text-zinc-700 mb-1">
+            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
               Invitation to join{" "}
-              <span className="font-semibold">'{documentTitle}'</span> with{" "}
-              <span className="font-semibold capitalize">{invite.role}</span>{" "}
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">'{documentTitle}'</span> with{" "}
+              <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span>{" "}
               access
             </span>
           )}
@@ -178,10 +178,10 @@ export function InboxItem({ invite }: { invite: any }) {
       </div>
         
       <div className="flex flex-col items-start sm:items-end justify-between gap-4 shrink-0 sm:min-w-[200px] mt-2 sm:mt-0">
-          <div className="flex items-center gap-3">
-            <div
-              className={`flex items-center gap-3 ${isExpiredLocal && invite.status === "pending" ? "opacity-50 grayscale-[0.3]" : ""}`}
-            >
+        {/* Top Right: Badges & Date */}
+        <div
+          className={`flex items-center gap-3 ${isExpiredLocal && invite.status === "pending" ? "opacity-50 grayscale-[0.3]" : ""}`}
+        >
           {invite.status === "accepted" && (
             <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-700">
               <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -220,61 +220,64 @@ export function InboxItem({ invite }: { invite: any }) {
           )}
 
           <div className="flex items-center gap-2">
-            <span className="text-[13px] font-bold text-zinc-700">
+            <span className="text-[13px] font-bold text-zinc-700 dark:text-zinc-400">
               {timeStr}
             </span>
-            <div className="h-[16px] w-[1px] bg-zinc-300 shrink-0" />
-            <span className="text-[13px] font-bold text-zinc-700">
+            <div className="h-[16px] w-[1px] bg-zinc-300 dark:bg-zinc-700 shrink-0" />
+            <span className="text-[13px] font-bold text-zinc-700 dark:text-zinc-400">
               {dateStr}
             </span>
           </div>
         </div>
 
-        {(invite.status !== "pending" || isExpiredLocal) && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-7 w-7 p-0 ml-1 text-zinc-400 hover:text-red-500 hover:bg-red-50"
-            onClick={() => setIsDeleteOpen(true)}
-            disabled={isLoading}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
-        )}
-      </div>
+        {/* Bottom Right: Action Buttons */}
+        <div className="flex items-center justify-end gap-2.5 w-full mt-1 min-h-[28px]">
+          {invite.status === "pending" && !isExpiredLocal && (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 w-[84px] text-xs border-zinc-200"
+                onClick={() => setIsRejectOpen(true)}
+                disabled={isLoading}
+              >
+                Reject
+              </Button>
+              <Button
+                size="sm"
+                className="h-7 w-[84px] text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                onClick={() => setIsAcceptOpen(true)}
+                disabled={isLoading}
+              >
+                Accept
+              </Button>
+            </>
+          )}
 
-        {invite.status === "pending" && !isExpiredLocal && (
-          <div className="flex items-center justify-end gap-2.5 w-full mt-1">
+          {invite.status === "accepted" && (
             <Button
               size="sm"
-              variant="outline"
-              className="h-7 w-[84px] text-xs border-zinc-200"
-              onClick={() => setIsRejectOpen(true)}
-              disabled={isLoading}
+              className="h-7 w-7 p-0 bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm shrink-0"
+              onClick={() => router.push(ROUTES.DOCUMENT(invite.document_id))}
+              title="Go to Document"
             >
-              Reject
+              <ArrowRight className="w-3.5 h-3.5" />
             </Button>
+          )}
+
+          {(invite.status !== "pending" || isExpiredLocal) && (
             <Button
               size="sm"
-              className="h-7 w-[84px] text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
-              onClick={() => setIsAcceptOpen(true)}
+              variant="ghost"
+              className="h-7 w-7 p-0 text-zinc-400 hover:text-red-500 hover:bg-red-50"
+              onClick={() => setIsDeleteOpen(true)}
               disabled={isLoading}
+              title="Remove from Inbox"
             >
-              Accept
+              <Trash2 className="w-3.5 h-3.5" />
             </Button>
-          </div>
-        )}
-
-        {invite.status === "accepted" && (
-          <Button
-            size="sm"
-            className="h-7 px-4 text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
-            onClick={() => router.push(ROUTES.DOCUMENT(invite.document_id))}
-          >
-            Go to Document
-            <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-          </Button>
-        )}
+          )}
+        </div>
       </div>
 
       <InboxItemDialogs

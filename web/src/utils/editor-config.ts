@@ -62,7 +62,7 @@ export const getEditorExtensions = ({
       multicolor: true,
     }),
     Table.configure({
-      resizable: false,
+      resizable: true,
       HTMLAttributes: {
         class: "w-full",
       },

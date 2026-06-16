@@ -68,12 +68,14 @@ export const server = new Server({
     const state = Buffer.from(Y.encodeStateAsUpdate(document)).toString(
       "base64",
     );
+    
+    const now = new Date().toISOString();
 
     const { error } = await supabase.from("document_content_state").upsert(
       {
         document_id: documentName,
         ydoc_state: state,
-        updated_at: new Date().toISOString(),
+        updated_at: now,
       },
       {
         onConflict: "document_id",
@@ -85,6 +87,19 @@ export const server = new Server({
         `[onStoreDocument] Error saving doc ${documentName}:`,
         error.message,
       );
+    } else {
+      // Update the parent document's updated_at timestamp so it floats to the top of the dashboard
+      const { error: updateDocError } = await supabase
+        .from("documents")
+        .update({ updated_at: now })
+        .eq("id", documentName);
+        
+      if (updateDocError) {
+        console.error(
+          `[onStoreDocument] Error updating document timestamp ${documentName}:`,
+          updateDocError.message,
+        );
+      }
     }
   },
 });
