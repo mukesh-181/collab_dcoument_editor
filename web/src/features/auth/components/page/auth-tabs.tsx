@@ -1,4 +1,6 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+"use client";
+
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -18,64 +20,65 @@ export function AuthTabs({
   next?: string;
   defaultTab?: string;
 }) {
-  // Only allow valid tabs to prevent errors
-  const activeTab = defaultTab === "register" ? "register" : "login";
+  const [activeTab, setActiveTab] = useState<"login" | "register">(
+    defaultTab === "register" ? "register" : "login"
+  );
 
   return (
-    <Card className="w-full max-w-md bg-white/80 dark:bg-zinc-950/70 backdrop-blur-xl border-zinc-200/60 shadow-2xl dark:border-zinc-800/60 rounded-2xl">
-      <Tabs defaultValue={activeTab} className="w-full">
-        <CardHeader className="space-y-1.5 text-center pb-8">
-          <CardTitle className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Welcome back
-          </CardTitle>
-          <CardDescription className="text-base text-zinc-500 dark:text-zinc-400">
-            Sign in to your account or create a new one
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <TabsList className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] mb-8 bg-transparent  dark:border-zinc-800 p-1 rounded-lg h-14">
-            <TabsTrigger
-              value="login"
-              className="h-full rounded-md text-base font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 data-[state=active]:bg-indigo-600 dark:data-[state=active]:bg-indigo-600 data-[state=active]:text-white dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all duration-200"
-            >
-              Sign In
-            </TabsTrigger>
-            <div className="flex h-full w-4 items-center justify-center">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none h-8 w-px bg-zinc-700 dark:bg-zinc-800"
-              />
-            </div>
-            <TabsTrigger
-              value="register"
-              className="h-full rounded-md text-base font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 data-[state=active]:bg-indigo-600 dark:data-[state=active]:bg-indigo-600 data-[state=active]:text-white dark:data-[state=active]:text-white data-[state=active]:shadow-sm transition-all duration-200"
-            >
-              Register
-            </TabsTrigger>
-          </TabsList>
+    <Card className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/40 bg-white/60 shadow-2xl backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/50 p-2 sm:p-4">
+      <CardHeader className="space-y-2 text-center pb-6">
+        <CardTitle className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 font-serif">
+          {activeTab === "login" ? "Welcome back" : "Create an account"}
+        </CardTitle>
+        <CardDescription className="text-base text-zinc-500 dark:text-zinc-400">
+          {activeTab === "login"
+            ? "Enter your details to access your account"
+            : "Sign up to start collaborating in real-time"}
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="space-y-6">
+        <OAuthButtons />
 
-          <OAuthButtons />
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <Separator className="w-full border-zinc-200 dark:border-zinc-800/50" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase font-medium tracking-wider">
+            <span className="bg-white/60 px-3 text-zinc-500 backdrop-blur-md dark:bg-zinc-950/50 dark:text-zinc-400 rounded-full">
+              Or continue with email
+            </span>
+          </div>
+        </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full border-zinc-200 dark:border-zinc-800" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
-                Or continue with email
-              </span>
+        {activeTab === "login" ? (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <LoginForm next={next} />
+            <div className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+              Don't have an account?{" "}
+              <button
+                onClick={() => setActiveTab("register")}
+                className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 underline-offset-4 hover:underline transition-all"
+              >
+                Sign up
+              </button>
             </div>
           </div>
-
-          <TabsContent value="login" className="mt-0">
-            <LoginForm next={next} />
-          </TabsContent>
-
-          <TabsContent value="register" className="mt-0">
+        ) : (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <RegisterForm next={next} />
-          </TabsContent>
-        </CardContent>
-      </Tabs>
+            <div className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+              Already have an account?{" "}
+              <button
+                onClick={() => setActiveTab("login")}
+                className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 underline-offset-4 hover:underline transition-all"
+              >
+                Sign in
+              </button>
+            </div>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }

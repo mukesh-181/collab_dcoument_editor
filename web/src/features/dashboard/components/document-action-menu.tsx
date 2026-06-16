@@ -37,7 +37,7 @@ export function DocumentActionMenu({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 opacity-80"
             onClick={(e) => {
               // Prevent default/propagation if wrapped in a link
               e.preventDefault();

@@ -4,32 +4,66 @@ import { createClient } from '@/lib/supabase/server'
 import { yDocToProsemirrorJSON } from 'y-prosemirror'
 import * as Y from 'yjs'
 
-export async function getUserDocuments() {
+interface GetDocumentsOptions {
+  search?: string;
+  page?: number;
+  filter?: string;
+  limit?: number;
+}
+
+export async function getUserDocuments(options?: GetDocumentsOptions) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
+  if (!user) return { documents: [], totalCount: 0, totalPages: 0 }
 
-  const { data: documents, error } = await supabase
+  const search = options?.search || ''
+  const page = options?.page || 1
+  const filter = options?.filter || 'all'
+  const limit = options?.limit || 6
+
+  let query = supabase
     .from('documents')
     .select(`
       *,
-      document_members!inner(role),
+      document_members!inner(role, user_id),
       all_members:document_members(
         role,
         user:users(id, name, image, email)
       ),
       owner:users!documents_owner_id_fkey(name),
       document_content_state(ydoc_state)
-    `)
+    `, { count: 'exact' })
     .eq('is_deleted', false)
     .eq('document_members.user_id', user.id)
+
+  if (search) {
+    query = query.ilike('title', `%${search}%`)
+  }
+
+  if (filter === 'owned-by-me') {
+    query = query.eq('document_members.role', 'owner')
+  } else if (filter === 'owned-by-others') {
+    query = query.neq('document_members.role', 'owner')
+  } else if (filter === 'editor') {
+    query = query.eq('document_members.role', 'editor')
+  } else if (filter === 'viewer') {
+    query = query.eq('document_members.role', 'viewer')
+  }
+
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  const { data: documents, error, count } = await query
     .order('updated_at', { ascending: false })
+    .range(from, to)
 
   if (error) {
     console.warn('Error fetching documents:', error)
-    return []
+    return { documents: [], totalCount: 0, totalPages: 0 }
   }
+
+  const totalPages = Math.max(1, Math.ceil((count || 0) / limit))
 
   // Process the documents to extract a JSON preview from the binary Yjs state
   const processedDocuments = documents.map((doc: any) => {
@@ -63,5 +97,9 @@ export async function getUserDocuments() {
     }
   })
 
-  return processedDocuments
+  return {
+    documents: processedDocuments,
+    totalCount: count || 0,
+    totalPages
+  }
 }

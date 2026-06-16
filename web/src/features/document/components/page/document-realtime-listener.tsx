@@ -69,11 +69,40 @@ export function DocumentRealtimeListener({
           {
             event: "*",
             schema: "public",
+            table: "invites",
+            filter: `document_id=eq.${documentId}`,
+          },
+          (payload) => {
+            // Guard against refreshing if the current user is the one being removed
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+              const record = payload.new as any;
+              if (record.email === user.email && record.status === 'removed') {
+                return;
+              }
+            }
+            router.refresh();
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
             table: "document_members",
             filter: `document_id=eq.${documentId}`,
           },
-          () => {
-            // When anyone is added, removed, or has their role changed, refresh the server state
+          (payload) => {
+            // If the current user is the one being removed, DO NOT refresh the page.
+            // Refreshing would cause the Server Component to throw a NoPermission error
+            // and unmount our pretty RemovedDialog.
+            if (payload.eventType === 'DELETE') {
+              const oldRecord = payload.old as any;
+              if (oldRecord && oldRecord.user_id === user.id) {
+                return;
+              }
+            }
+
+            // When anyone else is added, removed, or has their role changed, refresh the server state
             // to instantly update the DocumentMembersPopover for everyone viewing the document.
             router.refresh();
           }

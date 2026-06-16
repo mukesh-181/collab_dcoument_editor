@@ -48,15 +48,10 @@ export function TableControl({ editor }: TableControlProps) {
         align="start" 
         className="w-48 p-1"
         onCloseAutoFocus={(e) => e.preventDefault()}
-        onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div
           onClick={() => {
-            editor
-              .chain()
-              .focus()
-              .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-              .run();
+            editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
             setOpen(false);
           }}
           className="relative flex w-full cursor-default items-center gap-1.5 rounded-md px-2 py-1.5 text-sm outline-hidden select-none hover:bg-zinc-100 dark:hover:bg-zinc-800"

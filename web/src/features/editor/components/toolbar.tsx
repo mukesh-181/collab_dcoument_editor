@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useTransition } from "react";
 import { useCurrentEditor } from "@tiptap/react";
 import { Separator } from "@/components/ui/separator";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,12 +22,21 @@ import { TableControl } from "./toolbar/table-control";
 export function Toolbar({ documentId }: { documentId: string }) {
   const { editor } = useCurrentEditor();
   const [, forceUpdate] = useState(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (!editor) return;
 
     const handleUpdate = () => {
-      forceUpdate((n) => n + 1);
+      if (timeoutRef.current) return;
+      
+      timeoutRef.current = setTimeout(() => {
+        startTransition(() => {
+          forceUpdate((n) => n + 1);
+        });
+        timeoutRef.current = null;
+      }, 250);
     };
 
     // Listen to selection and content changes
@@ -35,6 +44,9 @@ export function Toolbar({ documentId }: { documentId: string }) {
 
     return () => {
       editor.off("transaction", handleUpdate);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
   }, [editor]);
 
@@ -44,7 +56,7 @@ export function Toolbar({ documentId }: { documentId: string }) {
 
   return (
     <TooltipProvider>
-      <div className="editor-toolbar-container flex items-center justify-start gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap">
+      <div className="editor-toolbar-container flex items-center justify-center gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap">
         <HistoryControls editor={editor} />
         
         <Separator

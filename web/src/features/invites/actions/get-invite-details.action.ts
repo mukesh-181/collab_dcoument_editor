@@ -14,6 +14,7 @@ export async function getInviteDetails(token: string, userId?: string) {
       status,
       role,
       document_id,
+      expires_at,
       documents (
         title,
         owner:users!documents_owner_id_fkey (

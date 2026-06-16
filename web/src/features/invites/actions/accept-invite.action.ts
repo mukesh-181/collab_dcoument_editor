@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 export async function acceptInvite(token: string) {
   const supabase = await createClient()
@@ -11,7 +12,7 @@ export async function acceptInvite(token: string) {
   // Find the pending invite
   const { data: invite, error: inviteError } = await supabase
     .from('invites')
-    .select('id, document_id, role, status, expires_at')
+    .select('id, document_id, role, status, expires_at, email')
     .eq('token', token)
     .single()
 
@@ -65,5 +66,7 @@ export async function acceptInvite(token: string) {
       .eq('id', invite.id)
   }
 
+  revalidatePath('/dashboard/inbox')
+  revalidatePath('/dashboard')
   return invite.document_id
 }

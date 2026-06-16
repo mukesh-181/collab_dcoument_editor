@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 
+import { revalidatePath } from 'next/cache'
+
 export async function rejectInvite(inviteId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -28,5 +30,7 @@ export async function rejectInvite(inviteId: string) {
     throw new Error(`Failed to reject invite: ${error.message || error.code}`)
   }
   
+  revalidatePath('/dashboard/inbox')
+  revalidatePath('/dashboard')
   return { success: true }
 }

@@ -118,7 +118,6 @@ export function LinkControl({ editor }: { editor: Editor }) {
           side="bottom" 
           align="start"
           onCloseAutoFocus={(e) => e.preventDefault()}
-          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <form onSubmit={handleLinkSubmit} className="flex flex-col gap-3">
             <h4 className="font-medium leading-none text-sm">Add Link</h4>

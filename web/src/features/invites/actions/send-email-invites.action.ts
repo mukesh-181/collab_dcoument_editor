@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+import { ROUTES } from '@/constants/routes'
 
 export async function sendEmailInvites(documentId: string, emails: string[], role: 'viewer' | 'editor') {
   const supabase = await createClient()
@@ -114,5 +116,6 @@ export async function sendEmailInvites(documentId: string, emails: string[], rol
     throw new Error('Failed to send invites')
   }
 
+  revalidatePath(ROUTES.DOCUMENT(documentId))
   return { success: true }
 }
