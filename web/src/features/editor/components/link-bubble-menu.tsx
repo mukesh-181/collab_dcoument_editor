@@ -66,6 +66,7 @@ export function LinkBubbleMenu() {
 
         return true;
       }}
+      updateDelay={250}
       className="flex items-center gap-1 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xl rounded-xl p-1.5"
     >
       <TooltipProvider>
@@ -106,7 +107,6 @@ export function LinkBubbleMenu() {
             side="top" 
             align="center"
             onCloseAutoFocus={(e) => e.preventDefault()}
-            onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <form onSubmit={handleSaveEdit} className="flex flex-col gap-3">
               <h4 className="font-medium leading-none text-sm">Edit Link</h4>

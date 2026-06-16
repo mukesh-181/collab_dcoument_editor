@@ -38,16 +38,23 @@ export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {})
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-2xl">
-        <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
+      <SignOutDialogContent isOpen={isOpen} setIsOpen={setIsOpen} isPending={isPending} onConfirm={handleSignOut} />
+    </Dialog>
+  )
+}
+
+export function SignOutDialogContent({ isOpen, setIsOpen, isPending, onConfirm }: any) {
+  return (
+    <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-border rounded-2xl shadow-2xl">
+        <div className="p-6">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                <LogOut className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background border border-border shadow-sm">
+                <LogOut className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="text-left">
                 <DialogTitle className="text-xl font-semibold">Sign Out</DialogTitle>
-                <DialogDescription className="mt-1.5 -ml-2 text-[13px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/50 dark:bg-zinc-800/50 px-2 py-1 rounded-md inline-block">
+                <DialogDescription className="mt-1.5 text-[13px] font-medium text-muted-foreground">
                   Are you sure you want to log out?
                 </DialogDescription>
               </div>
@@ -56,29 +63,29 @@ export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {})
         </div>
         
         <div className="p-6">
-          <p className="text-[15px] text-zinc-700 dark:text-zinc-300">
+          <p className="text-[15px] text-foreground">
             You will need to log back in to access your documents and collaborations.
           </p>
         </div>
         
-        <DialogFooter className="bg-zinc-50/50 dark:bg-zinc-900/50 p-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-end gap-2 sm:space-x-0">
+        <DialogFooter className="p-4 flex items-center justify-end gap-2 sm:space-x-0">
           <Button
             type="button"
             variant="ghost"
             onClick={() => setIsOpen(false)}
             disabled={isPending}
-            className="rounded-lg h-10 px-4 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+            className="rounded-lg h-10 px-4 hover:bg-accent transition-colors"
           >
             Cancel
           </Button>
           
-          <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1 hidden sm:block" />
+          <div className="w-px h-6 bg-border mx-1 hidden sm:block" />
           
           <Button 
             type="button" 
             disabled={isPending}
-            onClick={handleSignOut}
-            className="relative bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl h-10 px-6 font-medium transition-all hover:-translate-y-0.5"
+            onClick={onConfirm}
+            className="relative bg-primary hover:bg-primary/90 text-primary-foreground shadow-md rounded-xl h-10 px-6 font-medium transition-all hover:-translate-y-0.5"
           >
             <span className={isPending ? "opacity-0" : ""}>Sign Out</span>
             {isPending && (
@@ -89,6 +96,5 @@ export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {})
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
   )
 }

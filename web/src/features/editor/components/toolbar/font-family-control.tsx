@@ -65,7 +65,6 @@ export function FontFamilyControl({ editor }: FontFamilyControlProps) {
         align="start" 
         className="w-48 max-h-[300px] overflow-y-auto"
         onCloseAutoFocus={(e) => e.preventDefault()}
-        onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div
           onClick={() => {

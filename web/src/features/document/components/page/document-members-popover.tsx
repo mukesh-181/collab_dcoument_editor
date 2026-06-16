@@ -10,7 +10,7 @@ import { updateMemberRoleAction } from "../../actions/update-member-role.action"
 import { toast } from "sonner";
 import { getInitials } from "@/utils/string-utils";
 import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
-
+import { RemoveMemberDialog } from "./remove-member-dialog";
 
 
 interface DocumentMembersPopoverProps {
@@ -33,6 +33,7 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
 
   const [pendingAction, setPendingAction] = useState<{ memberId: string, type: 'editor' | 'viewer' | 'remove' } | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [removeDialogData, setRemoveDialogData] = useState<{ isOpen: boolean, memberId: string, memberEmail: string, memberName: string } | null>(null);
 
   const handleRoleUpdate = (memberId: string, memberEmail: string, newRole: string) => {
     setPendingAction({ memberId, type: newRole as 'editor' | 'viewer' });
@@ -48,18 +49,15 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
     });
   };
 
-  const handleRemove = (memberId: string, memberEmail: string) => {
-    setPendingAction({ memberId, type: 'remove' });
-    startTransition(async () => {
-      const result = await removeMemberAction(documentId, memberId, memberEmail);
-      setPendingAction(null);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("Member removed successfully");
-        setOpenMenuId(null);
-      }
-    });
+  const handleRemove = async (memberId: string, memberEmail: string) => {
+    const result = await removeMemberAction(documentId, memberId, memberEmail);
+    if (result.error) {
+      toast.error(result.error);
+      throw new Error(result.error);
+    } else {
+      toast.success("Member removed successfully");
+      setOpenMenuId(null);
+    }
   };
   if (!members || members.length === 0) return null;
 
@@ -70,7 +68,15 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
   });
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover 
+      open={open} 
+      onOpenChange={(newOpen) => {
+        setOpen(newOpen);
+        if (!newOpen) {
+          setOpenMenuId(null);
+        }
+      }}
+    >
       <PopoverTrigger asChild>
         <button className="flex items-center -space-x-2 mr-2 focus:outline-none cursor-pointer group">
           {sortedMembers.map((member) => (
@@ -133,23 +139,23 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
                 </div>
               </div>
               {member.role === "owner" ? (
-                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 cursor-default select-none">
-                  <Crown className="h-3 w-3 text-amber-600 dark:text-amber-400" />
-                  <span className="text-[11px] font-medium text-amber-700 dark:text-amber-400 capitalize">
+                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-400/15 text-purple-500 border border-purple-500/30 cursor-default select-none">
+                  <Crown className="h-3 w-3" />
+                  <span className="text-[11px] font-medium capitalize">
                     {member.role}
                   </span>
                 </div>
               ) : member.role === "editor" ? (
-                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 cursor-default select-none">
-                  <Pencil className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
-                  <span className="text-[11px] font-medium text-indigo-700 dark:text-indigo-400 capitalize">
+                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-400/15 text-blue-500 border border-blue-500/30 cursor-default select-none">
+                  <Pencil className="h-3 w-3" />
+                  <span className="text-[11px] font-medium capitalize">
                     {member.role}
                   </span>
                 </div>
               ) : (
-                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 cursor-default select-none">
-                  <Eye className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 capitalize">
+                <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-400/15 text-gray-500 border border-gray-500/30 cursor-default select-none">
+                  <Eye className="h-3 w-3" />
+                  <span className="text-[11px] font-medium capitalize">
                     {member.role}
                   </span>
                 </div>
@@ -204,15 +210,16 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
                         disabled={isPending}
                         onSelect={(e) => {
                           e.preventDefault();
-                          if (!isPending) handleRemove(member.user.id, member.user.email);
+                          setRemoveDialogData({
+                            isOpen: true,
+                            memberId: member.user.id,
+                            memberEmail: member.user.email,
+                            memberName: getUserName(member.user.name, member.user.email)
+                          });
                         }}
                         className="text-red-600 dark:text-red-400 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
                       >
-                        {pendingAction?.memberId === member.user.id && pendingAction.type === 'remove' ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <UserMinus className="mr-2 h-4 w-4" />
-                        )}
+                        <UserMinus className="mr-2 h-4 w-4" />
                         <span>Remove Access</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -223,6 +230,14 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
           ))}
         </div>
       </PopoverContent>
+      {removeDialogData && (
+        <RemoveMemberDialog
+          isOpen={removeDialogData.isOpen}
+          setIsOpen={(isOpen) => setRemoveDialogData(prev => prev ? { ...prev, isOpen } : null)}
+          memberName={removeDialogData.memberName}
+          onConfirm={() => handleRemove(removeDialogData.memberId, removeDialogData.memberEmail)}
+        />
+      )}
     </Popover>
   );
 }

@@ -72,7 +72,7 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
             <Label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
               Collaborator Role
             </Label>
-            <div className="flex items-center bg-white/80 dark:bg-zinc-900/50 p-1 rounded-full border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm backdrop-blur-md w-full">
+            <div className="flex items-center bg-muted p-1 rounded-full border border-border shadow-sm w-full">
               {[
                 { id: 'viewer', label: 'Viewer', icon: Eye },
                 { id: 'editor', label: 'Editor', icon: Edit2 },
@@ -85,8 +85,8 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
                     onClick={() => setRole(f.id as "viewer" | "editor")}
                     className={`flex items-center justify-center gap-2 flex-1 py-2 rounded-full text-[13.5px] font-medium transition-all duration-200 ${
                       role === f.id 
-                        ? "bg-primary/10 dark:bg-primary/20 text-primary shadow-sm" 
-                        : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
+                        ? "bg-primary text-primary-foreground shadow-sm" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                     }`}
                   >
                     <Icon className="h-[15px] w-[15px]" />
@@ -97,9 +97,9 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
             </div>
           </div>
 
-          <div className="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 p-3 rounded-lg flex items-start gap-2.5">
-            <Info className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
-            <p className="text-[12.5px] text-indigo-700 dark:text-indigo-300 leading-relaxed">
+          <div className="bg-muted border border-border p-3 rounded-lg flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+            <p className="text-[12.5px] text-muted-foreground leading-relaxed">
               <strong>Note:</strong> This link is multi-use but will <strong>expire in 24 hours</strong>. If an existing member uses this link, it will redirect them straight to the document without overriding their current role.
             </p>
           </div>
@@ -118,15 +118,15 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
           </Button>
         </div>
       ) : (
-        <div className="p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg flex flex-col gap-3">
-          <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <div className="p-4 bg-muted border border-border rounded-lg flex flex-col gap-3">
+          <div className="text-sm font-medium text-foreground">
             One-time link generated successfully
           </div>
           <div className="flex items-center gap-2">
             <Input
               readOnly
               value={inviteLink}
-              className="flex-1 bg-white dark:bg-zinc-950 font-mono text-xs h-10"
+              className="flex-1 bg-background font-mono text-xs h-10 border-border"
             />
             <Button
               size="icon"

@@ -13,9 +13,9 @@ We are building a real-time collaborative document editor. We've finished the fo
 - **Dashboard**: A robust, visually-rich interface where users can view, search, and filter their documents in real-time. It features scaled HTML document thumbnails and stacked presence avatars for a premium feel.
 - **Interactive Inbox**: A dedicated, fully persistent UI (`/inbox`) that displays all incoming document invitations, allowing users to securely Accept, Reject, or Delete them while preserving historical status.
 - **Document Access**: We use server-side checks to make sure users can only open documents they are allowed to see.
-- **Rich Text Editor**: We added a text editor using Tiptap and Tailwind's typography plugin. It features real-time collaborative cursors, an offline-resilient sync state, and a custom responsive formatting toolbar.
+- **Rich Text Editor**: We added a text editor using Tiptap and Tailwind's typography plugin. It features real-time collaborative cursors, an offline-resilient sync state, unified editor role synchronization, and a custom responsive formatting toolbar.
 - **Mobile Responsiveness**: The entire application is fully responsive, utilizing Shadcn Sheets for slide-out mobile navigation and horizontally scrollable toolbars.
-- **UI & Styling**: The interface is built with Tailwind CSS v4 and Shadcn UI components. We implemented an opacity-based CSS layout trick to render "zero-jitter" loading spinners across all interactive buttons (authentication, document creation, and invitations), completely preventing visually jarring layout shifts.
+- **UI & Styling**: The interface is built with Tailwind CSS v4 and Shadcn UI components. We revamped the global UI design with updated font typography, refined component styling, and enhanced glassmorphism effects. We also implemented an opacity-based CSS layout trick to render "zero-jitter" loading spinners across all interactive buttons, preventing visually jarring layout shifts.
 
 ---
 
@@ -88,7 +88,8 @@ We significantly expanded the Tiptap capabilities to match a premium editor expe
 1. **Core Elements**: Fully integrated interactive Tables (with row/col insertion), Bullet/Numbered Lists, and collaboratively synced Task Lists (checkboxes).
 2. **Workflow Speed (Slash Commands)**: Implemented a custom `/` command listener that mounts a floating popover menu at the cursor, allowing users to instantly insert Headings, Lists, Images, or Tables without using the mouse.
 3. **Contextual Bubble Menu**: Built a floating formatting bubble menu that appears directly over highlighted text, providing rapid access to Bold, Italic, Underline, and Highlight styles.
-4. **Persistent Image Uploads**: To solve the issue of ephemeral `blob:` URLs breaking in collaborative sessions, we routed image uploads through a Next.js Server Action. Images are securely uploaded to a Supabase storage bucket, and a permanent public URL is injected into the document, ensuring flawless synchronization across all connected users.
+4. **Persistent Image Uploads & Handling**: To solve the issue of ephemeral `blob:` URLs breaking in collaborative sessions, we routed image uploads through a Next.js Server Action. Images are securely uploaded to a Supabase storage bucket, and a permanent public URL is injected into the document. We also integrated a custom drag-and-drop workflow allowing users to naturally re-arrange images via `data-drag-handle`.
+5. **Focus Management**: Upgraded UI controls (like Radix Dropdown menus for font families and sizes) with strict focus-stealing interceptors (`onCloseAutoFocus={(e) => e.preventDefault()}` and passive `div` replacements). This unifies editor role synchronization and prevents the Tiptap editor from losing focus, which maintains the Yjs remote cursor highlight stability for all connected users.
 
 
 ### Saving, Renaming, and Real-Time Sync (Phase 7)
