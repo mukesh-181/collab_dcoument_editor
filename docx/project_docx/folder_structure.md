@@ -1,6 +1,7 @@
 # CollabDoc — Folder Structure
+*(Last Updated: 2026-06-15)*
 
-Complete project structure of the `web/` directory with one-liner descriptions.
+Complete project structure of the `web/` directory with one-liner descriptions, incorporating recent modularization and feature enhancements.
 
 ---
 
@@ -197,9 +198,11 @@ collab_docx/
 │       │   │   │   ├── toolbar/
 │       │   │   │   │   ├── alignment-controls.tsx
 │       │   │   │   │   ├── color-control.tsx
+│       │   │   │   │   ├── font-family-control.tsx # Font family selection dropdown
 │       │   │   │   │   ├── font-size-control.tsx
 │       │   │   │   │   ├── format-controls.tsx
 │       │   │   │   │   ├── heading-controls.tsx
+│       │   │   │   │   ├── highlight-control.tsx   # Text highlight color picker
 │       │   │   │   │   ├── history-controls.tsx
 │       │   │   │   │   ├── image-control.tsx
 │       │   │   │   │   ├── link-control.tsx

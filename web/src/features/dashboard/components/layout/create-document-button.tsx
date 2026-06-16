@@ -22,11 +22,20 @@ import { ROUTES } from "@/constants/routes";
 export function CreateDocumentButton({ children }: { children?: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
+  const [selectedIcon, setSelectedIcon] = useState('📝')
   const router = useRouter()
+
+  // Kept only relevant document icons
+  const icons = ['📝', '📄', '📘', '📓', '🗒️', '📁', '📊']
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    
+    // Prepend the icon to the title so it's visible before the title in the card
+    const title = formData.get('title') as string
+    formData.set('title', `${selectedIcon} ${title}`)
+    
     setIsPending(true)
     try {
       const newDocId = await createDocument(formData)
@@ -49,67 +58,78 @@ export function CreateDocumentButton({ children }: { children?: React.ReactNode 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-2xl">
-        <form onSubmit={handleSubmit}>
-          <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
-            <DialogHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                  <FileText className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-                </div>
-                <div className="text-left">
-                  <DialogTitle className="text-xl font-semibold">Create New Document</DialogTitle>
-                  <DialogDescription className="mt-1.5 -ml-2 text-[13px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100/50 dark:bg-zinc-800/50 px-2 py-1 rounded-md inline-block">
-                    Give your new document a title. You can always change it later.
-                  </DialogDescription>
-                </div>
-              </div>
-            </DialogHeader>
+      <DialogContent className="sm:max-w-[480px] p-6 border border-border rounded-2xl shadow-xl gap-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          
+          <div className="flex flex-col gap-1.5">
+            <DialogTitle className="text-xl font-bold tracking-tight text-foreground">Create a new document</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Give it a title and pick an icon. You can change these later.
+            </DialogDescription>
           </div>
           
-          <div className="p-6">
-            <div className="space-y-3">
-              <Label htmlFor="title" className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                Document Title
+          <div className="flex flex-col gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-[15px] font-semibold text-foreground">
+                Title
               </Label>
-                <Input
-                  id="title"
-                  name="title"
-                  defaultValue="Untitled Document"
-                  onFocus={(e) => e.target.select()}
-                  className="h-11 px-4 text-[15px] rounded-xl border-zinc-200/60 focus-visible:ring-indigo-500/50 dark:border-zinc-800/60 dark:focus-visible:ring-indigo-500/50 shadow-sm bg-white/50 dark:bg-zinc-950/50"
-                  autoFocus
-                  required
-                />
+              <Input
+                id="title"
+                name="title"
+                placeholder="Untitled"
+                className="h-11 px-3.5 text-[15px] rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-purple-500 shadow-sm"
+                autoFocus
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-[15px] font-semibold text-foreground">
+                Icon
+              </Label>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {icons.map((icon) => (
+                  <button
+                    key={icon}
+                    type="button"
+                    onClick={() => setSelectedIcon(icon)}
+                    className={`flex items-center justify-center w-10 h-10 rounded-xl text-xl transition-all ${
+                      selectedIcon === icon
+                        ? 'bg-purple-500/10 border border-purple-500/30 shadow-[0_0_10px_rgba(109,74,255,0.1)]'
+                        : 'border border-transparent hover:bg-accent'
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           
-          <DialogFooter className="bg-zinc-50/50 dark:bg-zinc-900/50 p-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-end gap-2 sm:space-x-0">
+          <div className="flex items-center justify-end gap-3 mt-2">
             <Button
               type="button"
               variant="ghost"
               onClick={() => setOpen(false)}
               disabled={isPending}
-              className="rounded-lg h-10 px-4 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+              className="rounded-xl h-10 px-4 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors font-semibold"
             >
               Cancel
             </Button>
             
-            <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 mx-1 hidden sm:block" />
-            
             <Button 
               type="submit" 
               disabled={isPending}
-              className="relative bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl h-10 px-6 font-medium transition-all hover:-translate-y-0.5"
+              className="relative bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm rounded-xl h-10 px-5 font-semibold transition-all border-0"
             >
-              <span className={isPending ? "opacity-0" : ""}>Create Document</span>
+              <span className={isPending ? "opacity-0" : ""}>Create document</span>
               {isPending && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </div>
               )}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

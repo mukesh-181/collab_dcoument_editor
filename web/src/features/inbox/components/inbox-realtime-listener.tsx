@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
-export function InboxRealtimeListener() {
+export function InboxRealtimeListener({ onNewEvent }: { onNewEvent?: () => void }) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
 
@@ -39,6 +39,7 @@ export function InboxRealtimeListener() {
             } else {
               toast.success("You have a new invite!");
             }
+            if (onNewEvent) onNewEvent();
             router.refresh()
           }
         )
@@ -51,6 +52,7 @@ export function InboxRealtimeListener() {
             filter: `email=eq.${user.email}`,
           },
           (payload) => {
+            if (onNewEvent) onNewEvent();
             router.refresh()
           }
         )

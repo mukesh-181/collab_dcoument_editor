@@ -25,5 +25,9 @@ export async function getDocumentById(documentId: string) {
     return null
   }
 
+  if (document.invites) {
+    document.invites = document.invites.filter((inv: any) => inv.status === 'pending')
+  }
+
   return document
 }

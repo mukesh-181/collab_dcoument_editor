@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from 'react'
 
 export type SyncState = 'saved' | 'saving' | 'offline'
 
@@ -17,7 +17,7 @@ interface DocumentContextType {
   syncState: SyncState
   setSyncState: (state: SyncState) => void
   activeUsers: ActiveUser[]
-  setActiveUsers: (users: ActiveUser[]) => void
+  setActiveUsers: Dispatch<SetStateAction<ActiveUser[]>>
   isEditorReady: boolean
   setIsEditorReady: (ready: boolean) => void
   currentUserRole: string
