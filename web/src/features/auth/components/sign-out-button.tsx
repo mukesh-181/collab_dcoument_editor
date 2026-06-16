@@ -38,7 +38,14 @@ export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {})
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-2xl">
+      <SignOutDialogContent isOpen={isOpen} setIsOpen={setIsOpen} isPending={isPending} onConfirm={handleSignOut} />
+    </Dialog>
+  )
+}
+
+export function SignOutDialogContent({ isOpen, setIsOpen, isPending, onConfirm }: any) {
+  return (
+    <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-2xl">
         <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 border-b border-zinc-100 dark:border-zinc-800">
           <DialogHeader>
             <div className="flex items-center gap-3">
@@ -77,7 +84,7 @@ export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {})
           <Button 
             type="button" 
             disabled={isPending}
-            onClick={handleSignOut}
+            onClick={onConfirm}
             className="relative bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-md rounded-xl h-10 px-6 font-medium transition-all hover:-translate-y-0.5"
           >
             <span className={isPending ? "opacity-0" : ""}>Sign Out</span>
@@ -89,6 +96,5 @@ export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {})
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
   )
 }

@@ -62,7 +62,10 @@ export const getEditorExtensions = ({
       multicolor: true,
     }),
     Table.configure({
-      resizable: true,
+      resizable: false,
+      HTMLAttributes: {
+        class: "w-full",
+      },
     }),
     TableRow,
     TableHeader,
@@ -139,9 +142,10 @@ export const editorPropsConfig = {
       "prose-ul:my-2 prose-ul:pl-6 prose-ul:list-disc",
       "prose-ol:my-2 prose-ol:pl-6 prose-ol:list-decimal",
       "prose-li:my-1 prose-li:marker:text-zinc-400",
-      "[&_table]:w-full [&_table]:border-collapse [&_table]:my-4",
-      "[&_td]:border [&_td]:border-zinc-300 dark:[&_td]:border-zinc-700 [&_td]:p-2",
-      "[&_th]:border [&_th]:border-zinc-300 dark:[&_th]:border-zinc-700 [&_th]:p-2 [&_th]:bg-zinc-100 dark:[&_th]:bg-zinc-800 [&_th]:text-left [&_th]:font-semibold",
+      "[&_.tableWrapper]:w-full [&_.tableWrapper]:my-4 [&_.tableWrapper]:relative",
+      "[&_table]:w-full [&_table]:border-collapse [&_table]:table-fixed [&_table]:!my-0",
+      "[&_td]:border [&_td]:border-zinc-300 dark:[&_td]:border-zinc-700 [&_td]:p-2 [&_td]:relative",
+      "[&_th]:border [&_th]:border-zinc-300 dark:[&_th]:border-zinc-700 [&_th]:p-2 [&_th]:bg-zinc-100 dark:[&_th]:bg-zinc-800 [&_th]:text-left [&_th]:font-semibold [&_th]:relative",
       "[&_table_p]:m-0",
       "prose-blockquote:border-l-4 prose-blockquote:border-zinc-300 dark:prose-blockquote:border-zinc-700 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4",
       "prose-q:quotes-['\"'_'\"'] prose-q:italic prose-q:text-zinc-600 dark:prose-q:text-zinc-400"

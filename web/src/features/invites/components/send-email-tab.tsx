@@ -14,6 +14,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { UserSearchInput, SelectedContact } from "./user-search-input";
 import { sendEmailInvites } from "../actions/send-email-invites.action";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getUserName, getUserImage } from "@/utils/user-utils";
+import { getInitials } from "@/utils/string-utils";
 
 export function SendEmailTab({ 
   documentId,
@@ -91,8 +94,16 @@ export function SendEmailTab({
   
   const isSubmitDisabled = (selectedContacts.length === 0 && !hasValidPendingEmail) || isSubmitting;
 
+  const sortedMembers = [...allMembers].sort((a, b) => {
+    const roleOrder: Record<string, number> = { owner: 0, editor: 1, viewer: 2 };
+    return (roleOrder[a.role] ?? 3) - (roleOrder[b.role] ?? 3);
+  });
+
+  const pendingInvites = invites.filter(inv => inv.status === 'pending' && new Date(inv.expires_at) > new Date());
+
   return (
-    <form onSubmit={handleSendEmail} className="space-y-4">
+    <div className="flex flex-col space-y-4">
+      <form onSubmit={handleSendEmail} className="space-y-4">
       <div className="space-y-2">
         <Label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           Email Address
@@ -105,12 +116,6 @@ export function SendEmailTab({
           allMembers={allMembers}
           invites={invites}
         />
-        <div className="flex items-center gap-1.5 mt-3 px-2.5 py-2 rounded-md bg-zinc-100/60 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-700/50 w-fit">
-          <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-          <p className="text-[12px] text-zinc-600 dark:text-zinc-300 font-medium leading-none">
-            Don't know their email? Use the <span className="text-zinc-900 dark:text-zinc-100 font-semibold">Create Link</span> tab above.
-          </p>
-        </div>
       </div>
       
       <div className="space-y-2">
@@ -141,14 +146,55 @@ export function SendEmailTab({
           })}
         </div>
       </div>
-
-      <div className="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 p-3 rounded-lg flex items-start gap-2.5">
-        <Info className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
-        <p className="text-[12.5px] text-indigo-700 dark:text-indigo-300 leading-relaxed">
-          <strong>Note:</strong> Existing members and users with pending invites are automatically excluded to prevent duplicates.
-        </p>
+      <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center gap-2 mb-2 px-1">
+          <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">People with access</h4>
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 px-1 text-[10px] font-bold text-zinc-500 dark:text-zinc-400">
+            {sortedMembers.length + pendingInvites.length}
+          </span>
+        </div>
+        <div className="max-h-[150px] overflow-y-auto pr-2 space-y-1 scrollbar-thin scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700 dark:hover:scrollbar-thumb-zinc-600 scrollbar-track-transparent">
+          {sortedMembers.map((member) => (
+            <div key={member.user.id} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors">
+              <div className="flex items-center space-x-3 overflow-hidden">
+                <Avatar className="w-8 h-8 border border-zinc-200 dark:border-zinc-800 shrink-0">
+                  <AvatarImage src={getUserImage(member.user.image)} />
+                  <AvatarFallback className="text-[10px]">{getInitials(member.user.name, member.user.email)}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col overflow-hidden">
+                  <span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate leading-snug">{getUserName(member.user.name, member.user.email)}</span>
+                  <span className="text-[11px] text-zinc-500 truncate leading-snug">{member.user.email}</span>
+                </div>
+              </div>
+              <div className={`ml-3 shrink-0 text-[11px] font-medium capitalize px-2 py-0.5 border rounded-md ${
+                member.role === 'owner' 
+                  ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/50'
+                  : member.role === 'editor'
+                  ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/50'
+                  : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50'
+              }`}>
+                {member.role}
+              </div>
+            </div>
+          ))}
+          {pendingInvites.map((inv, idx) => (
+            <div key={inv.id || idx} className="flex items-center justify-between p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors">
+              <div className="flex items-center space-x-3 overflow-hidden">
+                <Avatar className="w-8 h-8 border border-zinc-200 dark:border-zinc-800 shrink-0">
+                  <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-[10px]">{getInitials(null, inv.email)}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col overflow-hidden">
+                  <span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate leading-snug">{inv.email}</span>
+                  <span className="text-[11px] text-zinc-500 truncate leading-snug">Pending Invite</span>
+                </div>
+              </div>
+              <div className="ml-3 shrink-0 text-[11px] text-zinc-500 font-medium px-2 py-0.5 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/50 dark:border-zinc-800/50 rounded-md border-dashed">
+                Invited
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-
       <Button
         type="submit"
         disabled={isSubmitDisabled}
@@ -164,6 +210,7 @@ export function SendEmailTab({
           </div>
         )}
       </Button>
-    </form>
+      </form>
+    </div>
   );
 }

@@ -44,7 +44,7 @@ export function Toolbar({ documentId }: { documentId: string }) {
 
   return (
     <TooltipProvider>
-      <div className="editor-toolbar-container flex items-center justify-start gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap">
+      <div className="editor-toolbar-container flex items-center justify-center gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap">
         <HistoryControls editor={editor} />
         
         <Separator

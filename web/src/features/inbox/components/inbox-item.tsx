@@ -104,28 +104,28 @@ export function InboxItem({ invite }: { invite: any }) {
 
   return (
     <div
-      className={`py-5 px-5 bg-gradient-to-b from-white/80 to-indigo-50/60 dark:from-zinc-950/80 dark:to-indigo-950/40 backdrop-blur-md border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl shadow-sm transition-all duration-300 group relative overflow-hidden ${isExpiredLocal && invite.status === "pending" ? "opacity-75 grayscale-[0.5]" : "hover:border-indigo-500/30 hover:shadow-md hover:-translate-y-0.5"}`}
+      className={`py-5 px-5 bg-gradient-to-b from-white/80 to-indigo-50/60   backdrop-blur-md border border-zinc-200/60  rounded-2xl shadow-sm transition-all duration-300 group relative overflow-hidden ${isExpiredLocal && invite.status === "pending" ? "opacity-75 grayscale-[0.5]" : "hover:border-indigo-500/30 hover:shadow-md hover:-translate-y-0.5"}`}
     >
-      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] pointer-events-none mix-blend-overlay"></div>
       <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-between">
         <div
           className={`flex gap-4 items-start sm:items-center flex-1 min-w-0 ${isExpiredLocal && invite.status === "pending" ? "opacity-50 grayscale-[0.3]" : ""}`}
         >
-          <Avatar className="w-10 h-10 shrink-0 border-2 border-white dark:border-zinc-800 shadow-sm mt-1 sm:mt-0">
+          <Avatar className="w-10 h-10 shrink-0 border-2 border-white shadow-sm mt-1 sm:mt-0">
             <AvatarImage src={inviterImage} alt={inviterName} />
-            <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium text-xs">
+            <AvatarFallback className="bg-zinc-100 text-zinc-600 font-medium text-xs">
               {getInitials(inviterName, inviterEmail)}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex flex-col flex-1 min-w-0">
           <div className="flex items-center gap-2.5 mb-1">
-            <span className="font-semibold text-[16px] text-zinc-900 dark:text-zinc-100 truncate">
+            <span className="font-semibold text-[16px] text-zinc-900 truncate">
               {inviterName}
             </span>
             {inviterEmail && (
               <>
-                <div className="h-[18px] w-[1px] bg-zinc-300 dark:bg-zinc-700 shrink-0" />
+                <div className="h-[18px] w-[1px] bg-zinc-300 shrink-0" />
                 <span className="text-[13px] text-zinc-500 truncate">
                   {inviterEmail}
                 </span>
@@ -134,24 +134,24 @@ export function InboxItem({ invite }: { invite: any }) {
           </div>
 
           {invite.status === "exited" ? (
-            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+            <span className="text-[14px] text-zinc-700 mb-1">
+              <span className="font-semibold text-zinc-900">
                 {invite.token}
               </span>{" "}
               has exited from{" "}
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+              <span className="font-semibold text-zinc-900">
                 '{documentTitle}'
               </span>
               .
             </span>
           ) : invite.status === "removed" ? (
-            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
+            <span className="text-[14px] text-zinc-700 mb-1">
               You have been removed from{" "}
               <span className="font-semibold">'{documentTitle}'</span> by{" "}
               <span className="font-semibold">{inviterName}</span>
             </span>
           ) : invite.status === "role_updated" ? (
-            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1 flex flex-col">
+            <span className="text-[14px] text-zinc-700 mb-1 flex flex-col">
               <span>
                 Your role for{" "}
                 <span className="font-semibold">'{documentTitle}'</span> has
@@ -161,7 +161,7 @@ export function InboxItem({ invite }: { invite: any }) {
               </span>
             </span>
           ) : (
-            <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
+            <span className="text-[14px] text-zinc-700 mb-1">
               Invitation to join{" "}
               <span className="font-semibold">'{documentTitle}'</span> with{" "}
               <span className="font-semibold capitalize">{invite.role}</span>{" "}
@@ -170,7 +170,7 @@ export function InboxItem({ invite }: { invite: any }) {
           )}
 
           {invite.status === "pending" && !isExpiredLocal && (
-            <span className="text-[12px]  text-red-500 dark:text-zinc-400">
+            <span className="text-[12px] text-red-500">
               This invitation will expire in 24 hours.
             </span>
           )}
@@ -183,48 +183,48 @@ export function InboxItem({ invite }: { invite: any }) {
               className={`flex items-center gap-3 ${isExpiredLocal && invite.status === "pending" ? "opacity-50 grayscale-[0.3]" : ""}`}
             >
           {invite.status === "accepted" && (
-            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-700">
               <CheckCircle2 className="w-3 h-3 mr-1" />
               Accepted
             </span>
           )}
           {invite.status === "rejected" && (
-            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400">
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700">
               <XCircle className="w-3 h-3 mr-1" />
               Rejected
             </span>
           )}
           {invite.status === "removed" && (
-            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400">
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700">
               <XCircle className="w-3 h-3 mr-1" />
               Access Revoked
             </span>
           )}
           {invite.status === "exited" && (
-            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800/10 dark:text-zinc-400">
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-700">
               <XCircle className="w-3 h-3 mr-1" />
               Member Left
             </span>
           )}
           {invite.status === "role_updated" && (
-            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700">
               <CheckCircle2 className="w-3 h-3 mr-1" />
               Role Updated
             </span>
           )}
           {isExpiredLocal && invite.status === "pending" && (
-            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800/10 dark:text-zinc-400">
+            <span className="flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-700">
               <XCircle className="w-3 h-3 mr-1" />
               Expired
             </span>
           )}
 
           <div className="flex items-center gap-2">
-            <span className="text-[13px] font-bold text-zinc-700 dark:text-zinc-300">
+            <span className="text-[13px] font-bold text-zinc-700">
               {timeStr}
             </span>
-            <div className="h-[16px] w-[1px] bg-zinc-300 dark:bg-zinc-700 shrink-0" />
-            <span className="text-[13px] font-bold text-zinc-700 dark:text-zinc-300">
+            <div className="h-[16px] w-[1px] bg-zinc-300 shrink-0" />
+            <span className="text-[13px] font-bold text-zinc-700">
               {dateStr}
             </span>
           </div>
@@ -234,7 +234,7 @@ export function InboxItem({ invite }: { invite: any }) {
           <Button
             size="sm"
             variant="ghost"
-            className="h-7 w-7 p-0 ml-1 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50"
+            className="h-7 w-7 p-0 ml-1 text-zinc-400 hover:text-red-500 hover:bg-red-50"
             onClick={() => setIsDeleteOpen(true)}
             disabled={isLoading}
           >
@@ -248,7 +248,7 @@ export function InboxItem({ invite }: { invite: any }) {
             <Button
               size="sm"
               variant="outline"
-              className="h-7 w-[84px] text-xs border-zinc-200 dark:border-zinc-700"
+              className="h-7 w-[84px] text-xs border-zinc-200"
               onClick={() => setIsRejectOpen(true)}
               disabled={isLoading}
             >
@@ -256,7 +256,7 @@ export function InboxItem({ invite }: { invite: any }) {
             </Button>
             <Button
               size="sm"
-              className="h-7 w-[84px] text-xs bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-sm"
+              className="h-7 w-[84px] text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
               onClick={() => setIsAcceptOpen(true)}
               disabled={isLoading}
             >
@@ -268,7 +268,7 @@ export function InboxItem({ invite }: { invite: any }) {
         {invite.status === "accepted" && (
           <Button
             size="sm"
-            className="h-7 px-4 text-xs bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-sm"
+            className="h-7 px-4 text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
             onClick={() => router.push(ROUTES.DOCUMENT(invite.document_id))}
           >
             Go to Document

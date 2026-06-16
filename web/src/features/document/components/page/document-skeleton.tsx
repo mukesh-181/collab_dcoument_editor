@@ -4,46 +4,46 @@ import { ArrowLeft } from "lucide-react";
 
 export function EditorSkeleton() {
   return (
-    <div className="flex flex-col w-full min-h-full">
-      {/* Toolbar Skeleton */}
-      <div className="sticky top-0 z-10 w-full bg-transparent border-b border-zinc-200/50 dark:border-zinc-800/50 p-2 flex justify-center shadow-sm">
-        <div className="w-full max-w-[794px]">
+    <div className="flex flex-col w-full min-h-full relative items-center pt-4 pb-32">
+      {/* Floating Toolbar Skeleton */}
+      <div className="sticky top-[4rem] z-40 w-full flex justify-center pointer-events-none">
+        <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl shadow-md px-1 py-0.5 flex items-center justify-center pointer-events-auto max-w-[95%] overflow-hidden">
           <div className="flex items-center justify-start sm:justify-center gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap scrollbar-hide">
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-8 w-[120px] rounded-md shrink-0" />
+            <Skeleton className="h-7 w-[120px] rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-8 w-16 rounded-md shrink-0" />
+            <Skeleton className="h-7 w-16 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
-            <Skeleton className="h-8 w-8 rounded-md shrink-0" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
           </div>
         </div>
       </div>
 
-      {/* Page Skeleton */}
-      <div className="max-w-[794px] w-full min-h-[1123px] mx-auto bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md px-16 py-20 my-8 rounded-sm">
+      {/* A4 Page Skeleton */}
+      <div className="max-w-[794px] w-full min-h-[1123px] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md px-16 py-20 mt-8 rounded-sm">
         <Skeleton className="h-10 w-[60%] mb-8" />
         <Skeleton className="h-4 w-full mb-4" />
         <Skeleton className="h-4 w-[95%] mb-4" />
@@ -62,46 +62,46 @@ export function EditorSkeleton() {
 
 export function DocumentSkeleton() {
   return (
-    <div className="flex flex-col flex-1 min-h-0 overflow-hidden bg-transparent w-full">
+    <div className="flex flex-col flex-1 bg-transparent w-full">
       {/* Header Skeleton */}
-      <div className="flex items-center justify-between h-14 pr-4 pl-2 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-transparent shrink-0">
-        <div className="flex items-center gap-2">
-          {/* Mobile Sidebar Trigger Skeleton */}
-          <Skeleton className="h-8 w-8 rounded-md lg:hidden" />
-          
-          {/* Back Button Skeleton */}
-          <div className="h-8 w-8 flex items-center justify-center rounded-md text-zinc-300 dark:text-zinc-700">
-            <ArrowLeft className="h-4 w-4" />
+      <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/70 backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/70 supports-[backdrop-filter]:bg-white/60 shrink-0">
+        <div className="flex h-14 items-center justify-between px-6 max-w-7xl mx-auto w-full">
+          <div className="flex items-center gap-2">
+            {/* Mobile Sidebar Trigger Skeleton */}
+            <Skeleton className="md:hidden shrink-0 h-8 w-8 mr-2 -ml-2 rounded-md" />
+            
+            {/* Back Button Skeleton */}
+            <div className="h-8 w-8 flex items-center justify-center rounded-md text-zinc-300 dark:text-zinc-700">
+              <ArrowLeft className="h-4 w-4" />
+            </div>
+
+            <Separator orientation="vertical" className="h-8 mx-1 hidden sm:block" />
+
+            {/* Title Skeleton */}
+            <div className="flex flex-col ml-1 justify-center">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-[20px] w-[150px] sm:w-[250px]" />
+              </div>
+              <Skeleton className="h-3 w-16 mt-1.5" />
+            </div>
           </div>
 
-          <Separator orientation="vertical" className="h-6 mx-1" />
-
-          {/* Title Skeleton */}
-          <div className="flex flex-col ml-1">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-[18px] w-[150px] sm:w-[250px]" />
+          <div className="flex items-center gap-4">
+            {/* Avatars Skeleton */}
+            <div className="flex items-center -space-x-2 mr-2">
+              <Skeleton className="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-950 relative z-30" />
+              <Skeleton className="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-950 relative z-20" />
+              <Skeleton className="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-950 relative z-10" />
             </div>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <Skeleton className="h-3 w-16" />
-            </div>
+            
+            {/* Share/Leave Button Skeleton */}
+            <Skeleton className="h-9 w-[72px] rounded-md" />
           </div>
         </div>
-
-        <div className="flex items-center gap-4">
-          {/* Avatars Skeleton */}
-          <div className="flex items-center -space-x-2 mr-2">
-            <Skeleton className="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-950" />
-            <Skeleton className="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-950" />
-            <Skeleton className="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-950" />
-          </div>
-          
-          {/* Share Button Skeleton */}
-          <Skeleton className="h-9 w-[72px] rounded-md" />
-        </div>
-      </div>
+      </header>
 
       {/* Editor Area Skeleton */}
-      <div className="flex-1 overflow-y-auto bg-transparent min-h-0 flex flex-col w-full">
+      <div className="flex-1 w-full pb-32 flex flex-col items-center bg-transparent relative z-0">
         <EditorSkeleton />
       </div>
     </div>

@@ -83,7 +83,11 @@ export function Editor({
       },
       onSynced: () => {
         setIsSynced(true);
-        setIsEditorReady(true);
+        // Add a slight delay to allow Tiptap and PaginationPlus to finish rendering
+        // their complex DOM layout before we remove the skeleton overlay.
+        setTimeout(() => {
+          setIsEditorReady(true);
+        }, 150);
       },
       onAwarenessUpdate: ({ states }) => {
         const users: any[] = [];
@@ -124,8 +128,8 @@ export function Editor({
       <EditorProvider
         editable={currentUserRole !== "viewer"}
         slotBefore={
-          <div className={`sticky top-0 z-10 w-full bg-white/80 dark:bg-zinc-950/70 backdrop-blur-xl border-b border-zinc-200/60 dark:border-zinc-800/60 p-2 flex justify-center shadow-sm ${currentUserRole === "viewer" ? "hidden" : ""}`}>
-            <div className="w-full max-w-full px-4">
+          <div className={`sticky top-[4rem] z-40 w-full flex justify-center mb-8 pointer-events-none ${currentUserRole === "viewer" ? "hidden" : ""}`}>
+            <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl shadow-md px-1 py-0.5 flex items-center justify-center pointer-events-auto max-w-[95%] overflow-hidden">
               <Toolbar documentId={documentId} />
             </div>
           </div>

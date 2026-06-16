@@ -24,7 +24,7 @@ export function DocumentPage({
       <DocumentClientLayout>
         <DocumentRealtimeListener documentId={document.id} />
         <DocumentHeader document={document} documents={documents} currentUserName={currentUserName} />
-        <div className="flex-1 overflow-y-auto relative min-h-0">
+        <div className="flex-1 w-full pb-32 flex flex-col items-center">
           <Editor
             documentId={document.id}
             documentTitle={document.title}

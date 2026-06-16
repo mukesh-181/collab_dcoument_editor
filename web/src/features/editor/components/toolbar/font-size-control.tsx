@@ -55,7 +55,6 @@ export function FontSizeControl({ editor }: { editor: Editor }) {
         <DropdownMenuContent 
           className="w-20 min-w-0 max-h-[300px] overflow-y-auto"
           onCloseAutoFocus={(e) => e.preventDefault()}
-          onOpenAutoFocus={(e) => e.preventDefault()}
         >
           {FONT_SIZES.map((size) => (
             <div 

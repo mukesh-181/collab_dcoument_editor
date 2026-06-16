@@ -10,7 +10,7 @@ import { updateMemberRoleAction } from "../../actions/update-member-role.action"
 import { toast } from "sonner";
 import { getInitials } from "@/utils/string-utils";
 import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
-
+import { RemoveMemberDialog } from "./remove-member-dialog";
 
 
 interface DocumentMembersPopoverProps {
@@ -33,6 +33,7 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
 
   const [pendingAction, setPendingAction] = useState<{ memberId: string, type: 'editor' | 'viewer' | 'remove' } | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [removeDialogData, setRemoveDialogData] = useState<{ isOpen: boolean, memberId: string, memberEmail: string, memberName: string } | null>(null);
 
   const handleRoleUpdate = (memberId: string, memberEmail: string, newRole: string) => {
     setPendingAction({ memberId, type: newRole as 'editor' | 'viewer' });
@@ -48,18 +49,15 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
     });
   };
 
-  const handleRemove = (memberId: string, memberEmail: string) => {
-    setPendingAction({ memberId, type: 'remove' });
-    startTransition(async () => {
-      const result = await removeMemberAction(documentId, memberId, memberEmail);
-      setPendingAction(null);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("Member removed successfully");
-        setOpenMenuId(null);
-      }
-    });
+  const handleRemove = async (memberId: string, memberEmail: string) => {
+    const result = await removeMemberAction(documentId, memberId, memberEmail);
+    if (result.error) {
+      toast.error(result.error);
+      throw new Error(result.error);
+    } else {
+      toast.success("Member removed successfully");
+      setOpenMenuId(null);
+    }
   };
   if (!members || members.length === 0) return null;
 
@@ -204,15 +202,16 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
                         disabled={isPending}
                         onSelect={(e) => {
                           e.preventDefault();
-                          if (!isPending) handleRemove(member.user.id, member.user.email);
+                          setRemoveDialogData({
+                            isOpen: true,
+                            memberId: member.user.id,
+                            memberEmail: member.user.email,
+                            memberName: getUserName(member.user.name, member.user.email)
+                          });
                         }}
                         className="text-red-600 dark:text-red-400 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
                       >
-                        {pendingAction?.memberId === member.user.id && pendingAction.type === 'remove' ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <UserMinus className="mr-2 h-4 w-4" />
-                        )}
+                        <UserMinus className="mr-2 h-4 w-4" />
                         <span>Remove Access</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -223,6 +222,14 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
           ))}
         </div>
       </PopoverContent>
+      {removeDialogData && (
+        <RemoveMemberDialog
+          isOpen={removeDialogData.isOpen}
+          setIsOpen={(isOpen) => setRemoveDialogData(prev => prev ? { ...prev, isOpen } : null)}
+          memberName={removeDialogData.memberName}
+          onConfirm={() => handleRemove(removeDialogData.memberId, removeDialogData.memberEmail)}
+        />
+      )}
     </Popover>
   );
 }

@@ -106,7 +106,6 @@ export function LinkBubbleMenu() {
             side="top" 
             align="center"
             onCloseAutoFocus={(e) => e.preventDefault()}
-            onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <form onSubmit={handleSaveEdit} className="flex flex-col gap-3">
               <h4 className="font-medium leading-none text-sm">Edit Link</h4>

@@ -11,7 +11,7 @@ export async function acceptInvite(token: string) {
   // Find the pending invite
   const { data: invite, error: inviteError } = await supabase
     .from('invites')
-    .select('id, document_id, role, status, expires_at')
+    .select('id, document_id, role, status, expires_at, email')
     .eq('token', token)
     .single()
 

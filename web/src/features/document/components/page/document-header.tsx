@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { DocumentRenameDialog } from "./document-rename-dialog";
 import { DocumentSyncStatus } from "./document-sync-status";
 import { DocumentMembersPopover } from "./document-members-popover";
+import { LeaveDocumentDialog } from "./leave-document-dialog";
 import { useDocumentSync } from "./document-context";
 import { ROUTES } from "@/constants/routes";
 import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
@@ -35,6 +36,7 @@ interface DocumentHeaderProps {
         email: string;
       };
     }[];
+    invites?: any[];
   };
   documents?: any[];
   currentUserName?: string;
@@ -47,63 +49,63 @@ export function DocumentHeader({
 }: DocumentHeaderProps) {
   const { currentUserRole } = useDocumentSync();
   const [title, setTitle] = useState(document.title);
-  const [isLeaving, startLeaving] = useTransition();
+  const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const router = useRouter();
 
-  const handleLeave = () => {
-    startLeaving(async () => {
-      const ownerMember = document.all_members?.find((m) => m.role === "owner");
-      if (!ownerMember) {
-        toast.error("Could not find document owner");
-        return;
-      }
-      
-      const result = await leaveDocumentAction(document.id, ownerMember.user.email, currentUserName);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("You have left the document");
-        router.push(ROUTES.DASHBOARD);
-      }
-    });
+  const handleLeave = async () => {
+    const ownerMember = document.all_members?.find((m) => m.role === "owner");
+    if (!ownerMember) {
+      toast.error("Could not find document owner");
+      return;
+    }
+    
+    const result = await leaveDocumentAction(document.id, ownerMember.user.email, currentUserName);
+    if (result.error) {
+      toast.error(result.error);
+      throw new Error(result.error); // to keep button loading state if we want, or just let it close
+    } else {
+      toast.success("You have left the document");
+      router.push(ROUTES.DASHBOARD);
+    }
   };
 
   return (
-    <div className="flex items-center justify-between h-14 pr-4 pl-2 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-transparent shrink-0">
-      <div className="flex items-center gap-2">
-        <MobileSidebar documents={documents} />
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-          className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          <Link href={ROUTES.DASHBOARD}>
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back to Dashboard</span>
-          </Link>
-        </Button>
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/70 backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/70 supports-[backdrop-filter]:bg-white/60 shrink-0">
+      <div className="flex h-14 items-center justify-between px-6 max-w-7xl mx-auto w-full">
+        <div className="flex items-center gap-2">
+          <MobileSidebar documents={documents} />
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+            className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            <Link href={ROUTES.DASHBOARD}>
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back to Dashboard</span>
+            </Link>
+          </Button>
 
-        <Separator orientation="vertical" className="h-8 mx-1" />
+          <Separator orientation="vertical" className="h-8 mx-1 hidden sm:block" />
 
-        <div className="flex flex-col ml-1 justify-center">
-          <div className="flex items-center gap-2 group">
-            <h1 className="text-[18px] font-semibold text-zinc-900 dark:text-zinc-50 truncate max-w-[200px] sm:max-w-[400px]">
-              {title}
-            </h1>
+          <div className="flex flex-col ml-1 justify-center">
+            <div className="flex items-center gap-2 group">
+              <h1 className="text-[18px] font-semibold text-zinc-900 dark:text-zinc-50 truncate max-w-[200px] sm:max-w-[400px]">
+                {title}
+              </h1>
 
-            {currentUserRole !== "viewer" && (
-              <DocumentRenameDialog
-                documentId={document.id}
-                initialTitle={title}
-                onTitleUpdate={setTitle}
-              />
-            )}
+              {currentUserRole !== "viewer" && (
+                <DocumentRenameDialog
+                  documentId={document.id}
+                  initialTitle={title}
+                  onTitleUpdate={setTitle}
+                />
+              )}
+            </div>
+
+            <DocumentSyncStatus />
           </div>
-
-          <DocumentSyncStatus />
         </div>
-      </div>
 
       <div className="flex items-center gap-4">
         {/* View Only Badge */}
@@ -130,18 +132,26 @@ export function DocumentHeader({
 
         {/* Leave Document Button */}
         {currentUserRole !== "owner" && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLeave}
-            disabled={isLeaving}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 px-2"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            <span className="text-[13px]">Leave</span>
-          </Button>
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsLeaveDialogOpen(true)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 px-2"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              <span className="text-[13px]">Leave</span>
+            </Button>
+            <LeaveDocumentDialog 
+              isOpen={isLeaveDialogOpen}
+              setIsOpen={setIsLeaveDialogOpen}
+              documentTitle={document.title}
+              onConfirm={handleLeave}
+            />
+          </>
         )}
       </div>
-    </div>
+      </div>
+    </header>
   );
 }

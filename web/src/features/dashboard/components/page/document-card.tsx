@@ -1,24 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DocumentActionMenu } from "../document-action-menu";
 import { useDocumentPreview } from "../../hooks/use-document-preview";
 import { ROUTES } from "@/constants/routes";
 import { getInitials } from "@/utils/string-utils";
 
-// Sub-component to safely and efficiently render the rich text preview
+// Sub-component for rendering the scaled-down rich text preview
 function DocumentPreview({ json }: { json: any }) {
   const html = useDocumentPreview(json);
 
-  if (!html) return <div className="w-full h-full" />;
+  if (!html) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <FileText className="w-10 h-10 text-zinc-200 dark:text-zinc-800" strokeWidth={1} />
+      </div>
+    );
+  }
 
   return (
-    <div className="absolute inset-0 p-4 pt-5 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 p-4 overflow-hidden pointer-events-none ">
       <div
-        className="prose prose-zinc prose-sm dark:prose-invert max-w-none origin-top-left scale-[0.5] sm:scale-[0.55]"
-        style={{ width: "200%", height: "200%" }}
+        className="prose prose-zinc prose-sm dark:prose-invert max-w-none origin-top-left scale-[0.45]"
+        style={{ width: "220%", height: "220%" }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>
@@ -30,73 +36,98 @@ interface DocumentCardProps {
   role: string;
 }
 
+function getRoleBadge(role: string) {
+  const styles: Record<string, string> = {
+    owner: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
+    editor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+    viewer: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
+  };
+  return styles[role] || styles.viewer;
+}
+
 export function DocumentCard({ document, role }: DocumentCardProps) {
+  const memberCount = document.all_members?.length || 0;
+
   return (
-    <div className="group relative flex flex-col h-[240px] bg-gradient-to-b from-white/80 to-indigo-50/60 dark:from-zinc-950/80 dark:to-indigo-950/40 backdrop-blur-md border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl hover:border-indigo-500/30 transition-all duration-300 ease-out shadow-sm hover:shadow-xl hover:-translate-y-1 overflow-hidden">
-      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] dark:opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
-      {/* Thumbnail Preview */}
-      <Link
-        href={ROUTES.DOCUMENT(document.id)}
-        className="flex-1 block rounded-t-2xl outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 relative overflow-hidden bg-gradient-to-br from-indigo-50/40 to-purple-50/30 dark:from-indigo-900/10 dark:to-purple-900/10"
-      >
-        <DocumentPreview json={document.previewJson} />
+    <Link
+      href={ROUTES.DOCUMENT(document.id)}
+      className="group block outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-2xl"
+    >
+      <div className="relative flex flex-col h-[280px] bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 hover:shadow-lg overflow-hidden">
 
-        {/* Subtle gradient to fade out text at the bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-white to-transparent dark:from-zinc-950 pointer-events-none" />
-      </Link>
-
-      {/* Card Footer */}
-      <div className="shrink-0 h-[84px] px-3 py-2.5 flex flex-col justify-between border-t border-zinc-200/60 dark:border-zinc-800/60 bg-transparent rounded-b-2xl">
-        <div>
-          <Link
-            href={ROUTES.DOCUMENT(document.id)}
-            className="truncate text-[14px] font-medium text-zinc-800 dark:text-zinc-200 hover:text-indigo-600 dark:hover:text-indigo-400 block outline-none leading-tight"
+        {/* Preview Area — top portion */}
+        <div className="relative flex-1 bg-zinc-50 dark:bg-zinc-950/50 overflow-hidden ">
+          <DocumentPreview json={document.previewJson} />
+          {/* Fade-out gradient at the bottom of the preview */}
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-zinc-900/80 to-transparent pointer-events-none" />
+          {/* Action menu overlaid on the preview */}
+          <div
+            className="absolute top-2 right-2 z-10"
+            onClick={(e) => e.preventDefault()}
           >
-            {document.title}
-          </Link>
-          <span className="truncate text-[11px] text-zinc-500 block mt-0.5">
-            Edited {new Date(document.updated_at).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </span>
+            <DocumentActionMenu
+              documentId={document.id}
+              documentTitle={document.title}
+              role={role}
+            />
+          </div>
         </div>
-        <div className="flex items-center justify-between mt-1.5">
-          <div className="flex items-center gap-1.5 overflow-hidden">
-            <FileText className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" />
-            <span className="shrink-0 px-1.5 py-0.5 rounded-[4px] bg-indigo-50 dark:bg-indigo-500/10 text-[9px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider">
-              {role}
+
+        {/* Card Footer */}
+        <div className="shrink-0 px-5 py-4 space-y-3 bg-white dark:bg-zinc-900/80">
+          {/* Title + Edited */}
+          <div>
+            <h3 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-tight">
+              {document.title}
+            </h3>
+            <span className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5 block">
+              Edited{" "}
+              {new Date(document.updated_at).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {document.all_members && document.all_members.length > 0 && (
-              <div className="hidden sm:flex items-center -space-x-1.5 z-10">
-                {document.all_members.slice(0, 3).map((member: any, i: number) => (
-                  <Avatar
-                    key={member.user.id}
-                    className="w-5 h-5 border-2 border-white dark:border-zinc-900 relative shadow-md"
-                    style={{ zIndex: 10 - i }}
-                  >
-                    <AvatarImage src={member.user.image || undefined} />
-                    <AvatarFallback className="text-[8px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium">
-                      {getInitials(member.user.name, member.user.email)}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-              </div>
-            )}
-            <div className="flex-shrink-0 -mr-2">
-              <DocumentActionMenu
-                documentId={document.id}
-                documentTitle={document.title}
-                role={role}
-              />
+          {/* Bottom row: Avatars + member count + action menu */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {document.all_members && memberCount > 0 && (
+                <div className="flex items-center -space-x-1.5">
+                  {document.all_members
+                    .slice(0, 3)
+                    .map((member: any, i: number) => (
+                      <Avatar
+                        key={member.user.id}
+                        className="w-7 h-7 border-2 border-white dark:border-zinc-900 relative shadow-sm"
+                        style={{ zIndex: 10 - i }}
+                      >
+                        <AvatarImage src={member.user.image || undefined} />
+                        <AvatarFallback className="text-[10px] bg-gradient-to-br from-indigo-400 to-purple-500 text-white font-semibold">
+                          {getInitials(member.user.name, member.user.email)}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                </div>
+              )}
+              {memberCount > 0 && (
+                <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400">
+                  <Users className="w-3.5 h-3.5" />
+                  <span className="text-[12px] font-medium">{memberCount}</span>
+                </div>
+              )}
             </div>
+
+            {/* Role badge */}
+            <span
+              className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${getRoleBadge(role)}`}
+            >
+              {role}
+            </span>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
