@@ -128,10 +128,10 @@ export function DashboardHeader({ user }: { user: User | null }) {
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 mt-2 rounded-xl p-1">
+            <DropdownMenuContent align="end" className="w-64 mt-2 rounded-xl p-1">
               <div className="flex flex-col space-y-1 p-2">
                 <p className="text-sm font-medium leading-none text-zinc-900 dark:text-zinc-100">{fullName}</p>
-                <p className="text-xs leading-none text-zinc-500 dark:text-zinc-400 mt-1 truncate">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 break-all">
                   {user?.email}
                 </p>
               </div>

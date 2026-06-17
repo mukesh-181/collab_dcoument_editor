@@ -41,11 +41,19 @@ export function DocumentList({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
+  const urlFilter = searchParams.get("filter") || "all";
+  const [localFilter, setLocalFilter] = useState(urlFilter);
+
   const initialSearch = searchParams.get("search") || "";
   const [localSearch, setLocalSearch] = useState(initialSearch);
   const [debouncedSearch] = useDebounce(localSearch, 900);
 
-  const isLoading = isPending || localSearch !== initialSearch;
+  // Sync local filter when URL changes from outside (e.g. back/forward navigation)
+  useEffect(() => {
+    setLocalFilter(urlFilter);
+  }, [urlFilter]);
+
+  const isLoading = isPending || localSearch !== initialSearch || localFilter !== urlFilter;
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -111,11 +119,12 @@ export function DocumentList({
                 { id: 'editor', label: 'Editor' },
                 { id: 'viewer', label: 'Viewer' },
               ].map(f => {
-                const isActive = (searchParams.get("filter") || "all") === f.id;
+                const isActive = localFilter === f.id;
                 return (
                   <button
                     key={f.id}
                     onClick={() => {
+                      setLocalFilter(f.id);
                       startTransition(() => {
                         router.push(`${pathname}?${createQueryString("filter", f.id)}`, { scroll: false });
                       });
@@ -154,16 +163,32 @@ export function DocumentList({
           </div>
         </div>
 
-        {/* Document Grid or Loading State */}
-        <div className="flex-1 relative">
-          <div
-            className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 content-start transition-opacity duration-200 ${isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
-          >
-            {documents.map((doc: any) => {
-              const role = doc.document_members?.[0]?.role || "viewer";
-              return <DocumentCard key={doc.id} document={doc} role={role} />;
-            })}
-          </div>
+        {/* Document Grid, Empty State or Loading State */}
+        <div className="flex-1 relative flex flex-col">
+          {!isLoading && documents.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center py-10 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                <FileText className="w-7 h-7 text-zinc-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                No documents found
+              </h3>
+              <p className="text-[14px] text-zinc-500 mt-1">
+                {localSearch
+                  ? "Try a different search term"
+                  : "Create your first document to get started"}
+              </p>
+            </div>
+          ) : (
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 content-start transition-opacity duration-200 ${isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
+            >
+              {documents.map((doc: any) => {
+                const role = doc.document_members?.[0]?.role || "viewer";
+                return <DocumentCard key={doc.id} document={doc} role={role} currentUser={user} />;
+              })}
+            </div>
+          )}
 
           {isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
@@ -173,7 +198,7 @@ export function DocumentList({
         </div>
 
         {/* Pagination Controls */}
-        {!isLoading && totalPages > 1 && (
+        {!isLoading && totalPages > 1 && documents.length > 0 && (
           <div className="flex items-center justify-between pt-6 border-t border-zinc-200 dark:border-zinc-800 mt-8 shrink-0">
             <Button
               variant="outline"
@@ -200,23 +225,6 @@ export function DocumentList({
               Next
               <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!isLoading && documents.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
-              <FileText className="w-7 h-7 text-zinc-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              No documents found
-            </h3>
-            <p className="text-[14px] text-zinc-500 mt-1">
-              {localSearch
-                ? "Try a different search term"
-                : "Create your first document to get started"}
-            </p>
           </div>
         )}
       </div>

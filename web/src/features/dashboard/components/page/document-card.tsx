@@ -37,6 +37,7 @@ function DocumentPreview({ json }: { json: any }) {
 interface DocumentCardProps {
   document: any;
   role: string;
+  currentUser?: any;
 }
 
 function getRoleBadge(role: string) {
@@ -48,8 +49,11 @@ function getRoleBadge(role: string) {
   return styles[role] || styles.viewer;
 }
 
-export function DocumentCard({ document, role }: DocumentCardProps) {
+export function DocumentCard({ document, role, currentUser }: DocumentCardProps) {
   const memberCount = document.all_members?.length || 0;
+  const ownerMember = document.all_members?.find((m: any) => m.role === "owner");
+  const ownerEmail = ownerMember?.user?.email || "";
+  const currentUserName = currentUser?.user_metadata?.full_name || currentUser?.email || "Unknown User";
 
   return (
     <Link
@@ -72,6 +76,8 @@ export function DocumentCard({ document, role }: DocumentCardProps) {
               documentId={document.id}
               documentTitle={document.title}
               role={role}
+              ownerEmail={ownerEmail}
+              currentUserName={currentUserName}
             />
           </div>
         </div>

@@ -24,8 +24,8 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
 
-  const fetchFiltered = useCallback(async () => {
-    setIsFilterLoading(true);
+  const fetchFiltered = useCallback(async (silent = false) => {
+    if (!silent) setIsFilterLoading(true);
     try {
       const { data, count } = await getInbox(0, 15, filter);
       setInvites(data);
@@ -33,7 +33,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
       setPage(0);
       setHasMore(data.length === 15);
     } finally {
-      setIsFilterLoading(false);
+      if (!silent) setIsFilterLoading(false);
     }
   }, [filter]);
 
@@ -108,7 +108,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-500 bg-clip-text text-transparent dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-500">
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
               Inbox
             </h1>
             <div className="h-6 w-[1.5px] rounded-full bg-zinc-300 dark:bg-zinc-700 hidden sm:block" />

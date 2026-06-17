@@ -12,6 +12,13 @@ export function AlignmentControls({ editor }: { editor: Editor }) {
   const toggleClass =
     "data-[state=on]:bg-blue-100 data-[state=on]:text-blue-900 dark:data-[state=on]:bg-blue-900/50 dark:data-[state=on]:text-blue-200 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800";
 
+  const isCenter = editor.isActive({ textAlign: "center" });
+  const isRight = editor.isActive({ textAlign: "right" });
+  const isJustify = editor.isActive({ textAlign: "justify" });
+  
+  // Left is the default alignment in Tiptap if no other alignment is explicitly set
+  const isLeft = editor.isActive({ textAlign: "left" }) || (!isCenter && !isRight && !isJustify);
+
   return (
     <>
       <TooltipWrapper
@@ -20,7 +27,7 @@ export function AlignmentControls({ editor }: { editor: Editor }) {
       >
         <Toggle
           size="sm"
-          pressed={editor.isActive({ textAlign: "left" })}
+          pressed={isLeft}
           onPressedChange={() =>
             editor.chain().focus().setTextAlign("left").run()
           }

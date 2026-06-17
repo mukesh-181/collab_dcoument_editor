@@ -28,6 +28,22 @@ function EditorFocusListener() {
       editor?.commands.focus();
     };
     window.addEventListener("focus-editor", handleFocus);
+    
+    // Force pagination recalculation after web fonts have fully loaded
+    if (editor && typeof window !== "undefined" && document.fonts) {
+      document.fonts.ready.then(() => {
+        setTimeout(() => {
+          if (!editor.isDestroyed) {
+            // Firing a resize event forces most DOM-measuring plugins (like pagination) to recalculate
+            window.dispatchEvent(new Event("resize"));
+            
+            // Also force a proseMirror view update just in case
+            editor.view.dispatch(editor.state.tr.setMeta("forceUpdate", true));
+          }
+        }, 200);
+      });
+    }
+    
     return () => window.removeEventListener("focus-editor", handleFocus);
   }, [editor]);
   return null;
@@ -143,7 +159,7 @@ export function Editor({
       <EditorProvider
         editable={currentUserRole !== "viewer"}
         slotBefore={
-          <div className={`sticky top-[4rem] z-40 w-full flex justify-center mb-8 pointer-events-none ${currentUserRole === "viewer" ? "hidden" : ""}`}>
+          <div className={`sticky top-14 z-40 w-full flex justify-center pt-4 pb-4 mb-4 bg-zinc-50 dark:bg-zinc-900 pointer-events-none ${currentUserRole === "viewer" ? "hidden" : ""}`}>
             <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl shadow-md px-1 py-0.5 flex items-center justify-center pointer-events-auto max-w-[95%] overflow-hidden">
               <Toolbar documentId={documentId} />
             </div>
