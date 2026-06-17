@@ -19,7 +19,8 @@ export async function Navbar() {
               width={180} 
               height={50} 
               className="object-contain" 
-             priority 
+              style={{ width: 'auto', height: 'auto' }}
+              priority 
             />
           </Link>
         </div>

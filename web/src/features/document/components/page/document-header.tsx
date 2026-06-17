@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ShareDialog } from "@/features/invites/components/share-dialog";
@@ -14,7 +13,7 @@ import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { DocumentRenameDialog } from "./document-rename-dialog";
+import { DocumentRenameDialog } from "@/features/dashboard/components/dialogs/document-rename-dialog";
 import { DocumentSyncStatus } from "./document-sync-status";
 import { DocumentMembersPopover } from "./document-members-popover";
 import { LeaveDocumentDialog } from "./leave-document-dialog";
@@ -50,6 +49,7 @@ export function DocumentHeader({
 }: DocumentHeaderProps) {
   const { currentUserRole } = useDocumentSync();
   const [title, setTitle] = useState(document.title);
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const router = useRouter();
 
@@ -96,11 +96,23 @@ export function DocumentHeader({
               </h1>
 
               {currentUserRole !== "viewer" && (
-                <DocumentRenameDialog
-                  documentId={document.id}
-                  initialTitle={title}
-                  onTitleUpdate={setTitle}
-                />
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsRenameDialogOpen(true)}
+                    className="h-5 w-5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center -ml-1"
+                  >
+                    <Pencil className="h-3 w-3" />
+                    <span className="sr-only">Rename document</span>
+                  </Button>
+                  <DocumentRenameDialog
+                    documentId={document.id}
+                    documentTitle={title}
+                    isOpen={isRenameDialogOpen}
+                    setIsOpen={setIsRenameDialogOpen}
+                  />
+                </>
               )}
             </div>
 

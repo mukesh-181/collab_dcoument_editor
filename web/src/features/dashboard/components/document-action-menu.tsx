@@ -10,8 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { DocumentRenameDialog } from "./document-rename-dialog";
-import { DocumentDeleteDialog } from "./document-delete-dialog";
+import { DocumentRenameDialog } from "./dialogs/document-rename-dialog";
+import { DocumentDeleteDialog } from "./dialogs/document-delete-dialog";
 import { LeaveDocumentDialog } from "@/features/document/components/page/leave-document-dialog";
 import { leaveDocumentAction } from "@/features/document/actions/leave-document.action";
 import { toast } from "sonner";

@@ -1,5 +1,5 @@
 "use client";
-import { getEditorExtensions, editorPropsConfig } from "@/utils/editor-config";
+import { getEditorExtensions, editorPropsConfig } from "../config/editor-extensions";
 
 import { ENV } from "@/constants/env";
 import { EditorProvider, useCurrentEditor } from "@tiptap/react";
