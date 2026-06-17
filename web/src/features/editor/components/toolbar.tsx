@@ -71,12 +71,11 @@ export function Toolbar({ documentId }: { documentId: string }) {
           className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700"
         />
 
+        <FontFamilyControl editor={editor} />
         <Separator
           orientation="vertical"
           className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700"
         />
-
-        <FontFamilyControl editor={editor} />
         <FontSizeControl editor={editor} />
 
         <Separator

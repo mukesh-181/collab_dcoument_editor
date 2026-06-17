@@ -1,5 +1,5 @@
 # CollabDoc — Folder Structure
-*(Last Updated: 2026-06-15)*
+*(Last Updated: 2026-06-16)*
 
 Complete project structure of the `web/` directory with one-liner descriptions, incorporating recent modularization and feature enhancements.
 
@@ -180,6 +180,7 @@ collab_docx/
 │       │   │   │       ├── document-context.tsx       # Context Provider — manages sync state
 │       │   │   │       ├── document-header.tsx        # Client component — top navigation bar
 │       │   │   │       ├── document-members-popover.tsx # Popover displaying full member list
+│       │   │   │       ├── document-realtime-listener.tsx # Handles UI updates for role changes and access revocation
 │       │   │   │       ├── document-rename-dialog.tsx # Dialog for renaming document titles
 │       │   │   │       ├── document-skeleton.tsx      # Skeleton loader for documents
 │       │   │   │       └── document-sync-status.tsx   # UI indicator for save/offline states

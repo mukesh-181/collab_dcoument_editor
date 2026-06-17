@@ -6,7 +6,7 @@ export function EditorSkeleton() {
   return (
     <div className="flex flex-col w-full min-h-full relative items-center pt-4 pb-32">
       {/* Floating Toolbar Skeleton */}
-      <div className="sticky top-[4rem] z-40 w-full flex justify-center pointer-events-none">
+      <div className="sticky top-14 z-40 w-full flex justify-center pt-4 pb-4 mb-4 bg-zinc-50 dark:bg-zinc-900 pointer-events-none">
         <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl shadow-md px-1 py-0.5 flex items-center justify-center pointer-events-auto max-w-[95%] overflow-hidden">
           <div className="flex items-center justify-start sm:justify-center gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap scrollbar-hide">
             <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
