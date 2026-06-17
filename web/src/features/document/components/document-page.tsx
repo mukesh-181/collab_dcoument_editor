@@ -2,7 +2,7 @@ import { DocumentHeader } from "@/features/document/components/page/document-hea
 import { DocumentProvider } from "@/features/document/components/page/document-context";
 import { DocumentClientLayout } from "@/features/document/components/page/document-client-layout";
 import { DocumentRealtimeListener } from "@/features/document/components/page/document-realtime-listener";
-import { Editor } from "@/features/editor/components/editor";
+import { LazyEditor } from "@/features/editor/components/lazy-editor";
 
 interface DocumentPageProps {
   document: any;
@@ -21,11 +21,11 @@ export function DocumentPage({
 }: DocumentPageProps) {
   return (
     <DocumentProvider initialRole={currentUserRole}>
+      <DocumentRealtimeListener documentId={document.id} />
+      <DocumentHeader document={document} documents={documents} currentUserName={currentUserName} />
       <DocumentClientLayout>
-        <DocumentRealtimeListener documentId={document.id} />
-        <DocumentHeader document={document} documents={documents} currentUserName={currentUserName} />
         <div className="flex-1 w-full pb-32 flex flex-col items-center">
-          <Editor
+          <LazyEditor
             documentId={document.id}
             documentTitle={document.title}
             currentUserName={currentUserName}

@@ -599,3 +599,46 @@ pre code {
 .editor-toolbar-container > * {
   flex-shrink: 0 !important;
 }
+
+/* Tiptap Table Base Styles (Strict Zero-Config Reset) */
+.prose .tableWrapper {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.prose table {
+  border-collapse: collapse !important;
+  table-layout: fixed !important;
+  width: 100% !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+.prose table td,
+.prose table th {
+  min-width: 1em !important;
+  border: 1px solid #e4e4e7 !important; /* zinc-200 */
+  padding: 8px !important;
+  vertical-align: top !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+.dark .prose table td,
+.dark .prose table th {
+  border-color: #27272a !important; /* zinc-800 */
+}
+
+.prose table th {
+  font-weight: 600 !important;
+  text-align: left !important;
+  background-color: #f4f4f5 !important; /* zinc-100 */
+}
+
+.dark .prose table th {
+  background-color: #18181b !important; /* zinc-900 */
+}
+
+.prose table p {
+  margin: 0 !important;
+}

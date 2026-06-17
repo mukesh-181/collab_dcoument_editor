@@ -7,6 +7,7 @@ import { DocumentActionMenu } from "../document-action-menu";
 import { useDocumentPreview } from "../../hooks/use-document-preview";
 import { ROUTES } from "@/constants/routes";
 import { getInitials } from "@/utils/string-utils";
+import { preloadEditor } from "@/features/editor/components/lazy-editor";
 
 // Sub-component for rendering the scaled-down rich text preview
 function DocumentPreview({ json }: { json: any }) {
@@ -58,6 +59,7 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
   return (
     <Link
       href={ROUTES.DOCUMENT(document.id)}
+      onMouseEnter={preloadEditor}
       className="group block outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-2xl"
     >
       <div className="relative flex flex-col h-[280px] bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 hover:shadow-lg overflow-hidden">

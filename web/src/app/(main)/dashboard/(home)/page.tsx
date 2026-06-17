@@ -1,6 +1,6 @@
 import { getUserDocuments } from "@/features/dashboard/actions/get-user-documents.action";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardPage } from "@/features/dashboard/components/dashboard-page";
+import { DocumentList } from "@/features/dashboard/components/page/document-list";
 
 export default async function DashboardHome({
   searchParams,
@@ -18,5 +18,11 @@ export default async function DashboardHome({
     data: { user },
   } = await supabase.auth.getUser();
 
-  return <DashboardPage user={user} documents={documents} totalPages={totalPages} currentPage={page} totalCount={totalCount} />;
+  return (
+    <div className="flex flex-col flex-1 w-full min-h-0 overflow-hidden">
+      <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+        <DocumentList documents={documents} user={user} totalPages={totalPages} currentPage={page} totalCount={totalCount} />
+      </div>
+    </div>
+  );
 }

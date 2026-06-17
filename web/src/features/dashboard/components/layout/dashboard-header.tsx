@@ -102,6 +102,7 @@ export function DashboardHeader({ user }: { user: User | null }) {
             width={150} 
             height={32} 
             className="object-contain" 
+            style={{ width: 'auto', height: 'auto' }}
             priority 
           />
         </Link>
