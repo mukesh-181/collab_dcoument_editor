@@ -19,8 +19,7 @@ import { DocumentMembersPopover } from "./document-members-popover";
 import { LeaveDocumentDialog } from "./leave-document-dialog";
 import { useDocumentSync } from "./document-context";
 import { ROUTES } from "@/constants/routes";
-import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
-
+import { USER_FALLBACKS } from "@/utils/user-utils";
 
 interface DocumentHeaderProps {
   document: {

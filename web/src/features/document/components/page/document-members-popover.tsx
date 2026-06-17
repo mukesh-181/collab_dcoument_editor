@@ -9,7 +9,7 @@ import { removeMemberAction } from "../../actions/remove-member.action";
 import { updateMemberRoleAction } from "../../actions/update-member-role.action";
 import { toast } from "sonner";
 import { getInitials } from "@/utils/string-utils";
-import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
+import { extractUserInfo } from "@/utils/user-utils";
 import { RemoveMemberDialog } from "./remove-member-dialog";
 
 
@@ -79,20 +79,23 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
     >
       <PopoverTrigger asChild>
         <button className="flex items-center -space-x-2 mr-2 focus:outline-none cursor-pointer group">
-          {sortedMembers.map((member) => (
-            <Avatar
-              key={member.user.id}
-              className="w-8 h-8 border-2 border-white dark:border-zinc-950 transition-transform group-hover:scale-105"
-            >
-              <AvatarImage
-                src={getUserImage(member.user.image)}
-                alt={member.user.name || "User"}
-              />
-              <AvatarFallback className="text-[10px]">
-                {getInitials(member.user.name, member.user.email)}
-              </AvatarFallback>
-            </Avatar>
-          ))}
+          {sortedMembers.map((member) => {
+            const { name, image, email } = extractUserInfo(member.user);
+            return (
+              <Avatar
+                key={member.user.id}
+                className="w-8 h-8 border-2 border-white dark:border-zinc-950 transition-transform group-hover:scale-105"
+              >
+                <AvatarImage
+                  src={image}
+                  alt={name}
+                />
+                <AvatarFallback className="text-[10px]">
+                  {getInitials(name, email)}
+                </AvatarFallback>
+              </Avatar>
+            );
+          })}
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -114,7 +117,9 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
           </div>
         </div>
         <div className="max-h-[300px] overflow-y-auto p-2 scrollbar-thin">
-          {sortedMembers.map((member) => (
+          {sortedMembers.map((member) => {
+            const { name, image, email } = extractUserInfo(member.user);
+            return (
             <div
               key={member.user.id}
               className="flex items-center justify-between p-2.5 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors"
@@ -122,19 +127,19 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
               <div className="flex items-center space-x-3 overflow-hidden">
                 <Avatar className="w-9 h-9 border border-zinc-200 dark:border-zinc-800 shrink-0 shadow-sm">
                   <AvatarImage
-                    src={getUserImage(member.user.image)}
-                    alt={member.user.name || "User"}
+                    src={image}
+                    alt={name}
                   />
                   <AvatarFallback>
-                    {getInitials(member.user.name, member.user.email)}
+                    {getInitials(name, email)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
                   <span className="text-[14px] font-medium text-zinc-900 dark:text-zinc-50 truncate leading-snug">
-                    {getUserName(member.user.name, member.user.email)}
+                    {name}
                   </span>
                   <span className="text-[12px] text-zinc-500 dark:text-zinc-400 truncate leading-snug">
-                    {member.user.email}
+                    {email}
                   </span>
                 </div>
               </div>
@@ -213,8 +218,8 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
                           setRemoveDialogData({
                             isOpen: true,
                             memberId: member.user.id,
-                            memberEmail: member.user.email,
-                            memberName: getUserName(member.user.name, member.user.email)
+                            memberEmail: email,
+                            memberName: name
                           });
                         }}
                         className="text-red-600 dark:text-red-400 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
@@ -227,7 +232,7 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
                 </div>
               )}
             </div>
-          ))}
+          )})}
         </div>
       </PopoverContent>
       {removeDialogData && (

@@ -14,13 +14,7 @@ import { rejectInvite } from "@/features/invites/actions/reject-invite.action";
 import { deleteInvite } from "@/features/invites/actions/delete-invite.action";
 import { ROUTES } from "@/constants/routes";
 import { getInitials } from "@/utils/string-utils";
-import {
-  getUserName,
-  getUserImage,
-  getUserEmail,
-  getUserRole,
-  USER_FALLBACKS,
-} from "@/utils/user-utils";
+import { extractUserInfo, USER_FALLBACKS } from "@/utils/user-utils";
 
 export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?: (updates: any) => void }) {
   const router = useRouter();
@@ -55,9 +49,7 @@ export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?
   const timeStr = format(new Date(invite.created_at), "hh:mm a");
   const dateStr = format(new Date(invite.created_at), "dd/MM/yyyy");
 
-  const inviterEmail = getUserEmail(invite.documents?.owner?.email);
-  const inviterName = getUserName(invite.documents?.owner?.name, inviterEmail);
-  const inviterImage = getUserImage(invite.documents?.owner?.image);
+  const { name: inviterName, email: inviterEmail, image: inviterImage } = extractUserInfo(invite.documents?.owner);
   const documentTitle = invite.documents?.title || "Untitled Document";
 
   const handleAccept = async () => {

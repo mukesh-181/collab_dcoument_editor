@@ -8,6 +8,7 @@ import { useDocumentPreview } from "../../hooks/use-document-preview";
 import { ROUTES } from "@/constants/routes";
 import { getInitials } from "@/utils/string-utils";
 import { preloadEditor } from "@/features/editor/components/lazy-editor";
+import { extractUserInfo } from "@/utils/user-utils";
 
 // Sub-component for rendering the scaled-down rich text preview
 function DocumentPreview({ json }: { json: any }) {
@@ -55,6 +56,15 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
   const ownerMember = document.all_members?.find((m: any) => m.role === "owner");
   const ownerEmail = ownerMember?.user?.email || "";
   const currentUserName = currentUser?.user_metadata?.full_name || currentUser?.email || "Unknown User";
+
+  // Sort members so the current user is always first (on top of the avatar stack)
+  const sortedMembers = document.all_members 
+    ? [...document.all_members].sort((a: any, b: any) => {
+        if (a.user.id === currentUser?.id) return -1;
+        if (b.user.id === currentUser?.id) return 1;
+        return 0;
+      })
+    : [];
 
   return (
     <Link
@@ -106,20 +116,22 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
             <div className="flex items-center gap-2">
               {document.all_members && memberCount > 0 && (
                 <div className="flex items-center -space-x-1.5">
-                  {document.all_members
+                  {sortedMembers
                     .slice(0, 3)
-                    .map((member: any, i: number) => (
+                    .map((member: any, i: number) => {
+                      const { name, image, email } = extractUserInfo(member.user);
+                      return (
                       <Avatar
                         key={member.user.id}
                         className="w-7 h-7 border-2 border-white dark:border-zinc-900 relative shadow-sm"
                         style={{ zIndex: 10 - i }}
                       >
-                        <AvatarImage src={member.user.image || undefined} />
+                        <AvatarImage src={image} />
                         <AvatarFallback className="text-[10px] bg-gradient-to-br from-indigo-400 to-purple-500 text-white font-semibold">
-                          {getInitials(member.user.name, member.user.email)}
+                          {getInitials(name, email)}
                         </AvatarFallback>
                       </Avatar>
-                    ))}
+                    )})}
                 </div>
               )}
               {memberCount > 0 && (

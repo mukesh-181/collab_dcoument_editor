@@ -22,3 +22,12 @@ export function getUserImage(image?: string | null): string {
 export function getUserRole(role?: string | null): string {
   return role || USER_FALLBACKS.ROLE;
 }
+
+export function extractUserInfo(user: any, role?: string | null) {
+  return {
+    name: getUserName(user?.name, user?.email),
+    email: getUserEmail(user?.email),
+    image: getUserImage(user?.image || user?.user_metadata?.avatar_url),
+    role: getUserRole(role || user?.role)
+  };
+}

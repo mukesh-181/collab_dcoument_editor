@@ -37,6 +37,7 @@ export interface EditorConfigParams {
   ydoc: Y.Doc;
   provider: HocuspocusProvider;
   currentUserName: string;
+  currentUserImage?: string;
 }
 
 export const getEditorExtensions = ({
@@ -44,6 +45,7 @@ export const getEditorExtensions = ({
   ydoc,
   provider,
   currentUserName,
+  currentUserImage,
 }: EditorConfigParams) => {
   return [
     StarterKit.configure({
@@ -103,6 +105,7 @@ export const getEditorExtensions = ({
       provider: provider,
       user: {
         name: currentUserName,
+        image: currentUserImage,
         color: [
           "#f43f5e",
           "#8b5cf6",

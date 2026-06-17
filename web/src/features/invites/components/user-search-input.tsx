@@ -5,7 +5,7 @@ import { X, Search, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { searchUsersByEmail } from "../actions/search-users.action";
 import { getInitials } from "@/utils/string-utils";
-import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
+import { extractUserInfo } from "@/utils/user-utils";
 
 
 
@@ -229,6 +229,8 @@ export function UserSearchInput({
             const isMem = allMembers.some(m => m.user?.email?.toLowerCase() === user.email.toLowerCase());
             const isInv = invites.some(inv => inv.status === 'pending' && inv.email?.toLowerCase() === user.email.toLowerCase() && new Date(inv.expires_at) > new Date());
             const isDisabled = isMem || isInv;
+            
+            const { name, image, email } = extractUserInfo(user);
 
             return (
               <button
@@ -247,16 +249,16 @@ export function UserSearchInput({
                 }`}
               >
                 <Avatar className={`h-8 w-8 shrink-0 border border-zinc-200 dark:border-zinc-800 ${isDisabled ? 'grayscale' : ''}`}>
-                  <AvatarImage src={user.image || undefined} />
+                  <AvatarImage src={image || undefined} />
                   <AvatarFallback className="text-[11px] font-medium bg-zinc-100 dark:bg-zinc-800">
-                    {getInitials(user.name, user.email)}
+                    {getInitials(name, email)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="text-[13px] font-medium text-zinc-900 dark:text-zinc-100 truncate">
-                    {getUserName(user.name, user.email)}
+                    {name}
                   </span>
-                  <span className="text-[11px] text-zinc-500 truncate">{user.email}</span>
+                  <span className="text-[11px] text-zinc-500 truncate">{email}</span>
                 </div>
                 {isMem && (
                   <span className="text-[10px] shrink-0 bg-zinc-200/50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-1.5 py-0.5 rounded font-medium">

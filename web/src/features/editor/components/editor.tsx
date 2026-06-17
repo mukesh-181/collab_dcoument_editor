@@ -18,6 +18,7 @@ interface EditorProps {
   documentId: string;
   documentTitle?: string;
   currentUserName: string;
+  currentUserImage?: string;
   token: string;
 }
 
@@ -63,6 +64,7 @@ export function Editor({
   documentId,
   documentTitle = "Untitled Document",
   currentUserName,
+  currentUserImage,
   token,
 }: EditorProps) {
   const { setSyncState, setActiveUsers, setIsEditorReady, currentUserRole } = useDocumentSync();
@@ -134,9 +136,9 @@ export function Editor({
   const extensions = useMemo(
     () => {
       if (!provider || !ydoc) return [];
-      return getEditorExtensions({ documentId, ydoc, provider, currentUserName });
+      return getEditorExtensions({ documentId, ydoc, provider, currentUserName, currentUserImage });
     },
-    [documentId, ydoc, provider, currentUserName]
+    [documentId, ydoc, provider, currentUserName, currentUserImage]
   );
 
   // The parent DocumentClientLayout handles the full page skeleton overlay.

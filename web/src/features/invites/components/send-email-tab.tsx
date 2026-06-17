@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { UserSearchInput, SelectedContact } from "./user-search-input";
 import { sendEmailInvites } from "../actions/send-email-invites.action";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getUserName, getUserImage } from "@/utils/user-utils";
+import { extractUserInfo } from "@/utils/user-utils";
 import { getInitials } from "@/utils/string-utils";
 
 export function SendEmailTab({ 
@@ -154,16 +154,18 @@ export function SendEmailTab({
           </span>
         </div>
         <div className="max-h-[180px] overflow-y-auto pr-2 space-y-1 bg-muted/30 p-2 rounded-xl border border-border/50 scrollbar-thin scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700 dark:hover:scrollbar-thumb-zinc-600 scrollbar-track-transparent">
-          {sortedMembers.map((member) => (
+          {sortedMembers.map((member) => {
+            const { name, image, email } = extractUserInfo(member.user);
+            return (
             <div key={member.user.id} className="flex items-center justify-between p-2 bg-card hover:bg-accent border border-transparent hover:border-border rounded-lg transition-all shadow-sm">
               <div className="flex items-center space-x-3 overflow-hidden">
                 <Avatar className="w-8 h-8 border border-border shrink-0">
-                  <AvatarImage src={getUserImage(member.user.image)} />
-                  <AvatarFallback className="text-[10px]">{getInitials(member.user.name, member.user.email)}</AvatarFallback>
+                  <AvatarImage src={image} />
+                  <AvatarFallback className="text-[10px]">{getInitials(name, email)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{getUserName(member.user.name, member.user.email)}</span>
-                  <span className="text-[11px] text-muted-foreground truncate leading-snug">{member.user.email}</span>
+                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{name}</span>
+                  <span className="text-[11px] text-muted-foreground truncate leading-snug">{email}</span>
                 </div>
               </div>
               <div className={`ml-3 shrink-0 text-[11px] font-medium capitalize px-2 py-0.5 border rounded-md ${
@@ -176,7 +178,7 @@ export function SendEmailTab({
                 {member.role}
               </div>
             </div>
-          ))}
+          )})}
           {pendingInvites.map((inv, idx) => (
             <div key={inv.id || idx} className="flex items-center justify-between p-2 bg-card hover:bg-accent border border-transparent hover:border-border rounded-lg transition-all shadow-sm">
               <div className="flex items-center space-x-3 overflow-hidden">
