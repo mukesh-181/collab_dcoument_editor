@@ -6,7 +6,7 @@ export function InboxSkeleton() {
       <div className="relative z-10 px-6 py-8 max-w-4xl mx-auto w-full space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-500 bg-clip-text text-transparent dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-500">
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
               Inbox
             </h1>
             <div className="h-6 w-[1.5px] rounded-full bg-zinc-300 dark:bg-zinc-700 hidden sm:block" />

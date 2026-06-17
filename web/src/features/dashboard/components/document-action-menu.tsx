@@ -12,23 +12,46 @@ import {
 
 import { DocumentRenameDialog } from "./document-rename-dialog";
 import { DocumentDeleteDialog } from "./document-delete-dialog";
+import { LeaveDocumentDialog } from "@/features/document/components/page/leave-document-dialog";
+import { leaveDocumentAction } from "@/features/document/actions/leave-document.action";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
 
 interface DocumentActionMenuProps {
   documentId: string;
   documentTitle: string;
   role: string;
+  ownerEmail?: string;
+  currentUserName?: string;
 }
 
 export function DocumentActionMenu({
   documentId,
   documentTitle,
   role,
+  ownerEmail = "",
+  currentUserName = "Unknown User",
 }: DocumentActionMenuProps) {
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isLeaveOpen, setIsLeaveOpen] = useState(false);
+  const router = useRouter();
 
-  // If viewer, don't render the menu at all to keep UI clean
-  if (role === "viewer") return null;
+  const handleLeave = async () => {
+    if (!ownerEmail) {
+      toast.error("Could not find document owner");
+      return;
+    }
+    const result = await leaveDocumentAction(documentId, ownerEmail, currentUserName);
+    if (result.error) {
+      toast.error(result.error);
+      throw new Error(result.error);
+    } else {
+      toast.success("You have left the document");
+      router.refresh();
+    }
+  };
 
   return (
     <>
@@ -49,7 +72,7 @@ export function DocumentActionMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-xl rounded-xl p-1.5">
-          {(role === "owner" || role === "editor") && (
+          {role === "owner" && (
             <DropdownMenuItem
               onSelect={(e) => {
                 e.preventDefault();
@@ -74,6 +97,19 @@ export function DocumentActionMenu({
               Delete
             </DropdownMenuItem>
           )}
+          {(role === "editor" || role === "viewer") && (
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={(e) => {
+                e.preventDefault();
+                setIsLeaveOpen(true);
+              }}
+              className="cursor-pointer rounded-lg font-medium"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Leave
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -89,6 +125,13 @@ export function DocumentActionMenu({
         documentTitle={documentTitle}
         isOpen={isDeleteOpen}
         setIsOpen={setIsDeleteOpen}
+      />
+
+      <LeaveDocumentDialog
+        isOpen={isLeaveOpen}
+        setIsOpen={setIsLeaveOpen}
+        documentTitle={documentTitle}
+        onConfirm={handleLeave}
       />
     </>
   );

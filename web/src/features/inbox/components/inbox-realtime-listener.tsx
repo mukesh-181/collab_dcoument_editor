@@ -1,13 +1,19 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
-export function InboxRealtimeListener({ onNewEvent }: { onNewEvent?: () => void }) {
+export function InboxRealtimeListener({ onNewEvent }: { onNewEvent?: (silent: boolean) => void }) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
+  
+  // Use a ref to always point to the latest callback (prevents stale closure of 'filter' state)
+  const onNewEventRef = useRef(onNewEvent);
+  useEffect(() => {
+    onNewEventRef.current = onNewEvent;
+  }, [onNewEvent]);
 
   useEffect(() => {
     let isMounted = true
@@ -39,8 +45,7 @@ export function InboxRealtimeListener({ onNewEvent }: { onNewEvent?: () => void 
             } else {
               toast.success("You have a new invite!");
             }
-            if (onNewEvent) onNewEvent();
-            router.refresh()
+            if (onNewEventRef.current) onNewEventRef.current(true);
           }
         )
         .on(
@@ -52,8 +57,7 @@ export function InboxRealtimeListener({ onNewEvent }: { onNewEvent?: () => void 
             filter: `email=eq.${user.email}`,
           },
           (payload) => {
-            if (onNewEvent) onNewEvent();
-            router.refresh()
+            if (onNewEventRef.current) onNewEventRef.current(true);
           }
         )
         

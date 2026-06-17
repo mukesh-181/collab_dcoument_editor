@@ -79,7 +79,7 @@ export function ShareDialog({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="email" className="outline-none">
+            <TabsContent value="email" forceMount className="outline-none data-[state=inactive]:hidden">
               <SendEmailTab 
                 documentId={documentId} 
                 allMembers={allMembers}
@@ -88,7 +88,7 @@ export function ShareDialog({
               />
             </TabsContent>
 
-            <TabsContent value="link" className="outline-none">
+            <TabsContent value="link" forceMount className="outline-none data-[state=inactive]:hidden">
               <CreateLinkTab documentId={documentId} />
             </TabsContent>
           </Tabs>
