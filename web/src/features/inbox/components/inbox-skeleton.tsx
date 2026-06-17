@@ -4,19 +4,33 @@ export function InboxSkeleton() {
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-y-auto relative">
       <div className="relative z-10 px-6 py-8 max-w-4xl mx-auto w-full space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2 pointer-events-none">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
               Inbox
             </h1>
             <div className="h-6 w-[1.5px] rounded-full bg-zinc-300 dark:bg-zinc-700 hidden sm:block" />
-            <Skeleton className="h-4 w-12 hidden sm:block" />
+            <span className="text-[15px] font-medium text-zinc-500 capitalize hidden sm:block">
+              All
+            </span>
           </div>
 
           <div className="flex items-center gap-4">
             <Skeleton className="h-4 w-16 hidden sm:block" />
-            <Skeleton className="h-9 w-[260px] rounded-full hidden md:block" />
-            <Skeleton className="h-9 w-[140px] rounded-full md:hidden" />
+            
+            {/* Desktop Filters */}
+            <div className="hidden md:flex items-center bg-white/80 dark:bg-zinc-900/50 p-1 rounded-full border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm backdrop-blur-md">
+              <div className="px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-200 bg-primary/10 dark:bg-primary/20 text-primary shadow-sm">All</div>
+              <div className="px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-200 text-zinc-500">Invites</div>
+              <div className="px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-200 text-zinc-500">Documents</div>
+            </div>
+            
+            {/* Mobile Filter */}
+            <div className="md:hidden">
+              <div className="flex items-center justify-between h-9 w-[140px] rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-500 shadow-sm">
+                 <span>All</span>
+              </div>
+            </div>
           </div>
         </div>
         
