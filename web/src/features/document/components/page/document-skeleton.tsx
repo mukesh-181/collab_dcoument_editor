@@ -4,40 +4,65 @@ import { ArrowLeft } from "lucide-react";
 
 export function EditorSkeleton() {
   return (
-    <div className="flex flex-col w-full min-h-full relative items-center pt-4 pb-32">
+    <div className="flex flex-col w-full min-h-full items-center pb-32">
       {/* Floating Toolbar Skeleton */}
       <div className="sticky top-14 z-40 w-full flex justify-center pt-4 pb-4 mb-4 bg-zinc-50 dark:bg-zinc-900 pointer-events-none">
         <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl shadow-md px-1 py-0.5 flex items-center justify-center pointer-events-auto max-w-[95%] overflow-hidden">
           <div className="flex items-center justify-start sm:justify-center gap-1 px-2 py-2 w-full overflow-x-auto whitespace-nowrap scrollbar-hide">
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            {/* HistoryControls (2 items) */}
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-7 w-[120px] rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            {/* HeadingControls (3 items, not 1 wide) */}
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-7 w-16 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            {/* FontFamilyControl (1 wide item, w-32) */}
+            <Skeleton className="h-8 w-32 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            {/* FontSizeControl (1 medium item, w-20) */}
+            <Skeleton className="h-8 w-20 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            {/* FormatControls, Color, Highlight (8 items) */}
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
             
             <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
             
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
-            <Skeleton className="h-7 w-7 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            {/* Link, Image, Table (3 items) */}
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            
+            <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
+            
+            {/* ListControls (3 items) */}
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+
+            <Separator orientation="vertical" className="h-4 mx-1 bg-zinc-300 dark:bg-zinc-700" />
+            
+            {/* AlignmentControls (4 items) */}
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
+            <Skeleton className="h-8 w-8 rounded-md shrink-0 bg-zinc-200/50 dark:bg-zinc-800/50" />
           </div>
         </div>
       </div>

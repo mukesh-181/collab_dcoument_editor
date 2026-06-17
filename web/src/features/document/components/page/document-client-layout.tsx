@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useDocumentSync } from "./document-context";
-import { DocumentSkeleton } from "./document-skeleton";
+import { EditorSkeleton } from "./document-skeleton";
 
 export function DocumentClientLayout({
   children,
@@ -21,8 +21,8 @@ export function DocumentClientLayout({
   return (
     <div className="relative flex flex-col flex-1 bg-transparent">
       {!isEditorReady && (
-        <div className="absolute top-0 left-0 right-0 z-50 bg-zinc-50 dark:bg-zinc-950 flex flex-col min-h-screen">
-          <DocumentSkeleton />
+        <div className="absolute top-0 left-0 right-0 bottom-0 z-50 bg-zinc-50 dark:bg-zinc-950 flex flex-col">
+          <EditorSkeleton />
         </div>
       )}
       
