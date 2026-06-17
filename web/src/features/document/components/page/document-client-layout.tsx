@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useDocumentSync } from "./document-context";
 import { DocumentSkeleton } from "./document-skeleton";
 
@@ -9,6 +11,12 @@ export function DocumentClientLayout({
   children: React.ReactNode;
 }) {
   const { isEditorReady } = useDocumentSync();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Instantly reset the scroll position to the top whenever we enter a document route
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <div className="relative flex flex-col flex-1 bg-transparent">

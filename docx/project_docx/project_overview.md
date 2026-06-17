@@ -10,12 +10,11 @@ We are building a real-time collaborative document editor. We've finished the fo
 
 - **Authentication**: Users can log in using Email/Password or GitHub. We use Supabase to handle the sessions.
 - **Route Protection**: We have a proxy setup that automatically redirects logged-out users away from private pages (like the dashboard) and sends them to the login page.
-- **Dashboard**: A robust, visually-rich interface where users can view, search, and filter their documents in real-time. It features scaled HTML document thumbnails and stacked presence avatars for a premium feel.
-- **Interactive Inbox**: A dedicated, fully persistent UI (`/inbox`) that displays all incoming document invitations, allowing users to securely Accept, Reject, or Delete them while preserving historical status.
+- **Dashboard & Inbox**: A robust, visually-rich interface where users can view, search, and filter their documents and invitations in real-time. We utilize full server-side pagination and search to ensure optimal performance and mathematically accurate data representation regardless of account size. It features scaled HTML document thumbnails and stacked presence avatars for a premium feel.
 - **Document Access**: We use server-side checks to make sure users can only open documents they are allowed to see.
 - **Rich Text Editor**: We added a text editor using Tiptap and Tailwind's typography plugin. It features real-time collaborative cursors, an offline-resilient sync state, unified editor role synchronization, and a custom responsive formatting toolbar.
 - **Mobile Responsiveness**: The entire application is fully responsive, utilizing Shadcn Sheets for slide-out mobile navigation and horizontally scrollable toolbars.
-- **UI & Styling**: The interface is built with Tailwind CSS v4 and Shadcn UI components. We revamped the global UI design with updated font typography, refined component styling, and enhanced glassmorphism effects. We also implemented an opacity-based CSS layout trick to render "zero-jitter" loading spinners across all interactive buttons, preventing visually jarring layout shifts.
+- **UI & Styling**: The interface is built with Tailwind CSS v4 and Shadcn UI components. We revamped the global UI design with updated font typography, semantic color variables, theme-based design tokens, and enhanced glassmorphism effects. We also implemented an opacity-based CSS layout trick to render "zero-jitter" loading spinners across all interactive buttons, preventing visually jarring layout shifts.
 
 ---
 

@@ -253,6 +253,8 @@
     background-color: var(--rm-page-break-bg) !important;
     border-color: var(--rm-page-break-bg) !important;
     position: relative;
+    pointer-events: none !important;
+    user-select: none !important;
   }
   /* Subtle shadow/line at page edges for depth */
   .rm-pagination-gap::before {
@@ -286,6 +288,7 @@
     font-family: inherit;
     letter-spacing: 0.01em;
     user-select: none;
+    pointer-events: none !important;
   }
   .dark .rm-page-header,
   .dark .rm-page-footer {
