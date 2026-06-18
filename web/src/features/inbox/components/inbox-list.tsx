@@ -13,17 +13,28 @@ export async function InboxList() {
     status: inv.status as string,
     created_at: inv.created_at as string,
     expires_at: (inv.expires_at as string) || null,
-    documents: Array.isArray(inv.documents)
-      ? (() => {
-          const doc = (inv.documents as Array<Record<string, unknown>>)[0];
+    documents: (() => {
+        const raw = inv.documents;
+        if (!raw) return undefined;
+        // Supabase may return a single object or an array depending on relationship inference
+        if (Array.isArray(raw)) {
+          const doc = (raw as Array<Record<string, unknown>>)[0];
           if (!doc) return undefined;
-          const ownerArr = doc.owner as Array<Record<string, unknown>> | undefined;
+          const ownerArr = doc.owner as Array<Record<string, unknown>> | Record<string, unknown> | undefined;
           return {
             title: doc.title as string | undefined,
-            owner: Array.isArray(ownerArr) ? ownerArr[0] : undefined,
+            owner: Array.isArray(ownerArr) ? ownerArr[0] : ownerArr,
           };
-        })()
-      : undefined,
+        } else {
+          // Single object (many-to-one relationship resolved by PostgREST at runtime)
+          const doc = raw as Record<string, unknown>;
+          const ownerArr = doc.owner as Array<Record<string, unknown>> | Record<string, unknown> | undefined;
+          return {
+            title: doc.title as string | undefined,
+            owner: Array.isArray(ownerArr) ? ownerArr[0] : ownerArr,
+          };
+        }
+      })(),
   }));
 
   return <InboxClientList initialInvites={invites} initialCount={count || 0} />;

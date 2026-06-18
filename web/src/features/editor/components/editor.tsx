@@ -69,6 +69,7 @@ export function Editor({
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
   const [isSynced, setIsSynced] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [fadeIn, setFadeIn] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -135,13 +136,21 @@ export function Editor({
     [documentId, ydoc, provider, currentUserName, currentUserImage]
   );
 
+  useEffect(() => {
+    if (provider && ydoc && (isSynced || isOffline) && !fadeIn) {
+      const id = requestAnimationFrame(() => setFadeIn(true));
+      return () => cancelAnimationFrame(id);
+    }
+  }, [provider, ydoc, isSynced, isOffline, fadeIn]);
+
   if (!provider || !ydoc || (!isSynced && !isOffline)) {
     return null;
   }
 
   return (
     <div
-      className="flex flex-col w-full min-h-full"
+      className="flex flex-col w-full min-h-full transition-opacity duration-500 ease-in-out"
+      style={{ opacity: fadeIn ? 1 : 0 }}
       onClickCapture={(e) => {
         const target = e.target as HTMLElement;
         if (target && target.closest("a")) {

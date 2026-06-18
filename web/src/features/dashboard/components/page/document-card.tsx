@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FileText, Users } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useSyncExternalStore } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DocumentActionMenu } from "../document-action-menu";
 import { useDocumentPreview } from "../../hooks/use-document-preview";
@@ -38,9 +38,20 @@ const A4_HEIGHT = 1123;
 function DocumentPreview({ json }: { json: Record<string, unknown> | null | undefined }) {
   const html = useDocumentPreview(json);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.282); // sensible default until measured
+  const [scale, setScale] = useState(0.282);
+  const [showPreview, setShowPreview] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
-  // Measure container width and recompute scale whenever it changes
+  useEffect(() => {
+    if (!mounted) return;
+    const id = requestAnimationFrame(() => setShowPreview(true));
+    return () => cancelAnimationFrame(id);
+  }, [mounted]);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -54,7 +65,6 @@ function DocumentPreview({ json }: { json: Record<string, unknown> | null | unde
     return () => observer.disconnect();
   }, []);
 
-  // Tiptap often generates <p></p> or <p><br></p> for completely empty documents
   const isVisuallyEmpty =
     !html ||
     html.trim() === "" ||
@@ -63,22 +73,24 @@ function DocumentPreview({ json }: { json: Record<string, unknown> | null | unde
 
   return (
     <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none">
-      {isVisuallyEmpty ? (
-        <div className="flex items-center justify-center h-full">
+      {/* Placeholder — visible until preview fades in */}
+      {(!showPreview || isVisuallyEmpty) && (
+        <div className="absolute inset-0 flex items-center justify-center">
           <FileText className="w-10 h-10 text-zinc-200 dark:text-zinc-800" strokeWidth={1} />
         </div>
-      ) : (
-        // Full A4 page canvas scaled to container width
+      )}
+      {/* Preview — fades in smoothly on mount */}
+      {mounted && !isVisuallyEmpty && (
         <div
-          className="absolute top-0 left-0"
+          className="absolute top-0 left-0 transition-opacity duration-500 ease-in-out"
           style={{
+            opacity: showPreview ? 1 : 0,
             width: `${A4_WIDTH}px`,
             height: `${A4_HEIGHT}px`,
             transform: `scale(${scale})`,
             transformOrigin: "top left",
           }}
         >
-          {/* Replicates real page margins: 72px top/bottom, 64px left/right */}
           <div
             style={{
               padding: "72px 64px",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Share2, Link as LinkIcon, Mail } from "lucide-react";
 import {
   Dialog,
@@ -40,6 +40,11 @@ export function ShareDialog({
   const { syncState } = useDocumentSync();
   const [isOpen, setIsOpen] = useState(false);
   const [localInvites, setLocalInvites] = useState(invites || []);
+
+  // Sync local invites with server props to reflect realtime accept/reject/expire events
+  useEffect(() => {
+    setLocalInvites(invites || []);
+  }, [invites]);
 
   const isSavePending = syncState !== "saved";
 

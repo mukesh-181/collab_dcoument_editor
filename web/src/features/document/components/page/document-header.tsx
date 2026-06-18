@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Pencil, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,11 @@ export function DocumentHeader({
   currentUserName = USER_FALLBACKS.NAME,
 }: DocumentHeaderProps) {
   const { currentUserRole } = useDocumentSync();
-  const [title] = useState(document.title);
+  const [title, setTitle] = useState(document.title);
+  
+  useEffect(() => {
+    setTitle(document.title);
+  }, [document.title]);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const router = useRouter();

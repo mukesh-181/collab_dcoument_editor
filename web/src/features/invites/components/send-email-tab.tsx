@@ -22,6 +22,8 @@ interface PendingInvite {
   status: string;
   expires_at: string;
   role?: string;
+  name?: string | null;
+  image?: string | null;
 }
 
 interface NewInvite {
@@ -81,11 +83,16 @@ export function SendEmailTab({
       toast.success(`Successfully sent invitations to ${targetEmails.length} user${targetEmails.length > 1 ? 's' : ''}`);
       
       // Instantly block them from being selected again without a page reload
-      const newPendingInvites = targetEmails.map(e => ({
-        email: e,
-        status: 'pending',
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Fake expiry for immediate UI update
-      }));
+      const newPendingInvites = targetEmails.map(e => {
+        const contact = selectedContacts.find(c => c.email === e);
+        return {
+          email: e,
+          status: 'pending',
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Fake expiry for immediate UI update
+          name: contact?.name || null,
+          image: contact?.image || null
+        };
+      });
       if (onInviteSent) onInviteSent(newPendingInvites);
       
       setSelectedContacts([]);
@@ -196,11 +203,12 @@ export function SendEmailTab({
             <div key={inv.id || idx} className="flex items-center justify-between p-2 bg-card hover:bg-accent border border-transparent hover:border-border rounded-lg transition-all shadow-sm">
               <div className="flex items-center space-x-3 overflow-hidden">
                 <Avatar className="w-8 h-8 border border-border shrink-0">
-                  <AvatarFallback className="bg-muted text-[10px]">{getInitials(null, inv.email)}</AvatarFallback>
+                  <AvatarImage src={inv.image || undefined} />
+                  <AvatarFallback className="bg-muted text-[10px]">{getInitials(inv.name, inv.email)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{inv.email}</span>
-                  <span className="text-[11px] text-muted-foreground truncate leading-snug">Pending Invite</span>
+                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{inv.name || inv.email}</span>
+                  <span className="text-[11px] text-muted-foreground truncate leading-snug">{inv.name ? inv.email : "Pending Invite"}</span>
                 </div>
               </div>
               <div className="ml-3 shrink-0 text-[11px] font-medium px-2 py-0.5 bg-emerald-300/15 text-emerald-800 border border-emerald-500/30 rounded-md border-dashed">

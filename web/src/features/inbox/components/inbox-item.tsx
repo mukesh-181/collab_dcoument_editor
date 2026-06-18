@@ -17,6 +17,15 @@ import { getInitials } from "@/utils/string-utils";
 import { extractUserInfo } from "@/utils/user-utils";
 import type { UserLike } from "@/utils/user-utils";
 
+// Supabase returns nested join rows as arrays even for many-to-one relationships.
+// We model both possibilities and normalise at the access site.
+type SupabaseOwner = UserLike | UserLike[] | null | undefined;
+type SupabaseDocuments =
+  | { title?: string | null; owner?: SupabaseOwner }
+  | Array<{ title?: string | null; owner?: SupabaseOwner }>
+  | null
+  | undefined;
+
 export interface InboxInvite {
   id: string;
   token: string;
@@ -25,10 +34,7 @@ export interface InboxInvite {
   expires_at: string | null;
   created_at: string;
   document_id: string;
-  documents?: {
-    title?: string;
-    owner?: UserLike;
-  };
+  documents?: SupabaseDocuments;
 }
 
 export function InboxItem({ invite, onItemUpdate }: { invite: InboxInvite, onItemUpdate?: (updates: Partial<InboxInvite> & { _deleted?: boolean }) => void }) {
@@ -64,8 +70,13 @@ export function InboxItem({ invite, onItemUpdate }: { invite: InboxInvite, onIte
   const timeStr = format(new Date(invite.created_at), "hh:mm a");
   const dateStr = format(new Date(invite.created_at), "dd/MM/yyyy");
 
-  const { name: inviterName, email: inviterEmail, image: inviterImage } = extractUserInfo(invite.documents?.owner ?? {});
-  const documentTitle = invite.documents?.title || "Untitled Document";
+  // Normalise Supabase response: nested joins come back as arrays or single objects
+  const docsRaw = invite.documents;
+  const docsData = Array.isArray(docsRaw) ? docsRaw[0] : docsRaw;
+  const ownerRaw = docsData?.owner;
+  const ownerData = Array.isArray(ownerRaw) ? ownerRaw[0] : ownerRaw;
+  const { name: inviterName, email: inviterEmail, image: inviterImage } = extractUserInfo(ownerData ?? {});
+  const documentTitle = docsData?.title || "Untitled Document";
 
   const handleAccept = async () => {
     setIsLoading(true);

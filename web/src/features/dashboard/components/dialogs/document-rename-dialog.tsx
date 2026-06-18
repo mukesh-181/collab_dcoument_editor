@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Pencil, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,9 +34,13 @@ export function DocumentRenameDialog({
   const [isPending, setIsPending] = useState(false);
 
   // Reset draft title when dialog opens
-  if (isOpen && draftTitle !== documentTitle) {
-    setDraftTitle(documentTitle);
-  }
+  useEffect(() => {
+    if (isOpen) {
+      setDraftTitle(documentTitle);
+    }
+  }, [isOpen, documentTitle]);
+
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,6 +55,7 @@ export function DocumentRenameDialog({
       await updateDocumentTitle(documentId, newTitle);
       setIsOpen(false);
       toast.success("Document renamed successfully");
+      router.refresh();
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Failed to update title");
     } finally {

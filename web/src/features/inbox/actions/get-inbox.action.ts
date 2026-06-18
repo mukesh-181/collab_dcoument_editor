@@ -50,5 +50,10 @@ export async function getInbox(
     return { data: [], count: 0 }
   }
 
+  // DEBUG: log first item to inspect actual Supabase shape
+  if (invites && invites.length > 0) {
+    console.log('[inbox] first invite raw:', JSON.stringify(invites[0], null, 2));
+  }
+
   return { data: invites || [], count: count || 0 }
 }

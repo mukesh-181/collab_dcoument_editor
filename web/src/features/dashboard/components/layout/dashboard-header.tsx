@@ -17,12 +17,15 @@ import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action
 import { createClient } from "@/lib/supabase/client";
 import { ROUTES } from "@/constants/routes";
 
-function NavItem({ icon: Icon, label, href, badge }: { icon: LucideIcon; label: string; href: string; badge?: number }) {
+function NavItem({ icon: Icon, label, href, badge, pathname }: { icon: LucideIcon; label: string; href: string; badge?: number; pathname: string }) {
+  const isActive = pathname === href;
   return (
     <Link
       href={href}
-      className={`relative flex items-center px-3 py-1.5 text-sm font-medium transition-colors ${
-        "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+      className={`relative flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-lg ${
+        isActive
+          ? "text-zinc-900 bg-zinc-100 dark:text-zinc-100 dark:bg-zinc-800"
+          : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800/50"
       }`}
     >
       <div className="flex items-center gap-2">
@@ -106,8 +109,8 @@ export function DashboardHeader({ user }: { user: User | null }) {
 
         {/* Navigation */}
         <nav className="flex items-center space-x-1 flex-1">
-          <NavItem icon={LayoutGrid} label="Dashboard" href={ROUTES.DASHBOARD} />
-          <NavItem icon={Inbox} label="Inbox" href={ROUTES.INBOX} badge={unreadCount} />
+          <NavItem icon={LayoutGrid} label="Dashboard" href={ROUTES.DASHBOARD} pathname={pathname} />
+          <NavItem icon={Inbox} label="Inbox" href={ROUTES.INBOX} badge={unreadCount} pathname={pathname} />
         </nav>
 
         {/* Right Section */}
