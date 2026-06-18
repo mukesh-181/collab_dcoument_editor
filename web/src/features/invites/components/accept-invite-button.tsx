@@ -15,7 +15,7 @@ export function AcceptInviteButton({ token }: { token: string }) {
     setIsLoading(true)
     try {
       const documentId = await acceptInvite(token)
-      router.push(ROUTES.DOCUMENT(documentId))
+      window.location.href = ROUTES.DOCUMENT(documentId)
     } catch (error) {
       console.error(error)
       // If it fails on click, reload the page to let the server-side error page take over

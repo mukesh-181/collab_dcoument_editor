@@ -26,7 +26,7 @@ export async function createInviteLink(documentId: string, role: 'viewer' | 'edi
   const expiresAt = new Date()
   expiresAt.setHours(expiresAt.getHours() + 24)
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('invites')
     .insert({
       document_id: documentId,
@@ -35,13 +35,11 @@ export async function createInviteLink(documentId: string, role: 'viewer' | 'edi
       status: 'pending',
       expires_at: expiresAt.toISOString()
     })
-    .select('token')
-    .single()
 
-  if (error || !data) {
+  if (error) {
     console.error('Error creating invite:', error)
     throw new Error('Failed to create invite link')
   }
 
-  return data.token
+  return token
 }
