@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDebounce } from "use-debounce";
@@ -26,6 +26,7 @@ export function PageThumbnails() {
   const [thumbnails, setThumbnails] = useState<ThumbnailData[]>([]);
   const [rawHtmlTrigger, setRawHtmlTrigger] = useState(0);
   const [debouncedTrigger] = useDebounce(rawHtmlTrigger, 500);
+  const [, startTransition] = useTransition();
 
   // Setup mutation observer
   useEffect(() => {
@@ -68,7 +69,7 @@ export function PageThumbnails() {
     if (!editorNode) return;
 
     // Get the actual page count from DOM measurement
-    const pageCount = getPageCount(PAGINATION_CONFIG);
+    const pageCount = getPageCount();
     if (pageCount === 0) return;
 
     const newThumbnails: ThumbnailData[] = [];
@@ -85,7 +86,7 @@ export function PageThumbnails() {
       });
     }
 
-    setThumbnails(newThumbnails);
+    startTransition(() => setThumbnails(newThumbnails));
   }, [debouncedTrigger]);
 
   const scrollToPage = (pageNumber: number) => {
@@ -187,14 +188,14 @@ export function PageThumbnails() {
                   <div 
                     className={"prose prose-zinc dark:prose-invert max-w-none bg-transparent leading-[1.2] [&_strong]:text-inherit prose-a:text-blue-600 prose-a:underline dark:prose-a:text-blue-400 prose-p:m-0 prose-p:leading-[1.2] prose-headings:m-0 prose-headings:mb-2 prose-headings:leading-tight prose-ul:my-2 prose-ul:pl-6 prose-ul:list-disc prose-ol:my-2 prose-ol:pl-6 prose-ol:list-decimal prose-li:my-1 prose-li:marker:text-zinc-400 [&_.tableWrapper]:my-4 prose-blockquote:border-l-4 prose-blockquote:border-zinc-300 dark:prose-blockquote:border-zinc-700 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4 prose-q:quotes-['\"'_'\"'] prose-q:italic prose-q:text-zinc-600 dark:prose-q:text-zinc-400 [&_*]:!w-auto [&_*]:!max-w-full [&_*]:!float-none"}
                     style={{
-                      width: "666px !important" as any,
+                      width: "666px !important" ,
                       minHeight: "auto",
                       boxSizing: "border-box",
                       wordWrap: "break-word",
                       wordBreak: "break-word",
                       overflowWrap: "break-word",
                       whiteSpace: "normal",
-                      display: "block !important" as any,
+                      display: "block !important" ,
                     }}
                     dangerouslySetInnerHTML={{ __html: thumb.html }}
                   />

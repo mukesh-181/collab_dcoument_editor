@@ -10,7 +10,6 @@ import { sendEmailInvites } from "../actions/send-email-invites.action";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { extractUserInfo } from "@/utils/user-utils";
 import { getInitials } from "@/utils/string-utils";
-import { sendMail } from "../actions/sendgrid.action";
 
 interface Member {
   user: { id: string; email?: string; name?: string; image?: string; user_metadata?: Record<string, string> };

@@ -144,7 +144,7 @@ export function extractAllPageContents(
   config: PaginationConfig = DEFAULT_CONFIG,
 ): string[] {
   const contents: string[] = [];
-  const pageCount = getPageCount(config);
+  const pageCount = getPageCount();
 
   // Extract content for each page, including empty ones
   for (let pageNum = 1; pageNum <= pageCount; pageNum++) {
@@ -155,9 +155,7 @@ export function extractAllPageContents(
   return contents;
 }
 
-export function getPageCount(
-  config: PaginationConfig = DEFAULT_CONFIG,
-): number {
+export function getPageCount() {
   // Count actual page markers created by the pagination extension
   // This includes empty pages that are created but have no content
   const pageMarkers = document.querySelectorAll(

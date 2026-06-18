@@ -23,7 +23,7 @@ export function getUserRole(role?: string | null): string {
   return role || USER_FALLBACKS.ROLE;
 }
 
-interface UserLike {
+export interface UserLike {
   name?: string | null;
   email?: string | null;
   image?: string | null;

@@ -46,7 +46,7 @@ export function InboxItemDialogs({
           <AlertDialogHeader>
             <AlertDialogTitle>Accept Invitation?</AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to join <span className="text-indigo-600 dark:text-indigo-400 font-semibold">'{documentTitle}'</span> as an <span className="text-indigo-600 dark:text-indigo-400 font-semibold capitalize">{role}</span>.
+              You are about to join <span className="text-indigo-600 dark:text-indigo-400 font-semibold">&apos;{documentTitle}&apos;</span> as an <span className="text-indigo-600 dark:text-indigo-400 font-semibold capitalize">{role}</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -72,7 +72,7 @@ export function InboxItemDialogs({
           <AlertDialogHeader>
             <AlertDialogTitle>Reject Invitation?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to reject the invitation to join '{documentTitle}'?
+              Are you sure you want to reject the invitation to join &apos;{documentTitle}&apos;?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
