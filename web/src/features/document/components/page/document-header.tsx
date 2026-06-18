@@ -2,16 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ShareDialog } from "@/features/invites/components/share-dialog";
 import { ActiveUsersCluster } from "./active-users-cluster";
 import { MobileSidebar } from "@/features/dashboard/components/layout/mobile-sidebar";
 import { leaveDocumentAction } from "@/features/document/actions/leave-document.action";
-import { LogOut } from "lucide-react";
 import { toast } from "sonner";
-import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DocumentRenameDialog } from "@/features/dashboard/components/dialogs/document-rename-dialog";
 import { DocumentSyncStatus } from "./document-sync-status";
@@ -35,9 +33,9 @@ interface DocumentHeaderProps {
         email: string;
       };
     }[];
-    invites?: any[];
+    invites?: Record<string, unknown>[];
   };
-  documents?: any[];
+  documents?: Record<string, unknown>[];
   currentUserName?: string;
 }
 
@@ -47,7 +45,7 @@ export function DocumentHeader({
   currentUserName = USER_FALLBACKS.NAME,
 }: DocumentHeaderProps) {
   const { currentUserRole } = useDocumentSync();
-  const [title, setTitle] = useState(document.title);
+  const [title] = useState(document.title);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const router = useRouter();
@@ -137,8 +135,8 @@ export function DocumentHeader({
         {currentUserRole === "owner" && (
           <ShareDialog 
             documentId={document.id} 
-            allMembers={document.all_members}
-            invites={document.invites}
+            allMembers={document.all_members as Array<{ role: string; user: { id: string; name: string; image: string; email: string } }>}
+            invites={document.invites as Array<{ email: string; status: string; expires_at: string }>}
           />
         )}
 

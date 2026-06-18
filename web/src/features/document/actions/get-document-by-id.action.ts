@@ -26,7 +26,7 @@ export async function getDocumentById(documentId: string) {
   }
 
   if (document.invites) {
-    document.invites = document.invites.filter((inv: any) => inv.status === 'pending')
+    document.invites = document.invites.filter((inv: Record<string, unknown>) => inv.status === 'pending')
   }
 
   return document

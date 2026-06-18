@@ -36,8 +36,8 @@ export function DocumentDeleteDialog({
       await deleteDocument(documentId);
       setIsOpen(false);
       toast.success("Document deleted");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete document");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Failed to delete document");
     } finally {
       setIsPending(false);
     }

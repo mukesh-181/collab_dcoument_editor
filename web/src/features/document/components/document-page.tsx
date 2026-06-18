@@ -5,9 +5,18 @@ import { DocumentRealtimeListener } from "@/features/document/components/page/do
 import { LazyEditor } from "@/features/editor/components/lazy-editor";
 import { PageThumbnails } from "@/features/editor/components/page-thumbnails";
 
+interface DocData {
+  id: string;
+  title: string;
+  updated_at: string;
+  all_members?: Array<{ role: string; user: { id: string; name: string; image: string; email: string } }>;
+  invites?: Record<string, unknown>[];
+  [key: string]: unknown;
+}
+
 interface DocumentPageProps {
-  document: any;
-  documents: any[];
+  document: DocData;
+  documents: DocData[];
   currentUserRole: string;
   currentUserName: string;
   currentUserImage?: string;
@@ -32,7 +41,6 @@ export function DocumentPage({
           <div className="flex-1 w-full pb-32 flex flex-col items-center">
             <LazyEditor
               documentId={document.id}
-              documentTitle={document.title}
               currentUserName={currentUserName}
               currentUserImage={currentUserImage}
               token={token}

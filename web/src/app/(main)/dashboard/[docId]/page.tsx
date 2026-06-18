@@ -19,7 +19,7 @@ export default async function Page(props: { params: Promise<{ docId: string }> }
   const { data: { user } } = await supabase.auth.getUser()
   const { data: { session } } = await supabase.auth.getSession()
   const token = session?.access_token || ''
-  const currentUserMember = document.all_members?.find((m: any) => m.user.id === user?.id)
+  const currentUserMember = document.all_members?.find((m: { user: { id: string } }) => m.user.id === user?.id)
   
   // Extract all user fields using the single utility
   const { name: currentUserName, image: currentUserImage, role: currentUserRole } = extractUserInfo(

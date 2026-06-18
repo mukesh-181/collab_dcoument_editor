@@ -10,16 +10,32 @@ import { ROUTES } from "@/constants/routes";
 import { getInitials } from "@/utils/string-utils";
 import { preloadEditor } from "@/features/editor/components/lazy-editor";
 import { extractUserInfo } from "@/utils/user-utils";
+import type { User } from "@supabase/supabase-js";
+
+interface DocMember {
+  role: string;
+  user: {
+    id: string;
+    name: string;
+    image: string;
+    email: string;
+  };
+}
+
+interface DocData {
+  id: string;
+  title: string;
+  updated_at: string;
+  previewJson?: Record<string, unknown> | null;
+  all_members?: DocMember[];
+  document_members?: Array<{ role?: string | null }> | null;
+}
 
 // A4 page dimensions (px) matching the editor config
 const A4_WIDTH = 794;
 const A4_HEIGHT = 1123;
 
-// Sub-component for rendering the scaled-down rich text preview.
-// Uses the same A4-canvas technique as page-thumbnails.tsx:
-// renders a full 794×1123 A4 canvas with real page margins, then scales it
-// down to fit the card preview area via a measured CSS transform.
-function DocumentPreview({ json }: { json: any }) {
+function DocumentPreview({ json }: { json: Record<string, unknown> | null | undefined }) {
   const html = useDocumentPreview(json);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.282); // sensible default until measured
@@ -90,9 +106,9 @@ function DocumentPreview({ json }: { json: any }) {
 }
 
 interface DocumentCardProps {
-  document: any;
+  document: DocData;
   role: string;
-  currentUser?: any;
+  currentUser?: User | null;
 }
 
 function getRoleBadge(role: string) {
@@ -106,13 +122,12 @@ function getRoleBadge(role: string) {
 
 export function DocumentCard({ document, role, currentUser }: DocumentCardProps) {
   const memberCount = document.all_members?.length || 0;
-  const ownerMember = document.all_members?.find((m: any) => m.role === "owner");
+  const ownerMember = document.all_members?.find((m) => m.role === "owner");
   const ownerEmail = ownerMember?.user?.email || "";
   const currentUserName = currentUser?.user_metadata?.full_name || currentUser?.email || "Unknown User";
 
-  // Sort members so the current user is always first (on top of the avatar stack)
   const sortedMembers = document.all_members 
-    ? [...document.all_members].sort((a: any, b: any) => {
+    ? [...document.all_members].sort((a, b) => {
         if (a.user.id === currentUser?.id) return -1;
         if (b.user.id === currentUser?.id) return 1;
         return 0;
@@ -171,7 +186,7 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
                 <div className="flex items-center -space-x-1.5">
                   {sortedMembers
                     .slice(0, 3)
-                    .map((member: any, i: number) => {
+                    .map((member: DocMember, i: number) => {
                       const { name, image, email } = extractUserInfo(member.user);
                       return (
                       <Avatar
