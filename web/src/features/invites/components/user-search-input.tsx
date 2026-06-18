@@ -7,8 +7,6 @@ import { searchUsersByEmail } from "../actions/search-users.action";
 import { getInitials } from "@/utils/string-utils";
 import { extractUserInfo } from "@/utils/user-utils";
 
-
-
 export interface UserSearchResult {
   id: string;
   name: string | null;
@@ -24,18 +22,37 @@ export interface SelectedContact {
   isCustom?: boolean;
 }
 
+interface MemberUser {
+  id: string;
+  email?: string;
+  name?: string;
+  image?: string;
+}
+
+interface Member {
+  user: MemberUser;
+  role: string;
+}
+
+interface PendingInvite {
+  id?: string;
+  email: string;
+  status: string;
+  expires_at: string;
+}
+
 interface UserSearchInputProps {
   selectedContacts: SelectedContact[];
   onContactsChange: (contacts: SelectedContact[]) => void;
   emailQuery: string;
   onEmailQueryChange: (email: string) => void;
-  allMembers?: any[];
-  invites?: any[];
+  allMembers?: Member[];
+  invites?: PendingInvite[];
 }
 
 const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
-export function UserSearchInput({ 
+export function UserSearchInput({
   selectedContacts,
   onContactsChange,
   emailQuery,
@@ -54,18 +71,25 @@ export function UserSearchInput({
     selectedContactsRef.current = selectedContacts;
   }, [selectedContacts]);
 
+  const prevQueryRef = useRef<string>('');
+
   useEffect(() => {
     if (!emailQuery || emailQuery.length < 2) {
-      setResults([]);
-      setIsDropdownOpen(false);
+      // Only clear state when transitioning from a valid query
+      if (prevQueryRef.current.length >= 2) {
+        setResults([]);
+        setIsDropdownOpen(false);
+      }
+      prevQueryRef.current = emailQuery;
       return;
     }
 
-    setIsSearching(true);
+    prevQueryRef.current = emailQuery;
+
     const timeoutId = setTimeout(async () => {
+      setIsSearching(true);
       try {
         const users = await searchUsersByEmail(emailQuery);
-        // Filter out users already selected
         const filteredUsers = users.filter(u => !selectedContacts.some(sc => sc.email === u.email));
         setResults(filteredUsers);
         setIsDropdownOpen(true);
@@ -81,16 +105,16 @@ export function UserSearchInput({
 
   const handleAddCustomEmail = async () => {
     const rawEmails = emailQuery.split(/[,\s]+/).map(e => e.trim()).filter(Boolean);
-    let newContacts: SelectedContact[] = [];
-    
+    const newContacts: SelectedContact[] = [];
+
     for (const trimmed of rawEmails) {
       const isMem = allMembers.some(m => m.user?.email?.toLowerCase() === trimmed.toLowerCase());
       const isInv = invites.some(inv => inv.status === 'pending' && inv.email?.toLowerCase() === trimmed.toLowerCase() && new Date(inv.expires_at) > new Date());
-      
+
       if (isValidEmail(trimmed) && !selectedContactsRef.current.some(c => c.email === trimmed) && !newContacts.some(c => c.email === trimmed) && !isMem && !isInv) {
         // Try to find a matching registered user from our current search results
         let matchedUser = results.find(u => u.email.toLowerCase() === trimmed.toLowerCase());
-        
+
         // If they hit Enter instantly, the debounce hasn't finished. Do a quick DB check!
         if (!matchedUser) {
           setIsSearching(true);
@@ -103,7 +127,7 @@ export function UserSearchInput({
             setIsSearching(false);
           }
         }
-        
+
         if (matchedUser) {
           newContacts.push(matchedUser);
         } else {
@@ -111,7 +135,7 @@ export function UserSearchInput({
         }
       }
     }
-    
+
     if (newContacts.length > 0) {
       onEmailQueryChange("");
       setResults([]);
@@ -130,7 +154,6 @@ export function UserSearchInput({
       e.preventDefault();
       handleAddCustomEmail();
     } else if (e.key === 'Backspace' && emailQuery === '' && selectedContacts.length > 0) {
-      // Remove last selected contact if backspace is pressed on empty input
       onContactsChange(selectedContacts.slice(0, -1));
     }
   };
@@ -151,17 +174,17 @@ export function UserSearchInput({
 
   return (
     <div className="relative">
-      <div 
+      <div
         className="flex flex-wrap items-center gap-1.5 min-h-[44px] p-1.5 rounded-lg border border-zinc-200 focus-within:ring-1 focus-within:ring-zinc-400 dark:border-zinc-700 dark:focus-within:ring-zinc-600 shadow-sm bg-white dark:bg-zinc-950 transition-shadow cursor-text"
         onClick={() => inputRef.current?.focus()}
       >
         {selectedContacts.length === 0 && !emailQuery && (
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
         )}
-        
+
         {selectedContacts.map((contact) => (
-          <div 
-            key={contact.id} 
+          <div
+            key={contact.id}
             className="flex items-center gap-1.5 pl-1.5 pr-1 py-1 bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-md max-w-full"
           >
             {contact.isCustom ? (
@@ -204,10 +227,8 @@ export function UserSearchInput({
               if (results.length > 0) setIsDropdownOpen(true);
             }}
             onBlur={() => {
-              // Delay closing so click events on dropdown items can fire
               setTimeout(() => {
                 setIsDropdownOpen(false);
-                // Automatically convert to pill on blur if valid email
                 handleAddCustomEmail();
               }, 200);
             }}
@@ -222,14 +243,14 @@ export function UserSearchInput({
       </div>
 
       {isDropdownOpen && results.length > 0 && (
-        <div 
+        <div
           className="absolute z-50 top-full mt-1 w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg overflow-y-auto py-1 max-h-[400px] custom-scrollbar"
         >
           {results.map((user) => {
             const isMem = allMembers.some(m => m.user?.email?.toLowerCase() === user.email.toLowerCase());
             const isInv = invites.some(inv => inv.status === 'pending' && inv.email?.toLowerCase() === user.email.toLowerCase() && new Date(inv.expires_at) > new Date());
             const isDisabled = isMem || isInv;
-            
+
             const { name, image, email } = extractUserInfo(user);
 
             return (
@@ -238,7 +259,6 @@ export function UserSearchInput({
                 type="button"
                 disabled={isDisabled}
                 onMouseDown={(e) => {
-                  // Prevent focus from leaving the input so onBlur doesn't fire prematurely
                   e.preventDefault();
                   if (!isDisabled) {
                     handleUserSelect(user);

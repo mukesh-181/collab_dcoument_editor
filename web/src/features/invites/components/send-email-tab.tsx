@@ -1,14 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Send, Eye, Edit2, Loader2, Info, Lightbulb } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useState } from "react";
+import { Send, Eye, Edit2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -17,6 +10,26 @@ import { sendEmailInvites } from "../actions/send-email-invites.action";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { extractUserInfo } from "@/utils/user-utils";
 import { getInitials } from "@/utils/string-utils";
+import { sendMail } from "../actions/sendgrid.action";
+
+interface Member {
+  user: { id: string; email?: string; name?: string; image?: string; user_metadata?: Record<string, string> };
+  role: string;
+}
+
+interface PendingInvite {
+  id?: string;
+  email: string;
+  status: string;
+  expires_at: string;
+  role?: string;
+}
+
+interface NewInvite {
+  email: string;
+  status: string;
+  expires_at: string;
+}
 
 export function SendEmailTab({ 
   documentId,
@@ -25,9 +38,9 @@ export function SendEmailTab({
   onInviteSent
 }: { 
   documentId: string;
-  allMembers?: any[];
-  invites?: any[];
-  onInviteSent?: (newInvites: any[]) => void;
+  allMembers?: Member[];
+  invites?: PendingInvite[];
+  onInviteSent?: (newInvites: NewInvite[]) => void;
 }) {
   const [emailRole, setEmailRole] = useState<"viewer" | "editor">("viewer");
   const [email, setEmail] = useState("");
@@ -42,7 +55,7 @@ export function SendEmailTab({
     
     const targetEmails = selectedContacts.map(c => c.email);
     const rawEmails = email.split(/[,\s]+/).map(e => e.trim()).filter(Boolean);
-    let newlyAdded: SelectedContact[] = [];
+    const newlyAdded: SelectedContact[] = [];
 
     // Add pending inputs if they are valid emails
     for (const trimmed of rawEmails) {
@@ -78,8 +91,9 @@ export function SendEmailTab({
       
       setSelectedContacts([]);
       setEmail("");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send invitations");
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Failed to send invitations";
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }

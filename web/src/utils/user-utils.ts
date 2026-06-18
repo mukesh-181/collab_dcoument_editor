@@ -23,7 +23,18 @@ export function getUserRole(role?: string | null): string {
   return role || USER_FALLBACKS.ROLE;
 }
 
-export function extractUserInfo(user: any, role?: string | null) {
+interface UserLike {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role?: string | null;
+  user_metadata?: {
+    avatar_url?: string;
+    [key: string]: string | undefined;
+  };
+}
+
+export function extractUserInfo(user: UserLike, role?: string | null) {
   return {
     name: getUserName(user?.name, user?.email),
     email: getUserEmail(user?.email),

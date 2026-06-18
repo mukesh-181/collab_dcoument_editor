@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FileText, Users } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DocumentActionMenu } from "../document-action-menu";
 import { useDocumentPreview } from "../../hooks/use-document-preview";
@@ -10,28 +11,80 @@ import { getInitials } from "@/utils/string-utils";
 import { preloadEditor } from "@/features/editor/components/lazy-editor";
 import { extractUserInfo } from "@/utils/user-utils";
 
-// Sub-component for rendering the scaled-down rich text preview
+// A4 page dimensions (px) matching the editor config
+const A4_WIDTH = 794;
+const A4_HEIGHT = 1123;
+
+// Sub-component for rendering the scaled-down rich text preview.
+// Uses the same A4-canvas technique as page-thumbnails.tsx:
+// renders a full 794×1123 A4 canvas with real page margins, then scales it
+// down to fit the card preview area via a measured CSS transform.
 function DocumentPreview({ json }: { json: any }) {
   const html = useDocumentPreview(json);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.282); // sensible default until measured
+
+  // Measure container width and recompute scale whenever it changes
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width && width > 0) {
+        setScale(width / A4_WIDTH);
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Tiptap often generates <p></p> or <p><br></p> for completely empty documents
-  const isVisuallyEmpty = !html || html.trim() === '' || html === '<p></p>' || html === '<p><br></p>';
-
-  if (isVisuallyEmpty) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <FileText className="w-10 h-10 text-zinc-200 dark:text-zinc-800" strokeWidth={1} />
-      </div>
-    );
-  }
+  const isVisuallyEmpty =
+    !html ||
+    html.trim() === "" ||
+    html === "<p></p>" ||
+    html === "<p><br></p>";
 
   return (
-    <div className="absolute inset-0 p-4 overflow-hidden pointer-events-none ">
-      <div
-        className="prose prose-zinc prose-sm dark:prose-invert max-w-none origin-top-left scale-[0.45]"
-        style={{ width: "220%", height: "220%" }}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none">
+      {isVisuallyEmpty ? (
+        <div className="flex items-center justify-center h-full">
+          <FileText className="w-10 h-10 text-zinc-200 dark:text-zinc-800" strokeWidth={1} />
+        </div>
+      ) : (
+        // Full A4 page canvas scaled to container width
+        <div
+          className="absolute top-0 left-0"
+          style={{
+            width: `${A4_WIDTH}px`,
+            height: `${A4_HEIGHT}px`,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          {/* Replicates real page margins: 72px top/bottom, 64px left/right */}
+          <div
+            style={{
+              padding: "72px 64px",
+              width: "100%",
+              height: "100%",
+              boxSizing: "border-box",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              className="prose prose-zinc dark:prose-invert max-w-none bg-transparent leading-[1.2] [&_strong]:text-inherit prose-a:text-blue-600 prose-a:underline dark:prose-a:text-blue-400 prose-p:m-0 prose-p:leading-[1.2] prose-headings:m-0 prose-headings:mb-2 prose-headings:leading-tight prose-ul:my-2 prose-ul:pl-6 prose-ul:list-disc prose-ol:my-2 prose-ol:pl-6 prose-ol:list-decimal prose-li:my-1 prose-li:marker:text-zinc-400 [&_.tableWrapper]:my-4"
+              style={{
+                wordWrap: "break-word",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "normal",
+              }}
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

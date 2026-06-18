@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Share2, Link as LinkIcon, Mail } from "lucide-react";
 import {
   Dialog,
@@ -16,22 +16,30 @@ import { useDocumentSync } from "@/features/document/components/page/document-co
 import { CreateLinkTab } from "./create-link-tab";
 import { SendEmailTab } from "./send-email-tab";
 
+interface Member {
+  user: { id: string; email?: string; name?: string; image?: string };
+  role: string;
+}
+
+interface PendingInvite {
+  id?: string;
+  email: string;
+  status: string;
+  expires_at: string;
+}
+
 export function ShareDialog({ 
   documentId,
   allMembers = [],
   invites = []
 }: { 
   documentId: string;
-  allMembers?: any[];
-  invites?: any[];
+  allMembers?: Member[];
+  invites?: PendingInvite[];
 }) {
   const { syncState } = useDocumentSync();
   const [isOpen, setIsOpen] = useState(false);
   const [localInvites, setLocalInvites] = useState(invites || []);
-
-  useEffect(() => {
-    setLocalInvites(invites || []);
-  }, [invites]);
 
   const isSavePending = syncState !== "saved";
 

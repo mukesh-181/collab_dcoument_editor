@@ -68,9 +68,16 @@ export function getAvailablePageHeight(
  * Approach:
  * 1. Iterate through all children in the ProseMirror DOM
  * 2. Skip pagination widget nodes (rm-pages-wrapper)
- * 3. Measure each element's height and position
- * 4. Include elements that START within the target page's vertical range (strict boundary)
- * 5. Clean inline styles to prevent layout conflicts
+ * 3. Measure each element's top position relative to the editor
+ * 4. Include ONLY elements whose TOP edge starts within the target page's
+ *    vertical range: elementStartY >= pageStartY && elementStartY < pageEndY
+ *    (with a 1px tolerance for sub-pixel rounding)
+ * 5. This ensures each element belongs to exactly ONE page — no duplication,
+ *    no "first line of page N appearing as last line of page N-1".
+ * 6. Return elements as normal flowing HTML (NO absolute positioning).
+ *    The thumbnail container in page-thumbnails.tsx already applies
+ *    padding: 72px 64px for the page margins — adding absolute offsets here
+ *    would double-apply the margin and cause the exact bug we're fixing.
  */
 export function extractPageContent(
   pageNumber: number,
@@ -81,12 +88,11 @@ export function extractPageContent(
 
   if (pageNumber < 1) return "";
 
-  // Use actual DOM geometry instead of manual height summing.
   // tiptap-pagination-plus renders pages of `pageHeight` with a `pageGap` between them.
-  // We use 40 as the gap as defined in editor-extensions.ts.
+  // pageGap is 40 as defined in editor-extensions.ts.
   const pageStride = config.pageHeight + 40;
 
-  // The vertical range for this specific page relative to the top of the editor
+  // The vertical range for this specific page, relative to the top of the editor element.
   const pageStartY = (pageNumber - 1) * pageStride;
   const pageEndY = pageStartY + config.pageHeight;
 
@@ -108,31 +114,24 @@ export function extractPageContent(
 
     const childRect = child.getBoundingClientRect();
     const elementStartY = childRect.top - editorRect.top;
-    const elementEndY = childRect.bottom - editorRect.top;
 
-    // Include elements that overlap with this page's vertical bounds
-    const overlapsPage = elementStartY < pageEndY && elementEndY > pageStartY;
+    // 1px tolerance for sub-pixel rounding from the browser
+    const TOLERANCE = 1;
 
-    if (overlapsPage) {
-      let elementHtml = child.outerHTML;
-      elementHtml = cleanHtmlForThumbnail(elementHtml);
-      
-      // Force margin to 0 on the top-level element to prevent offset inside the absolute wrapper
-      elementHtml = elementHtml.replace(/^<([a-zA-Z0-9\-]+)([^>]*)>/, (match, tag, rest) => {
-        if (rest.includes('style="')) {
-          return `<${tag}${rest.replace(/style="/, 'style="margin: 0 !important; ')}>`;
-        }
-        return `<${tag} style="margin: 0 !important;"${rest}>`;
-      });
-      
-      // Calculate position relative to the start of this specific page
-      const relativeTop = elementStartY - pageStartY;
-      
-      // Use absolute positioning to place the element exactly where it appears in the editor
-      pageContent += `<div style="position: absolute; top: ${relativeTop}px; left: 0; right: 0; padding: 0 64px; box-sizing: border-box;">${elementHtml}</div>`;
+    // Strict: only include elements whose TOP starts within this page's range.
+    // Using elementStartY (not elementEndY) guarantees each element belongs to
+    // exactly one page — whichever page its top edge falls in.
+    const startsOnThisPage =
+      elementStartY >= pageStartY - TOLERANCE &&
+      elementStartY < pageEndY - TOLERANCE;
+
+    if (startsOnThisPage) {
+      // Append as normal flowing HTML — no absolute positioning.
+      // The thumbnail wrapper in page-thumbnails.tsx handles margins via padding.
+      pageContent += cleanHtmlForThumbnail(child.outerHTML);
     }
 
-    // Stop if we've clearly passed this page
+    // Once we've passed this page, no further elements can belong to it.
     if (elementStartY >= pageEndY) {
       break;
     }
