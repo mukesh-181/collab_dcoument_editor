@@ -119,7 +119,7 @@ export function SendEmailTab({
     return (roleOrder[a.role] ?? 3) - (roleOrder[b.role] ?? 3);
   });
 
-  const pendingInvites = invites.filter(inv => inv.status === 'pending' && new Date(inv.expires_at) > new Date());
+  const pendingInvites = invites.filter(inv => inv.status === 'pending' && inv.email && new Date(inv.expires_at) > new Date());
 
   return (
     <div className="flex flex-col space-y-4">
