@@ -3,13 +3,11 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { acceptInvite } from '../actions/accept-invite.action'
-import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { ROUTES } from "@/constants/routes";
 
 export function AcceptInviteButton({ token }: { token: string }) {
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
 
   const handleAccept = async () => {
     setIsLoading(true)
