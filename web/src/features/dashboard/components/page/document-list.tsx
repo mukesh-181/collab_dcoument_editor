@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useTransition, useEffect, useCallback } from "react";
+import { useState, useTransition, useEffect, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebounce } from "use-debounce";
-import Link from "next/link";
-
 import {
   Plus,
   Search,
@@ -19,7 +17,6 @@ import { CreateDocumentButton } from "../layout/create-document-button";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DocumentCard } from "./document-card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DocumentListProps {
   documents: DashboardDocument[];
@@ -48,9 +45,12 @@ export function DocumentList({
   const [localSearch, setLocalSearch] = useState(initialSearch);
   const [debouncedSearch] = useDebounce(localSearch, 900);
 
-  // Sync local filter when URL changes from outside (e.g. back/forward navigation)
+  const localFilterRef = useRef(urlFilter);
   useEffect(() => {
-    setLocalFilter(urlFilter);
+    if (localFilterRef.current !== urlFilter) {
+      localFilterRef.current = urlFilter;
+      setLocalFilter(urlFilter);
+    }
   }, [urlFilter]);
 
   const isLoading = isPending || localSearch !== initialSearch || localFilter !== urlFilter;
@@ -183,7 +183,7 @@ export function DocumentList({
             <div
               className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 content-start transition-opacity duration-200 ${isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
             >
-              {documents.map((doc: any) => {
+              {documents.map((doc: DashboardDocument) => {
                 const role = doc.document_members?.[0]?.role || "viewer";
                 return <DocumentCard key={doc.id} document={doc} role={role} currentUser={user} />;
               })}

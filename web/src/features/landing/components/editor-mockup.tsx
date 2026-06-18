@@ -3,7 +3,7 @@ export function EditorMockup() {
     <div className="mt-24 w-full max-w-5xl px-4 sm:px-6 lg:px-8 relative group">
       {/* Decorative background glow */}
       <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-20 blur-2xl transition duration-1000 group-hover:opacity-30"></div>
-      
+
       <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/60 shadow-2xl backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/50">
         <div className="flex items-center border-b border-zinc-200/50 bg-zinc-50/50 px-4 py-3 dark:border-zinc-800/50 dark:bg-zinc-900/50 backdrop-blur-md">
           <div className="flex gap-2">
@@ -15,18 +15,18 @@ export function EditorMockup() {
             <span className="truncate max-w-[200px]">collabdoc.app/d/project-setup</span>
           </div>
         </div>
-        
+
         <div className="relative p-8 sm:p-14 min-h-[400px]">
           <div className="mx-auto max-w-3xl space-y-6 text-left">
-            <h2 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 font-serif tracking-tight">Project Setup & Guidelines</h2>
-            
+            <h2 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 font-serif tracking-tight">Project Setup &amp; Guidelines</h2>
+
             <p className="text-lg text-zinc-600 leading-relaxed dark:text-zinc-300">
-              CollabDoc is designed to handle multiple concurrent users seamlessly. 
+              CollabDoc is designed to handle multiple concurrent users seamlessly.
               The underlying architecture relies on <strong className="text-zinc-900 dark:text-white font-medium">Conflict-free Replicated Data Types (CRDTs)</strong> to ensure that text merges deterministically without a central authority dictating state.
             </p>
-            
+
             <div className="pl-4 border-l-2 border-indigo-500/30 text-zinc-500 dark:text-zinc-400 italic">
-              "We need to ensure the WebSocket connection reconnects automatically with exponential backoff."
+              &quot;We need to ensure the WebSocket connection reconnects automatically with exponential backoff.&quot;
             </div>
 
             <div className="pt-8">

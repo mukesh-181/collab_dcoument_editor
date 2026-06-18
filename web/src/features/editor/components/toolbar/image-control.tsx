@@ -26,7 +26,7 @@ export function ImageControl({ editor, documentId }: { editor: Editor, documentI
           editor.chain().focus().setImage({ src: result.publicUrl }).run();
           toast.success("Image uploaded", { id: toastId });
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to upload image", { id: toastId });
       } finally {
         setIsUploading(false);

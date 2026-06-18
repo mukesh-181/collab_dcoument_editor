@@ -1,38 +1,40 @@
-import React from 'react';
-import { Extension } from '@tiptap/core';
-import Suggestion from '@tiptap/suggestion';
+
+import { Extension, type Editor, type Range } from '@tiptap/core';
+import Suggestion, { type SuggestionProps, type SuggestionKeyDownProps } from '@tiptap/suggestion';
 import { ReactRenderer } from '@tiptap/react';
-import tippy, { Instance } from 'tippy.js';
+import tippy, { type Instance, type GetReferenceClientRect } from 'tippy.js';
 import { SlashMenuList } from '@/features/editor/components/slash-menu-list';
-import { Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare, Image as ImageIcon, Table as TableIcon } from 'lucide-react';
+import { Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare, Table as TableIcon } from 'lucide-react';
+
+type CommandProps = { editor: Editor; range: Range };
 
 export const getSuggestionItems = ({ query }: { query: string }) => {
   return [
     {
       title: 'Heading 1',
       icon: <Heading1 className="h-4 w-4" />,
-      command: ({ editor, range }: any) => {
+      command: ({ editor, range }: CommandProps) => {
         editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run();
       },
     },
     {
       title: 'Heading 2',
       icon: <Heading2 className="h-4 w-4" />,
-      command: ({ editor, range }: any) => {
+      command: ({ editor, range }: CommandProps) => {
         editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run();
       },
     },
     {
       title: 'Heading 3',
       icon: <Heading3 className="h-4 w-4" />,
-      command: ({ editor, range }: any) => {
+      command: ({ editor, range }: CommandProps) => {
         editor.chain().focus().deleteRange(range).setNode('heading', { level: 3 }).run();
       },
     },
     {
       title: 'Bullet List',
       icon: <List className="h-4 w-4" />,
-      command: ({ editor, range }: any) => {
+      command: ({ editor, range }: CommandProps) => {
         let alignment: string | null = null;
         if (editor.isActive({ textAlign: "center" })) alignment = "center";
         else if (editor.isActive({ textAlign: "right" })) alignment = "right";
@@ -48,7 +50,7 @@ export const getSuggestionItems = ({ query }: { query: string }) => {
     {
       title: 'Numbered List',
       icon: <ListOrdered className="h-4 w-4" />,
-      command: ({ editor, range }: any) => {
+      command: ({ editor, range }: CommandProps) => {
         let alignment: string | null = null;
         if (editor.isActive({ textAlign: "center" })) alignment = "center";
         else if (editor.isActive({ textAlign: "right" })) alignment = "right";
@@ -64,7 +66,7 @@ export const getSuggestionItems = ({ query }: { query: string }) => {
     {
       title: 'Task List',
       icon: <CheckSquare className="h-4 w-4" />,
-      command: ({ editor, range }: any) => {
+      command: ({ editor, range }: CommandProps) => {
         let alignment: string | null = null;
         if (editor.isActive({ textAlign: "center" })) alignment = "center";
         else if (editor.isActive({ textAlign: "right" })) alignment = "right";
@@ -81,7 +83,7 @@ export const getSuggestionItems = ({ query }: { query: string }) => {
     {
       title: 'Table',
       icon: <TableIcon className="h-4 w-4" />,
-      command: ({ editor, range }: any) => {
+      command: ({ editor, range }: CommandProps) => {
         editor.chain().focus().deleteRange(range).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
       },
     },
@@ -96,7 +98,7 @@ export const SlashCommand = Extension.create({
     return {
       suggestion: {
         char: '/',
-        command: ({ editor, range, props }: any) => {
+        command: ({ editor, range, props }: CommandProps & { props: { command: (p: CommandProps) => void } }) => {
           props.command({ editor, range });
         },
       },
@@ -120,7 +122,7 @@ export const slashSuggestion = {
     let popup: Instance[];
 
     return {
-      onStart: (props: any) => {
+      onStart: (props: SuggestionProps) => {
         component = new ReactRenderer(SlashMenuList, {
           props,
           editor: props.editor,
@@ -131,7 +133,7 @@ export const slashSuggestion = {
         }
 
         popup = tippy('body', {
-          getReferenceClientRect: props.clientRect,
+          getReferenceClientRect: props.clientRect as GetReferenceClientRect,
           appendTo: () => document.body,
           content: component.element,
           showOnCreate: true,
@@ -141,7 +143,7 @@ export const slashSuggestion = {
         });
       },
 
-      onUpdate(props: any) {
+      onUpdate(props: SuggestionProps) {
         component.updateProps(props);
 
         if (!props.clientRect) {
@@ -149,16 +151,16 @@ export const slashSuggestion = {
         }
 
         popup[0].setProps({
-          getReferenceClientRect: props.clientRect,
+          getReferenceClientRect: props.clientRect as GetReferenceClientRect,
         });
       },
 
-      onKeyDown(props: any) {
+      onKeyDown(props: SuggestionKeyDownProps) {
         if (props.event.key === 'Escape') {
           popup[0].hide();
           return true;
         }
-        return (component.ref as any)?.onKeyDown(props);
+        return (component.ref as { onKeyDown?: (p: SuggestionKeyDownProps) => boolean })?.onKeyDown?.(props) ?? false;
       },
 
       onExit() {

@@ -3,12 +3,23 @@ import { DocumentProvider } from "@/features/document/components/page/document-c
 import { DocumentClientLayout } from "@/features/document/components/page/document-client-layout";
 import { DocumentRealtimeListener } from "@/features/document/components/page/document-realtime-listener";
 import { LazyEditor } from "@/features/editor/components/lazy-editor";
+import { PageThumbnails } from "@/features/editor/components/page-thumbnails";
+
+interface DocData {
+  id: string;
+  title: string;
+  updated_at: string;
+  all_members?: Array<{ role: string; user: { id: string; name: string; image: string; email: string } }>;
+  invites?: Record<string, unknown>[];
+  [key: string]: unknown;
+}
 
 interface DocumentPageProps {
-  document: any;
-  documents: any[];
+  document: DocData;
+  documents: DocData[];
   currentUserRole: string;
   currentUserName: string;
+  currentUserImage?: string;
   token: string;
 }
 
@@ -17,6 +28,7 @@ export function DocumentPage({
   documents,
   currentUserRole,
   currentUserName,
+  currentUserImage,
   token,
 }: DocumentPageProps) {
   return (
@@ -24,13 +36,16 @@ export function DocumentPage({
       <DocumentRealtimeListener documentId={document.id} />
       <DocumentHeader document={document} documents={documents} currentUserName={currentUserName} />
       <DocumentClientLayout>
-        <div className="flex-1 w-full pb-32 flex flex-col items-center">
-          <LazyEditor
-            documentId={document.id}
-            documentTitle={document.title}
-            currentUserName={currentUserName}
-            token={token}
-          />
+        <div className="flex flex-1 w-full relative">
+          <PageThumbnails />
+          <div className="flex-1 w-full pb-32 flex flex-col items-center">
+            <LazyEditor
+              documentId={document.id}
+              currentUserName={currentUserName}
+              currentUserImage={currentUserImage}
+              token={token}
+            />
+          </div>
         </div>
       </DocumentClientLayout>
     </DocumentProvider>

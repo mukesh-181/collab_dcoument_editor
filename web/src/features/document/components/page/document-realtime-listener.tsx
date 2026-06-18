@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ShieldAlert, UserMinus } from "lucide-react";
+import { UserMinus } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { useDocumentSync } from "./document-context";
 import { toast } from "sonner";
@@ -53,14 +53,14 @@ export function DocumentRealtimeListener({
             filter: `email=eq.${user.email}`,
           },
           (payload) => {
-            const invite = payload.new as any;
+            const invite = payload.new as Record<string, unknown>;
             if (invite.document_id !== documentId) return;
 
             if (invite.status === "removed") {
               setRemovedDialogOpen(true);
             } else if (invite.status === "role_updated") {
-              setCurrentUserRole(invite.role);
-              toast.success(`Your role was updated to ${invite.role}. ${invite.role === 'editor' ? 'You can now edit the document.' : 'You can no longer edit the document.'}`);
+              setCurrentUserRole(invite.role as string);
+              toast.success(`Your role was updated to ${invite.role as string}. ${(invite.role as string) === 'editor' ? 'You can now edit the document.' : 'You can no longer edit the document.'}`);
             }
           }
         )
@@ -75,7 +75,7 @@ export function DocumentRealtimeListener({
           (payload) => {
             // Guard against refreshing if the current user is the one being removed
             if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-              const record = payload.new as any;
+              const record = payload.new as Record<string, unknown>;
               if (record.email === user.email && record.status === 'removed') {
                 return;
               }
@@ -96,7 +96,7 @@ export function DocumentRealtimeListener({
             // Refreshing would cause the Server Component to throw a NoPermission error
             // and unmount our pretty RemovedDialog.
             if (payload.eventType === 'DELETE') {
-              const oldRecord = payload.old as any;
+              const oldRecord = payload.old as Record<string, unknown>;
               if (oldRecord && oldRecord.user_id === user.id) {
                 return;
               }
@@ -119,7 +119,7 @@ export function DocumentRealtimeListener({
         supabase.removeChannel(channel);
       }
     };
-  }, [supabase, documentId]);
+  }, [supabase, documentId, router, setCurrentUserRole]);
 
   return (
     <>

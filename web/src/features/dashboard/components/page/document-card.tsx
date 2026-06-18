@@ -2,43 +2,125 @@
 
 import Link from "next/link";
 import { FileText, Users } from "lucide-react";
+import { useRef, useState, useEffect, useSyncExternalStore } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DocumentActionMenu } from "../document-action-menu";
 import { useDocumentPreview } from "../../hooks/use-document-preview";
 import { ROUTES } from "@/constants/routes";
 import { getInitials } from "@/utils/string-utils";
 import { preloadEditor } from "@/features/editor/components/lazy-editor";
+import { extractUserInfo } from "@/utils/user-utils";
+import type { User } from "@supabase/supabase-js";
 
-// Sub-component for rendering the scaled-down rich text preview
-function DocumentPreview({ json }: { json: any }) {
+interface DocMember {
+  role: string;
+  user: {
+    id: string;
+    name: string;
+    image: string;
+    email: string;
+  };
+}
+
+interface DocData {
+  id: string;
+  title: string;
+  updated_at: string;
+  previewJson?: Record<string, unknown> | null;
+  all_members?: DocMember[];
+  document_members?: Array<{ role?: string | null }> | null;
+}
+
+// A4 page dimensions (px) matching the editor config
+const A4_WIDTH = 794;
+const A4_HEIGHT = 1123;
+
+function DocumentPreview({ json }: { json: Record<string, unknown> | null | undefined }) {
   const html = useDocumentPreview(json);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.282);
+  const [showPreview, setShowPreview] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
-  // Tiptap often generates <p></p> or <p><br></p> for completely empty documents
-  const isVisuallyEmpty = !html || html.trim() === '' || html === '<p></p>' || html === '<p><br></p>';
+  useEffect(() => {
+    if (!mounted) return;
+    const id = requestAnimationFrame(() => setShowPreview(true));
+    return () => cancelAnimationFrame(id);
+  }, [mounted]);
 
-  if (isVisuallyEmpty) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <FileText className="w-10 h-10 text-zinc-200 dark:text-zinc-800" strokeWidth={1} />
-      </div>
-    );
-  }
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width && width > 0) {
+        setScale(width / A4_WIDTH);
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const isVisuallyEmpty =
+    !html ||
+    html.trim() === "" ||
+    html === "<p></p>" ||
+    html === "<p><br></p>";
 
   return (
-    <div className="absolute inset-0 p-4 overflow-hidden pointer-events-none ">
-      <div
-        className="prose prose-zinc prose-sm dark:prose-invert max-w-none origin-top-left scale-[0.45]"
-        style={{ width: "220%", height: "220%" }}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Placeholder — visible until preview fades in */}
+      {(!showPreview || isVisuallyEmpty) && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <FileText className="w-10 h-10 text-zinc-200 dark:text-zinc-800" strokeWidth={1} />
+        </div>
+      )}
+      {/* Preview — fades in smoothly on mount */}
+      {mounted && !isVisuallyEmpty && (
+        <div
+          className="absolute top-0 left-0 transition-opacity duration-500 ease-in-out"
+          style={{
+            opacity: showPreview ? 1 : 0,
+            width: `${A4_WIDTH}px`,
+            height: `${A4_HEIGHT}px`,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          <div
+            style={{
+              padding: "72px 64px",
+              width: "100%",
+              height: "100%",
+              boxSizing: "border-box",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              className="prose prose-zinc dark:prose-invert max-w-none bg-transparent leading-[1.2] [&_strong]:text-inherit prose-a:text-blue-600 prose-a:underline dark:prose-a:text-blue-400 prose-p:m-0 prose-p:leading-[1.2] prose-headings:m-0 prose-headings:mb-2 prose-headings:leading-tight prose-ul:my-2 prose-ul:pl-6 prose-ul:list-disc prose-ol:my-2 prose-ol:pl-6 prose-ol:list-decimal prose-li:my-1 prose-li:marker:text-zinc-400 [&_.tableWrapper]:my-4"
+              style={{
+                wordWrap: "break-word",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "normal",
+              }}
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 interface DocumentCardProps {
-  document: any;
+  document: DocData;
   role: string;
-  currentUser?: any;
+  currentUser?: User | null;
 }
 
 function getRoleBadge(role: string) {
@@ -52,9 +134,17 @@ function getRoleBadge(role: string) {
 
 export function DocumentCard({ document, role, currentUser }: DocumentCardProps) {
   const memberCount = document.all_members?.length || 0;
-  const ownerMember = document.all_members?.find((m: any) => m.role === "owner");
+  const ownerMember = document.all_members?.find((m) => m.role === "owner");
   const ownerEmail = ownerMember?.user?.email || "";
   const currentUserName = currentUser?.user_metadata?.full_name || currentUser?.email || "Unknown User";
+
+  const sortedMembers = document.all_members 
+    ? [...document.all_members].sort((a, b) => {
+        if (a.user.id === currentUser?.id) return -1;
+        if (b.user.id === currentUser?.id) return 1;
+        return 0;
+      })
+    : [];
 
   return (
     <Link
@@ -106,20 +196,22 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
             <div className="flex items-center gap-2">
               {document.all_members && memberCount > 0 && (
                 <div className="flex items-center -space-x-1.5">
-                  {document.all_members
+                  {sortedMembers
                     .slice(0, 3)
-                    .map((member: any, i: number) => (
+                    .map((member: DocMember, i: number) => {
+                      const { name, image, email } = extractUserInfo(member.user);
+                      return (
                       <Avatar
                         key={member.user.id}
                         className="w-7 h-7 border-2 border-white dark:border-zinc-900 relative shadow-sm"
                         style={{ zIndex: 10 - i }}
                       >
-                        <AvatarImage src={member.user.image || undefined} />
+                        <AvatarImage src={image} />
                         <AvatarFallback className="text-[10px] bg-gradient-to-br from-indigo-400 to-purple-500 text-white font-semibold">
-                          {getInitials(member.user.name, member.user.email)}
+                          {getInitials(name, email)}
                         </AvatarFallback>
                       </Avatar>
-                    ))}
+                    )})}
                 </div>
               )}
               {memberCount > 0 && (

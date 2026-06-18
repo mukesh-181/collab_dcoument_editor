@@ -1,6 +1,18 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import type { ReactNode } from 'react';
 
-export const SlashMenuList = forwardRef((props: any, ref) => {
+interface SlashMenuItem {
+  title: string;
+  icon?: ReactNode;
+  command: (props: { editor: unknown; range: unknown }) => void;
+}
+
+interface SlashMenuProps {
+  items: SlashMenuItem[];
+  command: (item: SlashMenuItem) => void;
+}
+
+export const SlashMenuList = forwardRef<{ onKeyDown: (p: { event: KeyboardEvent }) => boolean }, SlashMenuProps>((props, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const selectItem = (index: number) => {
@@ -25,7 +37,7 @@ export const SlashMenuList = forwardRef((props: any, ref) => {
   useEffect(() => setSelectedIndex(0), [props.items]);
 
   useImperativeHandle(ref, () => ({
-    onKeyDown: ({ event }: any) => {
+    onKeyDown: ({ event }: { event: KeyboardEvent }) => {
       if (event.key === 'ArrowUp') {
         upHandler();
         return true;
@@ -48,7 +60,7 @@ export const SlashMenuList = forwardRef((props: any, ref) => {
 
   return (
     <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-md rounded-md flex flex-col gap-1 p-1 w-48 z-50">
-      {props.items.map((item: any, index: number) => (
+      {props.items.map((item: SlashMenuItem, index: number) => (
         <button
           className={`flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm text-left ${
             index === selectedIndex

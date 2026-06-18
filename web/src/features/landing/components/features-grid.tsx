@@ -42,7 +42,7 @@ export function FeaturesGrid() {
           Designed for speed and focus.
         </p>
         <p className="mt-6 text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-          We built CollabDoc to be the fastest, most reliable collaborative editor. Here's what makes it different.
+          We built CollabDoc to be the fastest, most reliable collaborative editor. Here&apos;s what makes it different.
         </p>
       </div>
 

@@ -24,6 +24,7 @@ import { FontSize } from "@/features/editor/extensions/font-size";
 import { SlashCommand, slashSuggestion } from "@/features/editor/extensions/slash-command";
 import * as Y from "yjs";
 import { HocuspocusProvider } from "@hocuspocus/provider";
+import type { EditorView } from "@tiptap/pm/view";
 
 const CustomLink = Link.extend({
   renderHTML({ HTMLAttributes }) {
@@ -37,6 +38,7 @@ export interface EditorConfigParams {
   ydoc: Y.Doc;
   provider: HocuspocusProvider;
   currentUserName: string;
+  currentUserImage?: string;
 }
 
 export const getEditorExtensions = ({
@@ -44,6 +46,7 @@ export const getEditorExtensions = ({
   ydoc,
   provider,
   currentUserName,
+  currentUserImage,
 }: EditorConfigParams) => {
   return [
     StarterKit.configure({
@@ -68,17 +71,22 @@ export const getEditorExtensions = ({
     TableRow,
     TableHeader,
     TableCell,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ResizableImage as any).configure({
       documentId: documentId,
     }),
     FontSize,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     TaskList as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (TaskItem as any).configure({
       nested: true,
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (SlashCommand as any).configure({
       suggestion: slashSuggestion,
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (PaginationPlus as any).configure({
       pageHeight: 1123,
       pageWidth: 794,
@@ -103,6 +111,7 @@ export const getEditorExtensions = ({
       provider: provider,
       user: {
         name: currentUserName,
+        image: currentUserImage,
         color: [
           "#f43f5e",
           "#8b5cf6",
@@ -145,7 +154,8 @@ export const editorPropsConfig = {
       "prose-q:quotes-['\"'_'\"'] prose-q:italic prose-q:text-zinc-600 dark:prose-q:text-zinc-400"
     ].join(" "),
   },
-  handleClick: (view: any, pos: any, event: any) => {
+  handleClick: (view: EditorView, pos: number, event: MouseEvent) => {
+    void view; void pos;
     const target = event.target as HTMLElement;
     if (target && target.closest("a")) {
       event.preventDefault();

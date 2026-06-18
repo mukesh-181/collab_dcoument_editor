@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { yDocToProsemirrorJSON } from 'y-prosemirror'
 import * as Y from 'yjs'
+import type { DashboardDocument } from '@/features/dashboard/types'
 
 interface GetDocumentsOptions {
   search?: string;
@@ -66,7 +67,7 @@ export async function getUserDocuments(options?: GetDocumentsOptions) {
   const totalPages = Math.max(1, Math.ceil((count || 0) / limit))
 
   // Process the documents to extract a JSON preview from the binary Yjs state
-  const processedDocuments = documents.map((doc: any) => {
+  const processedDocuments = documents.map((doc: Record<string, unknown>) => {
     let previewJson = null
     
     // Check if there is a content state (Supabase might return an array or object depending on relation)
@@ -82,9 +83,8 @@ export async function getUserDocuments(options?: GetDocumentsOptions) {
         
         // Convert Y.Doc directly to Prosemirror JSON tree to preserve formatting
         previewJson = yDocToProsemirrorJSON(yDoc, 'default')
-      } catch (err) {
-        // Use console.warn instead of console.error to prevent Next.js dev overlay interruptions
-        console.warn(`Failed to generate preview JSON for doc ${doc.id}`)
+      } catch {
+        console.warn(`Failed to generate preview JSON for doc ${doc.id as string}`)
       }
     }
 
@@ -93,8 +93,8 @@ export async function getUserDocuments(options?: GetDocumentsOptions) {
 
     return {
       ...doc,
-      previewJson
-    }
+      previewJson,
+    } as DashboardDocument
   })
 
   return {

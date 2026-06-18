@@ -54,7 +54,7 @@ const ResizableImageNode = (props: NodeViewProps) => {
           updateAttributes({ src: result.publicUrl });
           toast.success("Image replaced", { id: toastId });
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to replace image", { id: toastId });
       } finally {
         setIsUploading(false);
@@ -118,6 +118,7 @@ const ResizableImageNode = (props: NodeViewProps) => {
       style={{ display: 'inline-block', lineHeight: 0 }}
       data-drag-handle
     >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         ref={imgRef}
         src={src}

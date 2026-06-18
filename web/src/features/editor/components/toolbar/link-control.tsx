@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link2, Unlink } from "lucide-react";
 import { Editor } from "@tiptap/react";
+import type { Mark } from "@tiptap/pm/model";
 import {
   Popover,
   PopoverContent,
@@ -80,10 +81,10 @@ export function LinkControl({ editor }: { editor: Editor }) {
     const { empty, $from } = editor.state.selection;
     if (empty) {
       const isLinkBefore = $from.nodeBefore?.marks.some(
-        (mark: any) => mark.type.name === "link",
+        (mark: Mark) => mark.type.name === "link",
       );
       const isLinkAfter = $from.nodeAfter?.marks.some(
-        (mark: any) => mark.type.name === "link",
+        (mark: Mark) => mark.type.name === "link",
       );
       if (!isLinkBefore && !isLinkAfter) {
         return false;
