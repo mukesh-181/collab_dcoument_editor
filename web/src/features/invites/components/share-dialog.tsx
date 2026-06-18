@@ -43,6 +43,7 @@ export function ShareDialog({
 
   // Sync local invites with server props to reflect realtime accept/reject/expire events
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalInvites(invites || []);
   }, [invites]);
 

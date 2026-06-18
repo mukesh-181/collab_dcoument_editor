@@ -48,6 +48,7 @@ export function DocumentHeader({
   const [title, setTitle] = useState(document.title);
   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTitle(document.title);
   }, [document.title]);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
