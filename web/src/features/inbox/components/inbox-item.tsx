@@ -14,15 +14,30 @@ import { rejectInvite } from "@/features/invites/actions/reject-invite.action";
 import { deleteInvite } from "@/features/invites/actions/delete-invite.action";
 import { ROUTES } from "@/constants/routes";
 import { getInitials } from "@/utils/string-utils";
-import {
-  getUserName,
-  getUserImage,
-  getUserEmail,
-  getUserRole,
-  USER_FALLBACKS,
-} from "@/utils/user-utils";
+import { extractUserInfo } from "@/utils/user-utils";
+import type { UserLike } from "@/utils/user-utils";
 
-export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?: (updates: any) => void }) {
+// Supabase returns nested join rows as arrays even for many-to-one relationships.
+// We model both possibilities and normalise at the access site.
+type SupabaseOwner = UserLike | UserLike[] | null | undefined;
+type SupabaseDocuments =
+  | { title?: string | null; owner?: SupabaseOwner }
+  | Array<{ title?: string | null; owner?: SupabaseOwner }>
+  | null
+  | undefined;
+
+export interface InboxInvite {
+  id: string;
+  token: string;
+  status: string;
+  role: string;
+  expires_at: string | null;
+  created_at: string;
+  document_id: string;
+  documents?: SupabaseDocuments;
+}
+
+export function InboxItem({ invite, onItemUpdate }: { invite: InboxInvite, onItemUpdate?: (updates: Partial<InboxInvite> & { _deleted?: boolean }) => void }) {
   const router = useRouter();
   const [isAcceptOpen, setIsAcceptOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
@@ -32,22 +47,22 @@ export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?
   const [isExpiredLocal, setIsExpiredLocal] = useState(() => {
     return (
       invite.status === "expired" ||
-      (invite.expires_at && new Date(invite.expires_at) < new Date())
+      (invite.expires_at && new Date(invite.expires_at as string) < new Date())
     );
   });
 
   useEffect(() => {
     if (invite.status === "pending" && invite.expires_at && !isExpiredLocal) {
-      const msUntilExpiry = new Date(invite.expires_at).getTime() - Date.now();
+      const msUntilExpiry = new Date(invite.expires_at!).getTime() - Date.now();
       if (msUntilExpiry > 0) {
         const timeout = setTimeout(
           () => setIsExpiredLocal(true),
           msUntilExpiry,
         );
         return () => clearTimeout(timeout);
-      } else {
-        setIsExpiredLocal(true);
       }
+      // Already expired — the state initializer handles this on mount.
+      // No synchronous setState here to avoid cascading renders.
     }
   }, [invite.status, invite.expires_at, isExpiredLocal]);
 
@@ -55,10 +70,13 @@ export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?
   const timeStr = format(new Date(invite.created_at), "hh:mm a");
   const dateStr = format(new Date(invite.created_at), "dd/MM/yyyy");
 
-  const inviterEmail = getUserEmail(invite.documents?.owner?.email);
-  const inviterName = getUserName(invite.documents?.owner?.name, inviterEmail);
-  const inviterImage = getUserImage(invite.documents?.owner?.image);
-  const documentTitle = invite.documents?.title || "Untitled Document";
+  // Normalise Supabase response: nested joins come back as arrays or single objects
+  const docsRaw = invite.documents;
+  const docsData = Array.isArray(docsRaw) ? docsRaw[0] : docsRaw;
+  const ownerRaw = docsData?.owner;
+  const ownerData = Array.isArray(ownerRaw) ? ownerRaw[0] : ownerRaw;
+  const { name: inviterName, email: inviterEmail, image: inviterImage } = extractUserInfo(ownerData ?? {});
+  const documentTitle = docsData?.title || "Untitled Document";
 
   const handleAccept = async () => {
     setIsLoading(true);
@@ -67,8 +85,8 @@ export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?
       toast.success("Invitation accepted!");
       if (onItemUpdate) onItemUpdate({ status: 'accepted' });
       router.refresh();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to accept invite");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to accept invite");
     } finally {
       setIsLoading(false);
       setIsAcceptOpen(false);
@@ -82,8 +100,8 @@ export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?
       toast.success("Invitation rejected.");
       if (onItemUpdate) onItemUpdate({ status: 'rejected' });
       router.refresh();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to reject invite");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to reject invite");
     } finally {
       setIsLoading(false);
       setIsRejectOpen(false);
@@ -97,8 +115,8 @@ export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?
       toast.success("Invitation removed.");
       if (onItemUpdate) onItemUpdate({ _deleted: true }); // special flag to remove it
       router.refresh();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to remove invite");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to remove invite");
     } finally {
       setIsLoading(false);
       setIsDeleteOpen(false);
@@ -143,21 +161,21 @@ export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?
               </span>{" "}
               has exited from{" "}
               <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-                '{documentTitle}'
+                &apos;{documentTitle}&apos;
               </span>
               .
             </span>
           ) : invite.status === "removed" ? (
             <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
               You have been removed from{" "}
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">'{documentTitle}'</span> by{" "}
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span> by{" "}
               <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterName}</span>
             </span>
           ) : invite.status === "role_updated" ? (
             <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1 flex flex-col">
               <span>
                 Your role for{" "}
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100">'{documentTitle}'</span> has
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span> has
                 been updated to{" "}
                 <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span>{" "}
                 by <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterName}</span>.
@@ -166,7 +184,7 @@ export function InboxItem({ invite, onItemUpdate }: { invite: any, onItemUpdate?
           ) : (
             <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
               Invitation to join{" "}
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">'{documentTitle}'</span> with{" "}
+              <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span> with{" "}
               <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span>{" "}
               access
             </span>

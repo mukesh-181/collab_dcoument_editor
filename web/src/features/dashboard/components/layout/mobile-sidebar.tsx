@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { SidebarContent } from "./sidebar-content";
 import { User } from "@supabase/supabase-js";
 
-export function MobileSidebar({ documents, user }: { documents: any[], user?: User | null }) {
+export function MobileSidebar({ documents, user }: { documents: Record<string, unknown>[], user?: User | null }) {
   return (
     <Sheet>
       <SheetTrigger asChild>

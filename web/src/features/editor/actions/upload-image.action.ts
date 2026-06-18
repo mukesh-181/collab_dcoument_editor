@@ -28,7 +28,7 @@ export async function uploadImage(documentId: string, formData: FormData) {
     const fileName = `${crypto.randomUUID()}.${fileExt}`;
     const filePath = `${documentId}/${fileName}`;
     
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("document-assets")
       .upload(filePath, file, {
         cacheControl: "3600",

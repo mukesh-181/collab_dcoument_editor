@@ -37,7 +37,7 @@ export function InboxRealtimeListener({ onNewEvent }: { onNewEvent?: (silent: bo
             filter: `email=eq.${user.email}`,
           },
           (payload) => {
-            const invite = payload.new as any;
+            const invite = payload.new as Record<string, unknown>;
             if (invite.status === 'removed') {
               toast.error("Your access was revoked for a document.");
             } else if (invite.status === 'role_updated') {
@@ -56,7 +56,7 @@ export function InboxRealtimeListener({ onNewEvent }: { onNewEvent?: (silent: bo
             table: 'invites',
             filter: `email=eq.${user.email}`,
           },
-          (payload) => {
+          () => {
             if (onNewEventRef.current) onNewEventRef.current(true);
           }
         )

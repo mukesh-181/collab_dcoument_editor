@@ -2,18 +2,12 @@
 
 import { useState } from "react";
 import { Copy, Check, Loader2, AlertCircle, Eye, Edit2, Info } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createInviteLink } from "../actions/create-invite.action";
 import { ROUTES } from "@/constants/routes";
+import { ENV } from "@/constants/env";
 
 interface CreateLinkTabProps {
   documentId: string;
@@ -31,13 +25,11 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
     setError("");
     try {
       const token = await createInviteLink(documentId, role);
-      const url = new URL(
-        ROUTES.INVITE(token),
-        window.location.origin,
-      );
-      setInviteLink(url.toString());
-    } catch (err: any) {
-      setError(err.message || "Failed to create invite link");
+      const inviteLinkUrl = `${ENV.NEXT_PUBLIC_APP_URL}${ROUTES.INVITE(token)}`;
+      setInviteLink(inviteLinkUrl);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to create invite link";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }

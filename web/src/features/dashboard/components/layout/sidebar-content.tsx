@@ -4,20 +4,64 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Settings, PlusSquare, Inbox, LayoutGrid, FileText } from "lucide-react";
+import { Settings, Inbox, LayoutGrid } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
 import { useEffect, useState, useMemo } from "react";
+import type { LucideIcon } from "lucide-react";
 import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action";
 import { createClient } from "@/lib/supabase/client";
 import { ROUTES } from "@/constants/routes";
-import { getInitials } from "@/utils/string-utils";
+
+function NavItem({ icon: Icon, label, href, badge, pathname }: { icon: LucideIcon; label: string; href: string; badge?: number; pathname: string }) {
+  const isActive = pathname === href;
+  return (
+    <Link
+      href={href}
+      className={`group flex items-center justify-between h-9 px-3 rounded-xl transition-all ${
+        isActive
+          ? "bg-white shadow-sm ring-1 ring-zinc-200/50 dark:bg-zinc-800 dark:ring-zinc-700/50"
+          : "hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400"
+      }`}
+    >
+      <div className="flex items-center">
+        <Icon
+          className={`mr-3 h-[18px] w-[18px] shrink-0 ${
+            isActive
+              ? "text-primary"
+              : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
+          }`}
+        />
+        <span
+          className={`text-[14px] ${
+            isActive
+              ? "text-zinc-900 dark:text-zinc-100 font-semibold"
+              : "font-medium group-hover:text-zinc-900 dark:group-hover:text-zinc-100"
+          }`}
+        >
+          {label}
+        </span>
+      </div>
+      {badge !== undefined && (
+        <span
+          className={`flex h-5 items-center justify-center rounded-full px-2 text-[12px] font-bold ${
+            label === "Inbox"
+              ? "bg-primary text-primary-foreground"
+              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+          }`}
+        >
+          {badge}
+        </span>
+      )}
+    </Link>
+  );
+}
 
 export function SidebarContent({
   user,
 }: {
-  documents?: any[];
+  documents?: Record<string, unknown>[];
   user?: User | null;
 }) {
   const pathname = usePathname();
@@ -57,50 +101,6 @@ export function SidebarContent({
       supabase.removeChannel(channel);
     };
   }, [user?.email, supabase]);
-
-  const NavItem = ({ icon: Icon, label, href, badge }: any) => {
-    const isActive = pathname === href;
-    return (
-      <Link
-        href={href}
-        className={`group flex items-center justify-between h-9 px-3 rounded-xl transition-all ${
-          isActive
-            ? "bg-white shadow-sm ring-1 ring-zinc-200/50 dark:bg-zinc-800 dark:ring-zinc-700/50"
-            : "hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400"
-        }`}
-      >
-        <div className="flex items-center">
-          <Icon
-            className={`mr-3 h-[18px] w-[18px] shrink-0 ${
-              isActive
-                ? "text-primary"
-                : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
-            }`}
-          />
-          <span
-            className={`text-[14px] ${
-              isActive
-                ? "text-zinc-900 dark:text-zinc-100 font-semibold"
-                : "font-medium group-hover:text-zinc-900 dark:group-hover:text-zinc-100"
-            }`}
-          >
-            {label}
-          </span>
-        </div>
-        {badge !== undefined && (
-          <span
-            className={`flex h-5 items-center justify-center rounded-full px-2 text-[12px] font-bold ${
-              label === "Inbox"
-                ? "bg-primary text-primary-foreground"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-            }`}
-          >
-            {badge}
-          </span>
-        )}
-      </Link>
-    );
-  };
 
   return (
     <div className="flex h-full flex-col p-4">
@@ -147,11 +147,13 @@ export function SidebarContent({
             label="Inbox"
             href={ROUTES.INBOX}
             badge={unreadCount > 0 ? unreadCount : undefined}
+            pathname={pathname}
           />
           <NavItem
             icon={LayoutGrid}
             label="Dashboard"
             href={ROUTES.DASHBOARD}
+            pathname={pathname}
           />
         </div>
       </div>

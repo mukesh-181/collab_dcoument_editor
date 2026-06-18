@@ -47,7 +47,7 @@ export function RegisterForm({ next }: { next?: string }) {
         toast.success('Account created successfully!')
         router.push(next || ROUTES.DASHBOARD)
       }
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred')
     } finally {
       setIsLoading(false)
