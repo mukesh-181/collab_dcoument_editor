@@ -55,7 +55,7 @@ export function AuthTabs({
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <LoginForm next={next} />
             <div className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <button
                 onClick={() => setActiveTab("register")}
                 className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 underline-offset-4 hover:underline transition-all"

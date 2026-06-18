@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Inbox, LayoutGrid, FileText } from "lucide-react";
+import { Inbox, LayoutGrid } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -12,12 +12,38 @@ import { logout } from "@/features/auth/actions/logout.action";
 import { SignOutDialogContent } from "@/features/auth/components/sign-out-button";
 import { Dialog } from "@/components/ui/dialog";
 import { useEffect, useState, useMemo } from "react";
+import type { LucideIcon } from "lucide-react";
 import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action";
 import { createClient } from "@/lib/supabase/client";
 import { ROUTES } from "@/constants/routes";
 
+function NavItem({ icon: Icon, label, href, badge, pathname }: { icon: LucideIcon; label: string; href: string; badge?: number; pathname: string }) {
+  const isActive = pathname === href;
+  return (
+    <Link
+      href={href}
+      className={`relative flex items-center px-3 py-1.5 text-sm font-medium transition-colors rounded-lg ${
+        isActive
+          ? "text-zinc-900 bg-zinc-100 dark:text-zinc-100 dark:bg-zinc-800"
+          : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800/50"
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4" />
+        {label}
+      </div>
+      {badge !== undefined && badge > 0 && (
+        <span className="ml-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+          {badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
 export function DashboardHeader({ user }: { user: User | null }) {
   const pathname = usePathname();
+  const isDocumentPage = pathname?.match(/^\/dashboard\/[^/]+$/);
   const avatarUrl = user?.user_metadata?.avatar_url;
   const fullName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
   const initial = fullName.charAt(0).toUpperCase();
@@ -61,35 +87,9 @@ export function DashboardHeader({ user }: { user: User | null }) {
     };
   }, [user?.email, supabase]);
 
-  const isDocumentPage = pathname?.match(/^\/dashboard\/[^/]+$/);
-
   if (isDocumentPage) {
     return null;
   }
-
-  const NavItem = ({ icon: Icon, label, href, badge }: any) => {
-    const isActive = pathname === href;
-    return (
-      <Link
-        href={href}
-        className={`relative flex items-center px-3 py-1.5 text-sm font-medium transition-colors ${
-          isActive
-            ? "text-zinc-900 dark:text-white"
-            : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-        }`}
-      >
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4" />
-          {label}
-        </div>
-        {badge !== undefined && badge > 0 && (
-          <span className="ml-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
-            {badge}
-          </span>
-        )}
-      </Link>
-    );
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/70 backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/70 supports-[backdrop-filter]:bg-white/60">
@@ -109,8 +109,8 @@ export function DashboardHeader({ user }: { user: User | null }) {
 
         {/* Navigation */}
         <nav className="flex items-center space-x-1 flex-1">
-          <NavItem icon={LayoutGrid} label="Dashboard" href={ROUTES.DASHBOARD} />
-          <NavItem icon={Inbox} label="Inbox" href={ROUTES.INBOX} badge={unreadCount} />
+          <NavItem icon={LayoutGrid} label="Dashboard" href={ROUTES.DASHBOARD} pathname={pathname} />
+          <NavItem icon={Inbox} label="Inbox" href={ROUTES.INBOX} badge={unreadCount} pathname={pathname} />
         </nav>
 
         {/* Right Section */}

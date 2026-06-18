@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { InboxItem } from "./inbox-item";
+import { InboxItem, type InboxInvite } from "./inbox-item";
 import { InboxRealtimeListener } from "./inbox-realtime-listener";
 import {
   Select,
@@ -15,9 +15,9 @@ import { Loader2 } from "lucide-react";
 
 export type FilterType = "all" | "invites" | "document";
 
-export function InboxClientList({ initialInvites, initialCount }: { initialInvites: any[], initialCount: number }) {
+export function InboxClientList({ initialInvites, initialCount }: { initialInvites: InboxInvite[], initialCount: number }) {
   const [filter, setFilter] = useState<FilterType>("all");
-  const [invites, setInvites] = useState<any[]>(initialInvites);
+  const [invites, setInvites] = useState<InboxInvite[]>(initialInvites);
   const [totalCount, setTotalCount] = useState(initialCount);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(initialInvites.length === 15);
@@ -28,7 +28,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
     if (!silent) setIsFilterLoading(true);
     try {
       const { data, count } = await getInbox(0, 15, filter);
-      setInvites(data);
+      setInvites(data as InboxInvite[]);
       setTotalCount(count);
       setPage(0);
       setHasMore(data.length === 15);
@@ -48,7 +48,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
       try {
         const { data, count } = await getInbox(0, 15, filter);
         if (isMounted) {
-          setInvites(data);
+          setInvites(data as InboxInvite[]);
           setTotalCount(count);
           setPage(0);
           setHasMore(data.length === 15);
@@ -60,6 +60,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
     
     fetch();
     return () => { isMounted = false; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const loadMore = async () => {
@@ -73,7 +74,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
       setInvites((prev) => {
         // Filter out duplicates just in case realtime/pagination overlap
         const existingIds = new Set(prev.map(i => i.id));
-        const uniqueNewItems = newItems.filter((i: any) => !existingIds.has(i.id));
+        const uniqueNewItems = (newItems as InboxInvite[]).filter((i: InboxInvite) => !existingIds.has(i.id));
         return [...prev, ...uniqueNewItems];
       });
       setTotalCount(newCount);
@@ -98,6 +99,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
       
       if (node) observer.current.observe(node);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isLoadingMore, hasMore]
   );
 

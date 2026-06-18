@@ -27,7 +27,7 @@ export default function NotFound() {
         
         {/* Description */}
         <p className="text-base text-zinc-500 dark:text-zinc-400 mb-10 max-w-[280px] sm:max-w-none">
-          Sorry, we couldn't find the page you're looking for. It might have been moved or deleted.
+          Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved or deleted.
         </p>
 
         {/* Action Buttons */}

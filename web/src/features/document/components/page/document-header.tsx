@@ -1,17 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ShareDialog } from "@/features/invites/components/share-dialog";
 import { ActiveUsersCluster } from "./active-users-cluster";
 import { MobileSidebar } from "@/features/dashboard/components/layout/mobile-sidebar";
 import { leaveDocumentAction } from "@/features/document/actions/leave-document.action";
-import { LogOut } from "lucide-react";
 import { toast } from "sonner";
-import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DocumentRenameDialog } from "@/features/dashboard/components/dialogs/document-rename-dialog";
 import { DocumentSyncStatus } from "./document-sync-status";
@@ -19,8 +17,7 @@ import { DocumentMembersPopover } from "./document-members-popover";
 import { LeaveDocumentDialog } from "./leave-document-dialog";
 import { useDocumentSync } from "./document-context";
 import { ROUTES } from "@/constants/routes";
-import { getUserName, getUserImage, getUserEmail, getUserRole, USER_FALLBACKS } from "@/utils/user-utils";
-
+import { USER_FALLBACKS } from "@/utils/user-utils";
 
 interface DocumentHeaderProps {
   document: {
@@ -36,9 +33,9 @@ interface DocumentHeaderProps {
         email: string;
       };
     }[];
-    invites?: any[];
+    invites?: Record<string, unknown>[];
   };
-  documents?: any[];
+  documents?: Record<string, unknown>[];
   currentUserName?: string;
 }
 
@@ -49,6 +46,11 @@ export function DocumentHeader({
 }: DocumentHeaderProps) {
   const { currentUserRole } = useDocumentSync();
   const [title, setTitle] = useState(document.title);
+  
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTitle(document.title);
+  }, [document.title]);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const router = useRouter();
@@ -138,8 +140,8 @@ export function DocumentHeader({
         {currentUserRole === "owner" && (
           <ShareDialog 
             documentId={document.id} 
-            allMembers={document.all_members}
-            invites={document.invites}
+            allMembers={document.all_members as Array<{ role: string; user: { id: string; name: string; image: string; email: string } }>}
+            invites={document.invites as Array<{ email: string; status: string; expires_at: string }>}
           />
         )}
 

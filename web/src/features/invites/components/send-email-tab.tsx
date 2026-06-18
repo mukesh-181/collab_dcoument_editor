@@ -1,22 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Send, Eye, Edit2, Loader2, Info, Lightbulb } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useState } from "react";
+import { Send, Eye, Edit2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { UserSearchInput, SelectedContact } from "./user-search-input";
 import { sendEmailInvites } from "../actions/send-email-invites.action";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getUserName, getUserImage } from "@/utils/user-utils";
+import { extractUserInfo } from "@/utils/user-utils";
 import { getInitials } from "@/utils/string-utils";
+
+interface Member {
+  user: { id: string; email?: string; name?: string; image?: string; user_metadata?: Record<string, string> };
+  role: string;
+}
+
+interface PendingInvite {
+  id?: string;
+  email: string;
+  status: string;
+  expires_at: string;
+  role?: string;
+  name?: string | null;
+  image?: string | null;
+}
+
+interface NewInvite {
+  email: string;
+  status: string;
+  expires_at: string;
+}
 
 export function SendEmailTab({ 
   documentId,
@@ -25,9 +39,9 @@ export function SendEmailTab({
   onInviteSent
 }: { 
   documentId: string;
-  allMembers?: any[];
-  invites?: any[];
-  onInviteSent?: (newInvites: any[]) => void;
+  allMembers?: Member[];
+  invites?: PendingInvite[];
+  onInviteSent?: (newInvites: NewInvite[]) => void;
 }) {
   const [emailRole, setEmailRole] = useState<"viewer" | "editor">("viewer");
   const [email, setEmail] = useState("");
@@ -42,7 +56,7 @@ export function SendEmailTab({
     
     const targetEmails = selectedContacts.map(c => c.email);
     const rawEmails = email.split(/[,\s]+/).map(e => e.trim()).filter(Boolean);
-    let newlyAdded: SelectedContact[] = [];
+    const newlyAdded: SelectedContact[] = [];
 
     // Add pending inputs if they are valid emails
     for (const trimmed of rawEmails) {
@@ -69,17 +83,23 @@ export function SendEmailTab({
       toast.success(`Successfully sent invitations to ${targetEmails.length} user${targetEmails.length > 1 ? 's' : ''}`);
       
       // Instantly block them from being selected again without a page reload
-      const newPendingInvites = targetEmails.map(e => ({
-        email: e,
-        status: 'pending',
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Fake expiry for immediate UI update
-      }));
+      const newPendingInvites = targetEmails.map(e => {
+        const contact = selectedContacts.find(c => c.email === e);
+        return {
+          email: e,
+          status: 'pending',
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Fake expiry for immediate UI update
+          name: contact?.name || null,
+          image: contact?.image || null
+        };
+      });
       if (onInviteSent) onInviteSent(newPendingInvites);
       
       setSelectedContacts([]);
       setEmail("");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send invitations");
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Failed to send invitations";
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -154,16 +174,18 @@ export function SendEmailTab({
           </span>
         </div>
         <div className="max-h-[180px] overflow-y-auto pr-2 space-y-1 bg-muted/30 p-2 rounded-xl border border-border/50 scrollbar-thin scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-700 dark:hover:scrollbar-thumb-zinc-600 scrollbar-track-transparent">
-          {sortedMembers.map((member) => (
+          {sortedMembers.map((member) => {
+            const { name, image, email } = extractUserInfo(member.user);
+            return (
             <div key={member.user.id} className="flex items-center justify-between p-2 bg-card hover:bg-accent border border-transparent hover:border-border rounded-lg transition-all shadow-sm">
               <div className="flex items-center space-x-3 overflow-hidden">
                 <Avatar className="w-8 h-8 border border-border shrink-0">
-                  <AvatarImage src={getUserImage(member.user.image)} />
-                  <AvatarFallback className="text-[10px]">{getInitials(member.user.name, member.user.email)}</AvatarFallback>
+                  <AvatarImage src={image} />
+                  <AvatarFallback className="text-[10px]">{getInitials(name, email)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{getUserName(member.user.name, member.user.email)}</span>
-                  <span className="text-[11px] text-muted-foreground truncate leading-snug">{member.user.email}</span>
+                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{name}</span>
+                  <span className="text-[11px] text-muted-foreground truncate leading-snug">{email}</span>
                 </div>
               </div>
               <div className={`ml-3 shrink-0 text-[11px] font-medium capitalize px-2 py-0.5 border rounded-md ${
@@ -176,16 +198,17 @@ export function SendEmailTab({
                 {member.role}
               </div>
             </div>
-          ))}
+          )})}
           {pendingInvites.map((inv, idx) => (
             <div key={inv.id || idx} className="flex items-center justify-between p-2 bg-card hover:bg-accent border border-transparent hover:border-border rounded-lg transition-all shadow-sm">
               <div className="flex items-center space-x-3 overflow-hidden">
                 <Avatar className="w-8 h-8 border border-border shrink-0">
-                  <AvatarFallback className="bg-muted text-[10px]">{getInitials(null, inv.email)}</AvatarFallback>
+                  <AvatarImage src={inv.image || undefined} />
+                  <AvatarFallback className="bg-muted text-[10px]">{getInitials(inv.name, inv.email)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{inv.email}</span>
-                  <span className="text-[11px] text-muted-foreground truncate leading-snug">Pending Invite</span>
+                  <span className="text-[13px] font-medium text-foreground truncate leading-snug">{inv.name || inv.email}</span>
+                  <span className="text-[11px] text-muted-foreground truncate leading-snug">{inv.name ? inv.email : "Pending Invite"}</span>
                 </div>
               </div>
               <div className="ml-3 shrink-0 text-[11px] font-medium px-2 py-0.5 bg-emerald-300/15 text-emerald-800 border border-emerald-500/30 rounded-md border-dashed">

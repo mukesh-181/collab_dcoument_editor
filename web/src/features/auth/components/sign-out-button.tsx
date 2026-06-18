@@ -43,7 +43,12 @@ export function SignOutButton({ iconOnly = false }: { iconOnly?: boolean } = {})
   )
 }
 
-export function SignOutDialogContent({ isOpen, setIsOpen, isPending, onConfirm }: any) {
+export function SignOutDialogContent({ setIsOpen, isPending, onConfirm }: {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  isPending: boolean;
+  onConfirm: () => void;
+}) {
   return (
     <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-border rounded-2xl shadow-2xl">
         <div className="p-6">

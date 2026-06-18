@@ -9,15 +9,14 @@ import * as Y from "yjs";
 import { Toolbar } from "./toolbar";
 import { LinkBubbleMenu } from "./link-bubble-menu";
 import { FormattingBubbleMenu } from "./formatting-bubble-menu";
-import { useDocumentSync } from "@/features/document/components/page/document-context";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useDocumentSync, type ActiveUser } from "@/features/document/components/page/document-context";
+import { useEffect, useState, useMemo } from "react";
 import { OfflineBanner } from "./offline-banner";
-import { EditorSkeleton } from "@/features/document/components/page/document-skeleton";
 
 interface EditorProps {
   documentId: string;
-  documentTitle?: string;
   currentUserName: string;
+  currentUserImage?: string;
   token: string;
 }
 
@@ -61,8 +60,8 @@ function EditorRoleSync({ role }: { role: string }) {
 
 export function Editor({
   documentId,
-  documentTitle = "Untitled Document",
   currentUserName,
+  currentUserImage,
   token,
 }: EditorProps) {
   const { setSyncState, setActiveUsers, setIsEditorReady, currentUserRole } = useDocumentSync();
@@ -70,14 +69,12 @@ export function Editor({
   const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
   const [isSynced, setIsSynced] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [fadeIn, setFadeIn] = useState(false);
 
   useEffect(() => {
-    // Only connect to WebSocket if we have a valid token
     if (!token) return;
 
     const doc = new Y.Doc();
-    setYdoc(doc);
-
     const wsUrl = ENV.WEBSOCKET_URL;
 
     const hocuspocusProvider = new HocuspocusProvider({
@@ -99,20 +96,18 @@ export function Editor({
       },
       onSynced: () => {
         setIsSynced(true);
-        // Add a slight delay to allow Tiptap and PaginationPlus to finish rendering
-        // their complex DOM layout before we remove the skeleton overlay.
         setTimeout(() => {
           setIsEditorReady(true);
         }, 150);
       },
       onAwarenessUpdate: ({ states }) => {
-        const users: any[] = [];
-        states.forEach((state: any) => {
+        const users: ActiveUser[] = [];
+        states.forEach((state: { user?: { name: string; color: string; image?: string }; clientId?: number }) => {
           if (state.user && state.clientId !== doc.clientID) {
-            users.push({ clientId: state.clientId, user: state.user });
+            users.push({ clientId: state.clientId as number, user: state.user });
           }
         });
-        
+
         setActiveUsers((prev) => {
           const prevString = JSON.stringify(prev);
           const newString = JSON.stringify(users);
@@ -121,33 +116,41 @@ export function Editor({
       },
     });
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setProvider(hocuspocusProvider);
+    setYdoc(doc);
 
     return () => {
       hocuspocusProvider.destroy();
       doc.destroy();
     };
-  }, [documentId, token, setSyncState, setIsEditorReady]);
+  }, [documentId, token, setSyncState, setIsEditorReady, setActiveUsers]);
 
   const editorProps = useMemo(() => editorPropsConfig, []);
 
   const extensions = useMemo(
     () => {
       if (!provider || !ydoc) return [];
-      return getEditorExtensions({ documentId, ydoc, provider, currentUserName });
+      return getEditorExtensions({ documentId, ydoc, provider, currentUserName, currentUserImage });
     },
-    [documentId, ydoc, provider, currentUserName]
+    [documentId, ydoc, provider, currentUserName, currentUserImage]
   );
 
-  // The parent DocumentClientLayout handles the full page skeleton overlay.
-  // We just return null until we are ready to mount the actual editor.
+  useEffect(() => {
+    if (provider && ydoc && (isSynced || isOffline) && !fadeIn) {
+      const id = requestAnimationFrame(() => setFadeIn(true));
+      return () => cancelAnimationFrame(id);
+    }
+  }, [provider, ydoc, isSynced, isOffline, fadeIn]);
+
   if (!provider || !ydoc || (!isSynced && !isOffline)) {
     return null;
   }
 
   return (
     <div
-      className="flex flex-col w-full min-h-full"
+      className="flex flex-col w-full min-h-full transition-opacity duration-500 ease-in-out"
+      style={{ opacity: fadeIn ? 1 : 0 }}
       onClickCapture={(e) => {
         const target = e.target as HTMLElement;
         if (target && target.closest("a")) {

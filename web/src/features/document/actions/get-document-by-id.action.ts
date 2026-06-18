@@ -26,7 +26,27 @@ export async function getDocumentById(documentId: string) {
   }
 
   if (document.invites) {
-    document.invites = document.invites.filter((inv: any) => inv.status === 'pending')
+    const pendingInvites = document.invites.filter((inv: Record<string, unknown>) => inv.status === 'pending')
+    
+    // Enrich pending invites with user details if they are registered
+    if (pendingInvites.length > 0) {
+      const emails = pendingInvites.map((inv: Record<string, unknown>) => inv.email)
+      const { data: registeredUsers } = await supabase
+        .from('users')
+        .select('email, name, image')
+        .in('email', emails)
+        
+      if (registeredUsers && registeredUsers.length > 0) {
+        pendingInvites.forEach((inv: Record<string, unknown>) => {
+          const match = registeredUsers.find((u) => u.email === inv.email)
+          if (match) {
+            inv.name = match.name
+            inv.image = match.image
+          }
+        })
+      }
+    }
+    document.invites = pendingInvites
   }
 
   return document

@@ -8,7 +8,6 @@ import { login } from '../../actions/login.action'
 import { loginSchema, LoginInput } from '../../schemas/auth.schema'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
 import { ROUTES } from "@/constants/routes";
@@ -45,7 +44,7 @@ export function LoginForm({ next }: { next?: string }) {
         toast.success('Successfully logged in!')
         router.push(next || ROUTES.DASHBOARD)
       }
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred')
     } finally {
       setIsLoading(false)

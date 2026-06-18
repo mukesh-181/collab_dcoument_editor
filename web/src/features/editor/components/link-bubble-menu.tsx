@@ -9,6 +9,8 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { useDocumentSync } from "@/features/document/components/page/document-context";
+import type { Editor } from "@tiptap/core";
+import type { Mark } from "@tiptap/pm/model";
 
 export function LinkBubbleMenu() {
   const { editor } = useCurrentEditor();
@@ -46,7 +48,7 @@ export function LinkBubbleMenu() {
   return (
     <BubbleMenu
       editor={editor}
-      shouldShow={({ editor }: any) => {
+      shouldShow={({ editor }: { editor: Editor }) => {
         if (currentUserRole === 'viewer') return false;
         if (isEditOpen) return false;
         
@@ -57,8 +59,8 @@ export function LinkBubbleMenu() {
         if (empty) {
           // Check if the link actually exists in the document nodes surrounding the cursor,
           // rather than just being an active "stored mark" on an empty paragraph after deletion.
-          const isLinkBefore = $from.nodeBefore?.marks.some((mark: any) => mark.type.name === 'link');
-          const isLinkAfter = $from.nodeAfter?.marks.some((mark: any) => mark.type.name === 'link');
+          const isLinkBefore = $from.nodeBefore?.marks.some((mark: Mark) => mark.type.name === 'link');
+          const isLinkAfter = $from.nodeAfter?.marks.some((mark: Mark) => mark.type.name === 'link');
           if (!isLinkBefore && !isLinkAfter) {
             return false;
           }

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 import { generateHTML } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -39,22 +39,15 @@ const previewExtensions = [
   TableCell,
 ];
 
-export function useDocumentPreview(json: any) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
+export function useDocumentPreview(json: Record<string, unknown> | null | undefined) {
   const html = useMemo(() => {
-    // Prevent SSR from running generateHTML because it requires the DOM (window)
-    if (!json || !isMounted) return '';
+    if (!json) return '';
     try {
       return generateHTML(json, previewExtensions);
-    } catch (e) {
+    } catch {
       return '';
     }
-  }, [json, isMounted]);
+  }, [json]);
 
   return html;
 }
