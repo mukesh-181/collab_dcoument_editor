@@ -25,7 +25,8 @@ export function CreateLinkTab({ documentId }: CreateLinkTabProps) {
     setError("");
     try {
       const token = await createInviteLink(documentId, role);
-      const inviteLinkUrl = `${ENV.NEXT_PUBLIC_APP_URL}${ROUTES.INVITE(token)}`;
+      const appUrl = ENV.NEXT_PUBLIC_APP_URL.endsWith('/') ? ENV.NEXT_PUBLIC_APP_URL.slice(0, -1) : ENV.NEXT_PUBLIC_APP_URL;
+      const inviteLinkUrl = `${appUrl}${ROUTES.INVITE(token)}`;
       setInviteLink(inviteLinkUrl);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to create invite link";

@@ -18,15 +18,20 @@ export async function getInviteDetails(token: string, userId?: string) {
       documents (
         title,
         owner:users!documents_owner_id_fkey (
-          name
+          name,
+          email,
+          image
         )
       )
     `)
     .eq('token', token)
     .single()
 
-  if (error || !invite) {
-    throw new Error('Invalid invite link')
+  if (error) {
+    throw new Error(`Database error: ${error.message} (Code: ${error.code})`)
+  }
+  if (!invite) {
+    throw new Error('Invalid invite link: Invite not found')
   }
 
   let isAlreadyMember = false
