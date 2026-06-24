@@ -45,8 +45,10 @@ collab_docx/
 │   │   │   └── layout.tsx              # Dashboard layout shell — provides global sidebar navigation
 
 │   │   ├── auth/callback/route.ts      # OAuth callback — exchanges auth code for session (PKCE flow)
+│   │   ├── forgot-password/page.tsx    # Password reset request page
 │   │   ├── inbox/page.tsx              # Interactive inbox displaying pending and historical invitations
 │   │   ├── login/page.tsx              # Login/Register page — renders AuthTabs with tab param support
+│   │   ├── update-password/page.tsx    # New password entry page
 │   │   ├── favicon.ico                 # Browser tab icon
 │   │   ├── globals.css                 # Global styles, Tailwind directives, CSS custom properties
 │   │   ├── layout.tsx                  # Root layout — wraps entire app with fonts, metadata, Toaster
@@ -89,15 +91,19 @@ collab_docx/
 │   │   │   ├── actions/
 │   │   │   │   ├── login.action.ts
 │   │   │   │   ├── logout.action.ts
-│   │   │   │   └── signup.action.ts
+│   │   │   │   ├── request-password-reset.action.ts
+│   │   │   │   ├── signup.action.ts
+│   │   │   │   └── update-password.action.ts
 │   │   │   ├── components/
 │   │   │   │   ├── page/
 │   │   │   │   │   ├── auth-tabs.tsx
 │   │   │   │   │   ├── login-form.tsx
 │   │   │   │   │   ├── oauth-buttons.tsx
 │   │   │   │   │   └── register-form.tsx
+│   │   │   │   ├── forgot-password-form.tsx
 │   │   │   │   ├── login-page.tsx
-│   │   │   │   └── sign-out-button.tsx
+│   │   │   │   ├── sign-out-button.tsx
+│   │   │   │   └── update-password-form.tsx
 │   │   │   └── schemas/
 │   │   │       └── auth.schema.ts
 │   │   │

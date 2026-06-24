@@ -62,6 +62,8 @@ type AuthMethods = {
   signInWithPassword: ReturnType<typeof vi.fn>
   signUp: ReturnType<typeof vi.fn>
   signOut: ReturnType<typeof vi.fn>
+  resetPasswordForEmail: ReturnType<typeof vi.fn>
+  updateUser: ReturnType<typeof vi.fn>
 }
 
 type StorageMethods = {
@@ -95,6 +97,8 @@ export function createMockClient(overrides?: {
     signInWithPassword: vi.fn().mockResolvedValue({ data: { user }, error: authError }),
     signUp: vi.fn().mockResolvedValue({ data: { user }, error: authError }),
     signOut: vi.fn().mockResolvedValue({ error: null }),
+    resetPasswordForEmail: vi.fn().mockResolvedValue({ error: null }),
+    updateUser: vi.fn().mockResolvedValue({ data: { user }, error: authError }),
   }
 
   const storageBucket: StorageBucket = {
