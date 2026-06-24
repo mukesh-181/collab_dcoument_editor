@@ -10,13 +10,16 @@ collab_docx/
 ├── hocuspocus-server/                  # Standalone WebSocket server for real-time collaboration
 │   ├── package.json                    # Dependencies (tsx, @hocuspocus/server, yjs, supabase-js)
 │   ├── tsconfig.json                   # TypeScript compiler options (ESNext module resolution)
-│   └── src/                            # Server source code
-│       ├── config/
-│       │   ├── env.ts                  # Centralized constants for environment variables
-│       │   └── hocuspocus.config.ts    # Core logic — onAuthenticate, onLoadDocument, onStoreDocument hooks
-│       ├── lib/
-│       │   └── supabase.ts             # Supabase client initialized with Service Role key to bypass RLS
-│       └── server.ts                   # Entry point — starts the HTTP/WebSocket listener
+│   ├── src/                            # Server source code
+│   │   ├── config/
+│   │   │   ├── env.ts                  # Centralized constants for environment variables
+│   │   │   └── hocuspocus.config.ts    # Core logic — onAuthenticate, onLoadDocument, onStoreDocument hooks
+│   │   ├── lib/
+│   │   │   └── supabase.ts             # Supabase client initialized with Service Role key to bypass RLS
+│   │   └── server.ts                   # Entry point — starts the HTTP/WebSocket listener
+│   └── tests/                          # Vitest unit test suite for WebSocket server
+│       ├── env.test.ts                 # Validates environment variable parsing
+│       └── hooks.test.ts               # Mocks Supabase and tests auth/persistence hooks
 │
 ├── web/                                # Next.js frontend application
 │   ├── AGENTS.md                       # LLM agent instructions & context
@@ -28,6 +31,7 @@ collab_docx/
 │   ├── package.json                    # Dependencies and scripts (next dev, build, start)
 │   ├── postcss.config.mjs              # PostCSS config for Tailwind processing
 │   ├── tsconfig.json                   # TypeScript compiler options and path aliases (@/)
+│   ├── vitest.config.ts                # Vitest configuration for unit testing
 │   ├── proxy.ts                        # Edge Proxy — intercepts every request for auth + route protection
 │   ├── app/                            # Next.js App Router — strictly for URL routing only
 │   │   ├── (main)/dashboard/           # Main dashboard routes group
@@ -39,6 +43,7 @@ collab_docx/
 │   │   │   ├── invite/
 │   │   │   │   └── page.tsx            # Intermediate Accept/Cancel invitation screen
 │   │   │   └── layout.tsx              # Dashboard layout shell — provides global sidebar navigation
+
 │   │   ├── auth/callback/route.ts      # OAuth callback — exchanges auth code for session (PKCE flow)
 │   │   ├── inbox/page.tsx              # Interactive inbox displaying pending and historical invitations
 │   │   ├── login/page.tsx              # Login/Register page — renders AuthTabs with tab param support
@@ -227,6 +232,12 @@ collab_docx/
 │       ├── cn.ts                       # ClassName merging wrapper
 │       ├── string-utils.ts             # Assorted string manipulations
 │       └── user-utils.ts               # User avatar/initials extraction logic
+│
+│   └── tests/                          # Automated testing suites
+│       └── unit/                       # Vitest unit tests (300+ tests achieving 100% action/UI coverage)
+│           ├── constants/              # Route and environment variable tests
+│           ├── features/               # Server Actions, Context Providers, and UI Component tests
+│           └── utils/                  # Standalone utility function tests
 ```
 
 ---

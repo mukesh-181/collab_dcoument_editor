@@ -12,7 +12,7 @@ export function getUserName(name?: string | null, email?: string | null): string
 }
 
 export function getUserEmail(email?: string | null): string {
-  return email || USER_FALLBACKS.EMAIL;
+  return email ?? USER_FALLBACKS.EMAIL;
 }
 
 export function getUserImage(image?: string | null): string {
