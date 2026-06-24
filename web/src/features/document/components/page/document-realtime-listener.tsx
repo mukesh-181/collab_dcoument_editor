@@ -47,40 +47,30 @@ export function DocumentRealtimeListener({
         .on(
           "postgres_changes",
           {
-            event: "INSERT",
-            schema: "public",
-            table: "invites",
-            filter: `email=eq.${user.email}`,
-          },
-          (payload) => {
-            const invite = payload.new as Record<string, unknown>;
-            if (invite.document_id !== documentId) return;
-
-            if (invite.status === "removed") {
-              setRemovedDialogOpen(true);
-            } else if (invite.status === "role_updated") {
-              setCurrentUserRole(invite.role as string);
-              toast.success(`Your role was updated to ${invite.role as string}. ${(invite.role as string) === 'editor' ? 'You can now edit the document.' : 'You can no longer edit the document.'}`);
-            }
-          }
-        )
-        .on(
-          "postgres_changes",
-          {
             event: "*",
             schema: "public",
             table: "invites",
-            filter: `document_id=eq.${documentId}`,
           },
           (payload) => {
-            // Guard against refreshing if the current user is the one being removed
             if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
               const record = payload.new as Record<string, unknown>;
-              if (record.email === user.email && record.status === 'removed') {
-                return;
+              
+              if (record.document_id !== documentId) return;
+
+              if (record.email === user.email) {
+                if (record.status === "removed") {
+                  setRemovedDialogOpen(true);
+                  return;
+                } else if (record.status === "role_updated") {
+                  setCurrentUserRole(record.role as string);
+                  toast.success(`Your role was updated to ${record.role as string}. ${(record.role as string) === 'editor' ? 'You can now edit the document.' : 'You can no longer edit the document.'}`);
+                }
               }
+              
+              router.refresh();
+            } else if (payload.eventType === 'DELETE') {
+              router.refresh();
             }
-            router.refresh();
           }
         )
         .on(
@@ -89,22 +79,19 @@ export function DocumentRealtimeListener({
             event: "*",
             schema: "public",
             table: "document_members",
-            filter: `document_id=eq.${documentId}`,
           },
           (payload) => {
-            // If the current user is the one being removed, DO NOT refresh the page.
-            // Refreshing would cause the Server Component to throw a NoPermission error
-            // and unmount our pretty RemovedDialog.
             if (payload.eventType === 'DELETE') {
               const oldRecord = payload.old as Record<string, unknown>;
-              if (oldRecord && oldRecord.user_id === user.id) {
-                return;
+              // If PK is just 'id', oldRecord won't have user_id to check. 
+              // We just refresh the page.
+              router.refresh();
+            } else {
+              const record = payload.new as Record<string, unknown>;
+              if (record.document_id === documentId) {
+                router.refresh();
               }
             }
-
-            // When anyone else is added, removed, or has their role changed, refresh the server state
-            // to instantly update the DocumentMembersPopover for everyone viewing the document.
-            router.refresh();
           }
         );
 
