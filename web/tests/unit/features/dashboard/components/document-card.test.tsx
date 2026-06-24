@@ -23,8 +23,8 @@ const mockDoc = {
   updated_at: "2025-01-15T10:30:00Z",
   previewJson: { type: "doc", content: [] },
   all_members: [
-    { role: "owner", user: { id: "u1", name: "Alice", email: "alice@test.com", image: "" } },
-    { role: "editor", user: { id: "u2", name: "Bob", email: "bob@test.com", image: "" } },
+    { role: "owner", user: { id: "u1", name: "Alice", email: "alice@test.com", avatar_url: "" } },
+    { role: "editor", user: { id: "u2", name: "Bob", email: "bob@test.com", avatar_url: "" } },
   ],
   document_members: [{ role: "owner" }],
 }

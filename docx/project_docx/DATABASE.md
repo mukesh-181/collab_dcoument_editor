@@ -32,7 +32,7 @@ erDiagram
 | `id` | uuid (PK) | Foreign key referencing `auth.users.id` |
 | `name` | text | Display name (from GitHub `full_name` or signup metadata) |
 | `email` | text (unique) | User's email address |
-| `avatar_url` | text | Profile picture URL (from GitHub avatar) |
+| `image` | text | Profile picture URL (from GitHub avatar) |
 | `created_at` | timestamptz | Account creation timestamp |
 
 ---
@@ -152,7 +152,7 @@ create table public.users (
   id uuid references auth.users(id) on delete cascade primary key,
   name text,
   email text unique not null,
-  avatar_url text,
+  image text,
   created_at timestamptz not null default now()
 );
 
@@ -160,7 +160,7 @@ create table public.users (
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.users (id, name, email, avatar_url)
+  insert into public.users (id, name, email, image)
   values (
     new.id,
     new.raw_user_meta_data->>'full_name',

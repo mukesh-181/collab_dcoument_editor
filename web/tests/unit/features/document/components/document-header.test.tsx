@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { render, screen, fireEvent, waitFor } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { DocumentHeader } from "@/features/document/components/page/document-header"
 import { DocumentProvider, useDocumentSync } from "@/features/document/components/page/document-context"
 import { useEffect } from "react"
@@ -19,8 +19,8 @@ const mockDoc = {
   title: "Test Document",
   updated_at: "2025-01-01T00:00:00Z",
   all_members: [
-    { role: "owner", user: { id: "user-1", name: "Owner", email: "owner@test.com", image: "" } },
-    { role: "editor", user: { id: "user-2", name: "Editor", email: "editor@test.com", image: "" } },
+    { role: "owner", user: { id: "user-1", name: "Owner", email: "owner@test.com", avatar_url: "" } },
+    { role: "editor", user: { id: "user-2", name: "Editor", email: "editor@test.com", avatar_url: "" } },
   ],
 }
 

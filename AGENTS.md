@@ -138,7 +138,7 @@ Do not create generic Supabase clients. Next.js App Router runs in 3 environment
 
 | Table | Key Columns | Notes |
 |---|---|---|
-| `users` | `id`, `name`, `email`, `avatar_url` | Synced from `auth.users` via PostgreSQL trigger |
+| `users` | `id`, `name`, `email`, `image` | Synced from `auth.users` via PostgreSQL trigger |
 | `documents` | `id`, `title`, `owner_id`, `created_at`, `updated_at` | `title` may be prefixed with an emoji icon (no separate `icon` column) |
 | `document_members` | `document_id`, `user_id`, `role` | Roles: `owner`, `editor`, `viewer` |
 | `document_content_state` | `document_id`, `ydoc_state` (base64), `preview_json` | One row per document; upserted via Hocuspocus `onStoreDocument` hook |
@@ -262,7 +262,7 @@ Do not create generic Supabase clients. Next.js App Router runs in 3 environment
 - **Intermediate invite screen**: `/dashboard/invite?token=...` shows "You've been invited!" card with document title, owner name, and role before accepting. Cancel returns to dashboard without consuming token.
 - **Edge Proxy**: Preserves `?token=...` in `next` param during unauthenticated redirects: `/login?next=/dashboard/invite?token=abc`.
 - **Share dialog**: Two tabs — "Create Link" (universal link generator) and "Send Email" (multi-email token input).
-- **UserSearchInput**: Slack/Gmail-style token/pill input. Debounced DB lookup for registered users (avatar + name). `useRef` escapes stale closure in async pill creation. Dropdown shows "Member" and "Invited" badges; already-added users are `disabled` + `opacity-50`.
+- **UserSearchInput**: Slack/Gmail-style token/pill input. Debounced DB lookup for registered users (name + image). `useRef` escapes stale closure in async pill creation. Dropdown shows "Member" and "Invited" badges; already-added users are `disabled` + `opacity-50`.
 - **Smart validation**: `isSubmitDisabled` blocks form submission if all emails are already members or invited. Server action silently drops self-invites and duplicates; only errors if ALL recipients fail.
 - **Member popover**: Clicking the avatar cluster in `DocumentHeader` opens a scrollable list of all members with name, email, role.
 - **Inbox** (`/inbox`): Filterable list of all received invites. Filter options: All, Pending, Accepted, Rejected, Expired. Status-based badges replace action buttons after resolution. Delete (trash icon) physically removes the row. `useMemo` with client-side expiry math for "Expired" filter — no page refresh needed.

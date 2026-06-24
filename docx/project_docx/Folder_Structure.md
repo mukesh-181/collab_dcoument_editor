@@ -220,13 +220,24 @@ collab_docx/
 │   │   │       ├── share-dialog.tsx
 │   │   │       └── user-search-input.tsx
 │   │   │
-│   │   └── landing/                    # Marketing / Landing page UI components
-│   │       └── components/
-│   │           ├── editor-mockup.tsx
-│   │           ├── features-grid.tsx
-│   │           ├── footer.tsx
-│   │           ├── hero.tsx
-│   │           └── landing-page.tsx
+│   │   ├── landing/                    # Marketing / Landing page UI components
+│   │   │   └── components/
+│   │   │       ├── editor-mockup.tsx
+│   │   │       ├── features-grid.tsx
+│   │   │       ├── footer.tsx
+│   │   │       ├── hero.tsx
+│   │   │       └── landing-page.tsx
+│   │   │
+│   │   └── user/                       # User profile and settings feature
+│   │       ├── actions/
+│   │       │   ├── update-profile.action.ts
+│   │       │   └── upload-avatar.action.ts
+│   │       ├── components/
+│   │       │   ├── profile-settings-tab.tsx
+│   │       │   ├── settings-dialog.tsx
+│   │       │   └── user-dropdown-menu.tsx
+│   │       └── schemas/
+│   │           └── user.schema.ts
 │   │
 │   ├── lib/
 │   │   └── supabase/                   # Supabase client factory (3 environments)

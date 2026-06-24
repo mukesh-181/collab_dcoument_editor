@@ -63,7 +63,7 @@ export function ForgotPasswordForm() {
           Reset Password
         </CardTitle>
         <CardDescription className="text-base text-zinc-500 dark:text-zinc-400">
-          Enter your email and we'll send you a link to reset your password.
+          Enter your email and we&apos;ll send you a link to reset your password.
         </CardDescription>
       </CardHeader>
       
@@ -71,7 +71,7 @@ export function ForgotPasswordForm() {
         {isSuccess ? (
           <div className="text-center space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm">
-              We've sent a password reset link to <strong>{form.getValues('email')}</strong>. Please check your inbox.
+              We&apos;ve sent a password reset link to <strong>{form.getValues('email')}</strong>. Please check your inbox.
             </div>
             <Link href={ROUTES.LOGIN} className="inline-flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
               <ArrowLeft className="mr-2 h-4 w-4" />

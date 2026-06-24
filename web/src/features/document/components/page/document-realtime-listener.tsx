@@ -82,8 +82,7 @@ export function DocumentRealtimeListener({
           },
           (payload) => {
             if (payload.eventType === 'DELETE') {
-              const oldRecord = payload.old as Record<string, unknown>;
-              // If PK is just 'id', oldRecord won't have user_id to check. 
+              // If PK is just 'id', payload.old won't have user_id to check. 
               // We just refresh the page.
               router.refresh();
             } else {

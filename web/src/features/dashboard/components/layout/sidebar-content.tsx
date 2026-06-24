@@ -13,6 +13,7 @@ import type { LucideIcon } from "lucide-react";
 import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action";
 import { createClient } from "@/lib/supabase/client";
 import { ROUTES } from "@/constants/routes";
+import { extractUserInfo } from "@/utils/user-utils";
 
 function NavItem({ icon: Icon, label, href, badge, pathname }: { icon: LucideIcon; label: string; href: string; badge?: number; pathname: string }) {
   const isActive = pathname === href;
@@ -65,9 +66,7 @@ export function SidebarContent({
   user?: User | null;
 }) {
   const pathname = usePathname();
-  const avatarUrl = user?.user_metadata?.avatar_url;
-  const fullName =
-    user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const { name: fullName, image: avatarUrl } = extractUserInfo(user);
   const initial = fullName.charAt(0).toUpperCase();
 
   const [unreadCount, setUnreadCount] = useState<number>(0);

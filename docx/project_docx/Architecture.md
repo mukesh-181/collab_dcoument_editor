@@ -159,6 +159,7 @@ src/
 
 - **GitHub OAuth (PKCE):** Client-side redirect via `signInWithOAuth`, server-side code exchange in `app/auth/callback/route.ts`.
 - **Email/Password:** Server Action calls `signInWithPassword()` directly.
+- **Password Reset:** Generates a Magic Link via `resetPasswordForEmail`, routes through `auth/callback` PKCE exchange, and securely lands on `/update-password`.
 - **Edge Proxy (`proxy.ts`):** Intercepts all routes. Public routes are whitelisted. Unauthorized access redirects to `/login?next=[intended_path]` — preserving invite tokens through sign-up flows.
 - **Sign-Out:** Centralized `SignOutButton` with confirmation Dialog to prevent accidental logouts.
 
