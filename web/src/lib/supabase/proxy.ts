@@ -38,6 +38,7 @@ export async function updateSession(request: NextRequest) {
   const isPublicRoute = 
     request.nextUrl.pathname === ROUTES.HOME ||
     request.nextUrl.pathname === ROUTES.LOGIN ||
+    request.nextUrl.pathname === ROUTES.FORGOT_PASSWORD ||
     request.nextUrl.pathname.startsWith(ROUTES.AUTH_CALLBACK)
 
   if (!user && !isPublicRoute) {

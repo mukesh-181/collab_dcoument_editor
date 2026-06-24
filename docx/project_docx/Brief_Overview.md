@@ -193,7 +193,7 @@ Unauthenticated invite links redirect to `/login?next=/dashboard/invite?token=<u
 
 | Table | Purpose |
 |---|---|
-| `users` | Public profiles mirroring `auth.users` |
+| `users` | Public profiles (`name`, `email`, `image`) mirroring `auth.users` |
 | `documents` | Metadata: `title`, `owner_id`, timestamps, `is_deleted` |
 | `document_members` | ACL: `document_id`, `user_id`, `role` (owner/editor/viewer) |
 | `document_content_state` | `ydoc_state` (base64 CRDT binary) + `preview_json` |
@@ -223,6 +223,8 @@ Every table has RLS enabled. Queries are automatically scoped to the authenticat
 
 - **Email/Password**: Server Action calls `signInWithPassword()`. Password never round-trips through a client-side `fetch`.
 - **GitHub OAuth (PKCE)**: Client-side redirect to GitHub (`signInWithOAuth`), server-side code exchange in `app/auth/callback/route.ts` via `exchangeCodeForSession()`. GitHub credentials live in Supabase Dashboard, NOT in `.env.local`.
+- **Forgot Password (Magic Link)**: Uses `resetPasswordForEmail` to send a branded HTML email, routing through the PKCE callback to securely authenticate before reaching `/update-password`.
+- **User Profile Sync**: Profile updates (like avatar uploads) use a deferred local-preview model, saving the image to the database's `image` column only when explicitly submitted.
 - **Double Validation**: Zod schemas consumed by React Hook Form (client) and `.safeParse()` (server).
 - **Auth-Aware Navbar**: Async Server Component calls `getUser()` during render — correct buttons baked into first HTML response, zero-flicker.
 - **`{ success, error }` Contract**: Actions return JSON, never throw `redirect()` internally. Prevents `NEXT_REDIRECT` errors in client `try/catch` blocks.

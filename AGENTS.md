@@ -43,6 +43,18 @@ For **specific topics**, read the corresponding extracted document:
 
 ---
 
+## Project Layout & Version Control (Monorepo)
+
+The codebase is structured as a **Monorepo** containing two distinct, isolated applications:
+- **`/web`**: The Next.js frontend application.
+- **`/hocuspocus-server`**: The standalone Node.js WebSocket backend.
+
+**Critical rules regarding this structure:**
+1. **Isolated Dependencies**: Because these are two separate Node.js environments, they each maintain their own `package.json` and `node_modules` folders. DO NOT attempt to merge them into a single root `node_modules`. Running `npm install` must be done specifically inside `cd web/` or `cd hocuspocus-server/`.
+2. **Root Git Initialization**: A single `.git` repository is initialized at the absolute root (`/collab_docx`). This is intentional. It ensures that frontend and backend changes are tracked and committed together in atomic commits (e.g., if a new real-time feature requires both a frontend UI change and a backend hook change, they are tracked in the exact same version history). Do NOT initialize separate git repositories inside `web/` or `hocuspocus-server/`.
+
+---
+
 ## Critical Implementation Rules for Agents
 
 ### 1. Database & Auth Interaction (The 3 Clients)
@@ -114,13 +126,19 @@ Do not create generic Supabase clients. Next.js App Router runs in 3 environment
 - Use `useMemo` for filtered/sorted arrays to prevent recalculation on every render.
 - Use `requestAnimationFrame(() => setState(true))` + `transition-opacity duration-500` for smooth fade-in animations on content that renders after mount.
 
+### 10. Automated Testing & Documentation Sync
+
+- **Mandatory Testing**: Always create a corresponding unit test file when implementing a new feature, server action, or UI component. Maintain the project's 100% unit test coverage standard. (Note: E2E testing is deferred for later; focus exclusively on unit tests via Vitest for now).
+- **Verification**: After making code changes, you MUST run the test suite (`npm run test` in `web/`), run ESLint, and run TypeScript checking to ensure all previous tests pass, linting is clean, and types are valid before completing your task. You must also create and verify any newly created tests for your feature.
+- **Documentation Sync**: If you create, move, or **delete** any files, you MUST immediately update `docx/project_docx/Folder_Structure.md` and `docx/project_docx/step_by_step_log.md` to reflect those architectural changes accurately. Detecting and logging file deletions is critical to prevent future agents from hallucinating missing files.
+
 ---
 
 ## Database Schema (5-Table MVP)
 
 | Table | Key Columns | Notes |
 |---|---|---|
-| `users` | `id`, `name`, `email`, `avatar_url` | Synced from `auth.users` via PostgreSQL trigger |
+| `users` | `id`, `name`, `email`, `image` | Synced from `auth.users` via PostgreSQL trigger |
 | `documents` | `id`, `title`, `owner_id`, `created_at`, `updated_at` | `title` may be prefixed with an emoji icon (no separate `icon` column) |
 | `document_members` | `document_id`, `user_id`, `role` | Roles: `owner`, `editor`, `viewer` |
 | `document_content_state` | `document_id`, `ydoc_state` (base64), `preview_json` | One row per document; upserted via Hocuspocus `onStoreDocument` hook |
@@ -244,7 +262,7 @@ Do not create generic Supabase clients. Next.js App Router runs in 3 environment
 - **Intermediate invite screen**: `/dashboard/invite?token=...` shows "You've been invited!" card with document title, owner name, and role before accepting. Cancel returns to dashboard without consuming token.
 - **Edge Proxy**: Preserves `?token=...` in `next` param during unauthenticated redirects: `/login?next=/dashboard/invite?token=abc`.
 - **Share dialog**: Two tabs — "Create Link" (universal link generator) and "Send Email" (multi-email token input).
-- **UserSearchInput**: Slack/Gmail-style token/pill input. Debounced DB lookup for registered users (avatar + name). `useRef` escapes stale closure in async pill creation. Dropdown shows "Member" and "Invited" badges; already-added users are `disabled` + `opacity-50`.
+- **UserSearchInput**: Slack/Gmail-style token/pill input. Debounced DB lookup for registered users (name + image). `useRef` escapes stale closure in async pill creation. Dropdown shows "Member" and "Invited" badges; already-added users are `disabled` + `opacity-50`.
 - **Smart validation**: `isSubmitDisabled` blocks form submission if all emails are already members or invited. Server action silently drops self-invites and duplicates; only errors if ALL recipients fail.
 - **Member popover**: Clicking the avatar cluster in `DocumentHeader` opens a scrollable list of all members with name, email, role.
 - **Inbox** (`/inbox`): Filterable list of all received invites. Filter options: All, Pending, Accepted, Rejected, Expired. Status-based badges replace action buttons after resolution. Delete (trash icon) physically removes the row. `useMemo` with client-side expiry math for "Expired" filter — no page refresh needed.

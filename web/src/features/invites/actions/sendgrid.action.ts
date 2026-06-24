@@ -3,7 +3,9 @@
 import sgMail from "@sendgrid/mail";
 import { ENV } from "@/constants/env";
 
-sgMail.setApiKey(ENV.SENDGRID_API_KEY!);
+if (ENV.SENDGRID_API_KEY) {
+  sgMail.setApiKey(ENV.SENDGRID_API_KEY);
+}
 
 interface SendMailParams {
   to: string;
@@ -19,7 +21,10 @@ export async function sendMail({
   try {
     await sgMail.send({
       to,
-      from: ENV.SENDGRID_FROM_EMAIL!,
+      from: {
+        email: ENV.SENDGRID_FROM_EMAIL!,
+        name: "CollabDoc",
+      },
       subject,
       html,
     });

@@ -1995,6 +1995,18 @@ Performing this check on the server, rather than fetching the session after the 
 
 ---
 
+### 14.7 Forgot Password & Magic Link Flow
+
+The password reset flow relies on Supabase's native "Magic Link" API rather than custom hash tokens.
+
+- **The Request**: Users enter their email at `/forgot-password`. We call `supabase.auth.resetPasswordForEmail`, triggering a branded SendGrid HTML email containing a secure link.
+- **The Callback**: The emailed link points back to `app/auth/callback/route.ts` (the same PKCE handler used by GitHub OAuth). The Edge Proxy intercepts the payload, seamlessly establishing an authenticated session.
+- **The Reset**: The callback redirects the authenticated user to `/update-password`. Here, `update-password.action.ts` runs `supabase.auth.updateUser({ password })` to save the new credentials.
+
+This architecture offloads token generation and verification to Supabase, eliminating the need to pass insecure IDs in URLs.
+
+---
+
 ## 15. Document CRUD Server Actions
 
 This section documents the actions behind the Dashboard's most basic verbs — create, read, rename, delete — and the design decisions that make them safe to call directly from forms and buttons.
@@ -2112,3 +2124,19 @@ Every uploaded file is stored at a path shaped like `{documentId}/{crypto.random
 RLS handles *who* can write to the bucket, but it has no concept of file size or MIME type. Those checks — verifying the file's type starts with `image/`, enforcing a 5MB ceiling, confirming the request is authenticated before doing any work at all — are performed inside the `upload-image.action.ts` server action itself (Section 6.11), before the file ever reaches Supabase Storage. This is a deliberate division of labor: RLS is the database-level guarantee that can't be bypassed even if application code has a bug, while the action-level validation is the friendlier, more specific gate that rejects bad input early with a clear error message rather than letting an oversized or non-image file reach storage and fail (or worse, succeed) silently.
 
 ---
+
+## 17. User Profile Sync and Avatar Uploads
+
+The user profile settings handle identity updates, specifically the user's name and avatar image. This is heavily tied to the `public.users` table schema described in Section 12.
+
+### 17.1 Database Schema Synchronization (`image` column)
+
+In early iterations, the codebase queried an `avatar_url` column. This was corrected to align with the actual PostgreSQL schema of `public.users`, which uses the `image` column to store profile pictures. All data fetching (e.g., `get-document-by-id.action.ts`), TypeScript interfaces, and utility functions (`extractUserInfo`) are now strictly mapped to `image` as the ultimate source of truth.
+
+### 17.2 Avatar Upload UX & Preloading
+
+Avatar uploads inside the Profile Settings tab deliberately avoid immediate database mutations. 
+
+- **Local Preview**: When a user selects a file, it generates a zero-cost local object URL via `URL.createObjectURL()`. This allows users to test multiple images without uploading them to Supabase Storage.
+- **Deferred Upload**: The actual upload (`upload-avatar.action.ts`) and profile mutation (`update-profile.action.ts`) only fire when the "Save Changes" button is submitted.
+- **Zero-Jitter Spinner & Preloading**: The "Save Changes" button transitions to a spinner. Upon a successful database update, the spinner intentionally remains active while a background `new Image()` silently downloads the newly generated Supabase URL. The UI only clears the spinner when the `onload` event confirms the image is fully cached, guaranteeing a completely flash-free update.

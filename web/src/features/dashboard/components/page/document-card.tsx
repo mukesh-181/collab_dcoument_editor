@@ -136,7 +136,7 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
   const memberCount = document.all_members?.length || 0;
   const ownerMember = document.all_members?.find((m) => m.role === "owner");
   const ownerEmail = ownerMember?.user?.email || "";
-  const currentUserName = currentUser?.user_metadata?.full_name || currentUser?.email || "Unknown User";
+  const { name: currentUserName } = extractUserInfo(currentUser);
 
   const sortedMembers = document.all_members 
     ? [...document.all_members].sort((a, b) => {
