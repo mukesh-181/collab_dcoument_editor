@@ -259,3 +259,17 @@ Every table has RLS enabled. Queries are automatically scoped to the authenticat
 - **100% Type-Safe**: The core application (`src/`) has zero TypeScript errors (`npx tsc --noEmit` exit 0). All `any` types were systematically removed from server action payloads and component props.
 - **ESLint Compliance**: Zero lint warnings. React Hook rules (`exhaustive-deps`, `set-state-in-effect`) strictly followed via `useCallback` and proper render cycle management.
 - **Vitest Mocking Strategy**: In test files (`tests/unit/`), strict ESLint rules for `no-explicit-any` are bypassed explicitly via `/* eslint-disable */` to allow flexible coercion of Vitest's `vi.fn()` recursive types and complex `mockDoc` payloads without compromising the application's actual type definitions.
+
+---
+
+## 18. Caching Strategy & Real-Time Sync
+- **SWR Migration**: Migrated pagination lists (Inbox, Document Activity, User Documents) from standard React state to `useSWRInfinite`. Provides instant cache responses, eliminates UI jitter, and handles cursor management natively.
+- **Strict WebSockets**: Disabled all HTTP background polling (`revalidateIfStale: false`). Data is fetched only on mount or when triggered by a persistent Supabase `postgres_changes` WebSocket channel payload pushing updates down to the client.
+
+## 19. Auditing and History
+- **Document Activity Log**: Dedicated `document_activity` table capturing immutable events (creation, joins, role changes, removals).
+- **Activity Tree UI**: GitHub-style continuous vertical timeline slide-out drawer rendering the history of interactions per document.
+
+## 20. Advanced Session & Access Management
+- **Two-Step Revocation**: Solves Supabase Realtime's blind `DELETE` event payload by first applying an `UPDATE` (broadcasting the ID) before the `DELETE`.
+- **Sessions Tab**: Allows users to actively manage and revoke persistent authentication sessions across devices.

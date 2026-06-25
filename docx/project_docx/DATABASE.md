@@ -130,15 +130,22 @@ Manages document access provisioning via secure tokens. Supports two invite type
 
 ---
 
-## 6. Storage Architecture: `document-assets`
+## 6. Storage Architecture: `document-assets`, `user-assets`, & `public-assets`
 
-To support rich text editing, we bypassed temporary Base64 strings in favor of true CDN-backed cloud storage.
+To support rich functionality across the platform, we utilize three distinct Supabase Storage buckets:
 
-- **The Bucket:** We created a public Supabase Storage bucket named `document-assets`.
-- **Access:** Public reads (anonymous — `<img>` tags work without auth headers), authenticated-only writes (RLS on `storage.objects`).
-- **The Upload Flow:** When a user inserts an image in the editor, the client sends a `FormData` payload to a server action (`upload-image.action.ts`). The server validates the MIME type and 5MB size limit, generates a `crypto.randomUUID()`, and uploads the file to a structured path: `{documentId}/{uuid}.{ext}`.
-- **Why it's efficient:** Grouping assets by `documentId` makes cleanup and data portability incredibly simple. Because the bucket is public, the Tiptap editor and exported PDFs can resolve the `<img>` tags natively without needing to generate expiring signed URLs, ensuring the document always renders perfectly.
-- **Why not `blob:` URLs?** `blob:` URLs are scoped to the browser tab that created them — other collaborators or page refreshes would show broken images.
+- **`document-assets`**: A public bucket used exclusively for rich text editor images. 
+  - **Access:** Public reads (anonymous — `<img>` tags work without auth headers), authenticated-only writes (RLS on `storage.objects`).
+  - **The Upload Flow:** When a user inserts an image in the editor, the client sends a `FormData` payload to a server action (`upload-image.action.ts`). The server validates the MIME type and 5MB size limit, generates a `crypto.randomUUID()`, and uploads the file to a structured path: `{documentId}/{uuid}.{ext}`.
+  - **Why it's efficient:** Grouping assets by `documentId` makes cleanup and data portability incredibly simple. Because the bucket is public, the Tiptap editor and exported PDFs can resolve the `<img>` tags natively without needing to generate expiring signed URLs, ensuring the document always renders perfectly.
+  - **Why not `blob:` URLs?** `blob:` URLs are scoped to the browser tab that created them — other collaborators or page refreshes would show broken images.
+
+- **`user-assets`**: A public bucket for storing custom user profile avatars.
+  - *Access*: Public reads, authenticated writes (restricted so users can only write to their own folder).
+  - *Structure*: `{userId}/{uuid}.{ext}`. Ensures profile images are decoupled from OAuth providers and can be managed locally.
+
+- **`public-assets`**: A public bucket for static application assets.
+  - *Usage*: Primarily used to host the official application logo and branding assets so they can be securely embedded in external systems, such as SendGrid HTML email templates.
 
 ---
 

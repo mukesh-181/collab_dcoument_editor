@@ -2173,8 +2173,35 @@ The history is powered by a new `document_activity` table that stores immutable 
 - **Metadata:** Each row stores the `action_type`, the `actor_id` who triggered the event, an optional `target_user_id` for user-to-user actions, and a flexible JSONB `metadata` column for action-specific details (e.g. `new_role`).
 - **Security:** RLS is strictly enforced. The queries inherently verify the current user exists in the `document_members` table for that document before aggregating historical logs.
 
-### 19.2 The UI Implementation
-The `DocumentActivityTree` component was designed for pixel-perfect continuity.
-- **Continuous Timeline:** The tree uses absolute CSS positioning to draw a vertical `w-0.5` line perfectly linking user avatars end-to-end without visual gaps, recreating a continuous history timeline.
-- **Localized Badges:** Conditionally rendered status badges dynamically indicate the most `Recent` interaction, and trace the history back to the blue `Created` badge.
-- **Centralized Profiles:** The tree utilizes the `user-utils.ts` utilities to natively format profile strings and fallbacks without duplicating avatar layout logic across the system.
+### 19.3 Real-Time WebSocket Hooks
+The activity tree relies heavily on a dedicated `DocumentActivityRealtimeListener`. Since the activity log is a slide-out drawer, fetching data on every open would cause unnecessary database load. Instead, the UI subscribes directly to `postgres_changes` on the `document_activity` table. When an `INSERT` event fires (e.g. an owner removes a member), the WebSocket pushes the payload to the active listener, which immediately triggers a local cache revalidation.
+
+---
+
+## 20. SWR Caching & The "Silent Network" Architecture
+
+A major architectural shift was made from manual React `useState` / `useEffect` data fetching to an event-driven, cache-first architecture using SWR (Stale-While-Revalidate).
+
+### 20.1 Why `useSWRInfinite`?
+Managing cursor-based infinite scrolling natively in React involves complex dependency arrays, memory leak risks on unmount, and race conditions if requests fire concurrently. `useSWRInfinite` was chosen because it orchestrates sequential page fetching effortlessly by defining a global cache key shape (e.g. `['activity', documentId, pageIndex]`). 
+
+### 20.2 Locking Down the Polling
+By default, SWR attempts to ensure data freshness by revalidating (HTTP polling) the cache whenever the user re-focuses the browser window or when the cache becomes stale. To completely silence the network tab and reduce database load to absolute zero during idle usage, we applied strict config flags: `{ revalidateOnFocus: false, revalidateIfStale: false }`.
+
+### 20.3 Integrating with Supabase Realtime
+With background HTTP polling disabled, the application relies exclusively on Supabase WebSockets. Invisible listener components (`InboxRealtimeListener`, `DocumentListRealtimeListener`) maintain persistent channels to PostgreSQL. 
+When an event occurs (e.g., an invite is sent), the WebSocket receives the payload and manually invokes SWR's `mutate()` method. This instantly invalidates the local memory cache and triggers a targeted UI refresh. The result is a frontend that feels instantly responsive, drawing from cache on navigation, and only pinging the server when an actual database mutation happens.
+
+---
+
+## 21. Advanced Session & Access Management
+
+### 21.1 Two-Step Invite Revocation
+A known limitation of Supabase Realtime is that `DELETE` event payloads do not contain the deleted row's data (only its primary key). Because the frontend inbox state needed the invite data to properly filter the array, blind deletes caused state desynchronization.
+We implemented a two-step mutation pattern in `revokeInviteAction`:
+1. `UPDATE` the invite to `status = 'rejected'`. This forces Supabase to broadcast the full row payload (including the ID).
+2. Immediately `DELETE` the row in the same transaction.
+The frontend WebSocket listener catches the `UPDATE` payload, reads the ID, and instantly strips the revoked invite from the UI before the row is permanently destroyed on the backend.
+
+### 21.2 Sessions Management
+A new `sessions-settings-tab.tsx` was introduced to provide enterprise-grade visibility into active authentication sessions. It leverages Supabase's native sessions API to list active logins across devices, allowing users to securely revoke stale or unauthorized sessions remotely.
