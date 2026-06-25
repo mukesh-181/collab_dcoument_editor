@@ -138,6 +138,7 @@ collab_docx/
 │   │   │
 │   │   ├── document/                   # Document-level operations
 │   │   │   ├── actions/
+│   │   │   │   ├── get-document-activity.action.ts
 │   │   │   │   ├── get-document-by-id.action.ts
 │   │   │   │   ├── leave-document.action.ts
 │   │   │   │   ├── remove-member.action.ts
@@ -145,6 +146,7 @@ collab_docx/
 │   │   │   └── components/
 │   │   │       ├── page/
 │   │   │       │   ├── active-users-cluster.tsx
+│   │   │       │   ├── document-activity-tree.tsx
 │   │   │       │   ├── document-client-layout.tsx
 │   │   │       │   ├── document-context.tsx
 │   │   │       │   ├── document-header.tsx

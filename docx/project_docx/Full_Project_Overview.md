@@ -2160,3 +2160,21 @@ This guarantees the client WebSocket receives the full row payload on the update
 
 ### 18.3 Seamless Glassmorphic Textures (`noise.png`)
 The application heavily relies on `bg-[url('/noise.png')] mix-blend-overlay` in Tailwind classes to achieve a frosted glass, textured aesthetic across dialogs, page layouts, and skeletons. The `noise.png` static asset was integrated into the `public/` directory, resolving widespread 404 network errors and ensuring the premium UI consistency is flawlessly rendered.
+
+---
+
+## 19. Document Activity Tree
+
+CollabDoc provides an auditable, GitHub-style linear activity log for every document, allowing owners and editors to track the entire lifecycle of a document in a premium visual format.
+
+### 19.1 Architecture & Schema
+The history is powered by a new `document_activity` table that stores immutable historical events.
+- **Event Logging:** Natively triggers on document creation, member invitations, member roles updates, member removals, and document departures.
+- **Metadata:** Each row stores the `action_type`, the `actor_id` who triggered the event, an optional `target_user_id` for user-to-user actions, and a flexible JSONB `metadata` column for action-specific details (e.g. `new_role`).
+- **Security:** RLS is strictly enforced. The queries inherently verify the current user exists in the `document_members` table for that document before aggregating historical logs.
+
+### 19.2 The UI Implementation
+The `DocumentActivityTree` component was designed for pixel-perfect continuity.
+- **Continuous Timeline:** The tree uses absolute CSS positioning to draw a vertical `w-0.5` line perfectly linking user avatars end-to-end without visual gaps, recreating a continuous history timeline.
+- **Localized Badges:** Conditionally rendered status badges dynamically indicate the most `Recent` interaction, and trace the history back to the blue `Created` badge.
+- **Centralized Profiles:** The tree utilizes the `user-utils.ts` utilities to natively format profile strings and fallbacks without duplicating avatar layout logic across the system.

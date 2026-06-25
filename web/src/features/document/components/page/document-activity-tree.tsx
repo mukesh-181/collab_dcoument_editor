@@ -72,7 +72,7 @@ export function DocumentActivityTree({ documentId, isOpen, setIsOpen }: Document
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent className="w-[400px] sm:w-[540px] flex flex-col p-0">
+      <SheetContent className="w-[400px] sm:w-[540px] flex flex-col p-0" aria-describedby={undefined}>
         <SheetHeader className="p-6 pb-2 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
           <SheetTitle>Document Activity</SheetTitle>
         </SheetHeader>
