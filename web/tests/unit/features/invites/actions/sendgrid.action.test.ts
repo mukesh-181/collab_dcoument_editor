@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
 vi.mock("@sendgrid/mail", () => ({
@@ -16,7 +17,7 @@ beforeEach(() => {
 describe("sendMail", () => {
   it("sends email successfully", async () => {
     const sgMail = (await import("@sendgrid/mail")).default
-    vi.mocked(sgMail.send).mockResolvedValue([{ statusCode: 202 }, {}])
+    vi.mocked(sgMail.send).mockResolvedValue([{ statusCode: 202 } as any, {}])
 
     const { sendMail } = await import("@/features/invites/actions/sendgrid.action")
     const result = await sendMail({

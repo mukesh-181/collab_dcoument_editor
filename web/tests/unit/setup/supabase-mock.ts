@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi } from "vitest"
 
 type QueryResult<T = unknown> = {
@@ -7,24 +8,24 @@ type QueryResult<T = unknown> = {
 }
 
 type SupabaseQuery = {
-  select: ReturnType<typeof vi.fn>
-  insert: ReturnType<typeof vi.fn>
-  update: ReturnType<typeof vi.fn>
-  delete: ReturnType<typeof vi.fn>
-  eq: ReturnType<typeof vi.fn>
-  neq: ReturnType<typeof vi.fn>
-  ilike: ReturnType<typeof vi.fn>
-  in: ReturnType<typeof vi.fn>
-  order: ReturnType<typeof vi.fn>
-  range: ReturnType<typeof vi.fn>
-  single: ReturnType<typeof vi.fn>
-  limit: ReturnType<typeof vi.fn>
-  maybeSingle: ReturnType<typeof vi.fn>
-  textSearch: ReturnType<typeof vi.fn>
-  gt: ReturnType<typeof vi.fn>
-  gte: ReturnType<typeof vi.fn>
-  lt: ReturnType<typeof vi.fn>
-  lte: ReturnType<typeof vi.fn>
+  select: any
+  insert: any
+  update: any
+  delete: any
+  eq: any
+  neq: any
+  ilike: any
+  in: any
+  order: any
+  range: any
+  single: any
+  limit: any
+  maybeSingle: any
+  textSearch: any
+  gt: any
+  gte: any
+  lt: any
+  lte: any
 }
 
 function createMockChain(overrides: Partial<QueryResult> = {}): SupabaseQuery {
@@ -58,26 +59,26 @@ function createMockChain(overrides: Partial<QueryResult> = {}): SupabaseQuery {
 }
 
 type AuthMethods = {
-  getUser: ReturnType<typeof vi.fn>
-  signInWithPassword: ReturnType<typeof vi.fn>
-  signUp: ReturnType<typeof vi.fn>
-  signOut: ReturnType<typeof vi.fn>
-  resetPasswordForEmail: ReturnType<typeof vi.fn>
-  updateUser: ReturnType<typeof vi.fn>
+  getUser: any
+  signInWithPassword: any
+  signUp: any
+  signOut: any
+  resetPasswordForEmail: any
+  updateUser: any
 }
 
 type StorageMethods = {
-  from: ReturnType<typeof vi.fn>
+  from: any
 }
 
 type StorageBucket = {
-  upload: ReturnType<typeof vi.fn>
-  getPublicUrl: ReturnType<typeof vi.fn>
+  upload: any
+  getPublicUrl: any
 }
 
 export type MockSupabaseClient = {
   auth: AuthMethods
-  from: ReturnType<typeof vi.fn>
+  from: any
   storage: StorageMethods
 }
 

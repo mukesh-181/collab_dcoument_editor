@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { createMockClient, type MockSupabaseClient } from "@test/unit/setup/supabase-mock"
 import { createClient } from "@/lib/supabase/server"
@@ -18,7 +19,7 @@ describe("createDocument action", () => {
   it("creates a document and returns its id", async () => {
     const docId = "doc-1"
     mockClient.from().single
-      .mockResolvedValueOnce({ data: { id: docId, title: "My Doc", owner_id: "user-1" }, error: null })
+      .mockResolvedValueOnce({ data: { id: docId, title: "My Doc", owner_id: "user-1" } as any, error: null })
       .mockResolvedValueOnce({ data: null, error: null })
 
     const result = await createDocument(new FormData())
@@ -70,7 +71,7 @@ describe("createDocument action", () => {
 
     const chain = mockClient.from()
     chain.insert
-      .mockImplementationOnce(function () { return this })  // doc insert: chainable
+      .mockImplementationOnce(function (this: any) { return this })  // doc insert: chainable
       .mockResolvedValueOnce({ error: { message: "Insert error" } })  // member insert: fails
 
     await expect(createDocument(new FormData())).rejects.toThrow("Failed to assign document ownership")
