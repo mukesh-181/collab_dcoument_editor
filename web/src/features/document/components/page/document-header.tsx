@@ -73,7 +73,7 @@ export function DocumentHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white dark:border-zinc-800/50 dark:bg-zinc-950 shrink-0">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-zinc-200/50 bg-white dark:border-zinc-800/50 dark:bg-zinc-950 shrink-0">
       <div className="flex h-14 items-center justify-between px-6 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-2">
           <MobileSidebar documents={documents} />
@@ -97,7 +97,7 @@ export function DocumentHeader({
                 {title}
               </h1>
 
-              {currentUserRole !== "viewer" && (
+              {currentUserRole === "owner" && (
                 <>
                   <Button
                     variant="ghost"
@@ -134,7 +134,12 @@ export function DocumentHeader({
         <ActiveUsersCluster />
 
         {/* Member Avatars Popover */}
-        <DocumentMembersPopover members={document.all_members} documentId={document.id} currentUserRole={currentUserRole} />
+        <DocumentMembersPopover 
+          members={document.all_members} 
+          invites={document.invites as { id: string; email: string; status: string; expires_at: string; role: string; name?: string | null; image?: string | null }[]}
+          documentId={document.id} 
+          currentUserRole={currentUserRole} 
+        />
 
         {/* Invite Button */}
         {currentUserRole === "owner" && (

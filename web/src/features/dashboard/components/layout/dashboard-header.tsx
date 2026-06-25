@@ -76,7 +76,7 @@ export function DashboardHeader({ user }: { user: User | null }) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/70 backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/70 supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-zinc-200/50 bg-white/70 backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-950/70 supports-[backdrop-filter]:bg-white/60">
       <div className="flex h-14 items-center px-6 gap-8 max-w-7xl mx-auto">
         {/* Brand */}
         <Link href={ROUTES.DASHBOARD} className="flex items-center gap-2 mr-4 cursor-pointer transition-opacity">

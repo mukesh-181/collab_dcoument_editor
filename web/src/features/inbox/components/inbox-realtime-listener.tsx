@@ -60,6 +60,19 @@ export function InboxRealtimeListener({ onNewEvent }: { onNewEvent?: (silent: bo
             if (onNewEventRef.current) onNewEventRef.current(true);
           }
         )
+        .on(
+          'postgres_changes',
+          {
+            event: 'DELETE',
+            schema: 'public',
+            table: 'invites',
+          },
+          () => {
+            // We can't filter DELETE by email without full replica identity,
+            // so we listen to all deletes and silently refetch.
+            if (onNewEventRef.current) onNewEventRef.current(true);
+          }
+        )
         
       channel.subscribe()
     }

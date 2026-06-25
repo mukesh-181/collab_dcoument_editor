@@ -128,8 +128,8 @@ export function PageThumbnails() {
         className="overflow-hidden transition-[width] duration-300 ease-in-out"
         style={{ width: isOpen ? '16rem' : '0' }}
       >
-        <div className="w-64 h-full border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 flex flex-col backdrop-blur-sm shadow-xl">
-          <div className="h-14 flex items-center justify-between px-4 border-b border-zinc-200/50 dark:border-zinc-800/50 shrink-0">
+        <div className="w-64 h-full border-r-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 flex flex-col backdrop-blur-sm shadow-xl">
+          <div className="h-14 flex items-center justify-between px-4 border-b-2 border-zinc-200/50 dark:border-zinc-800/50 shrink-0">
             <div className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300 font-medium text-[13px] whitespace-nowrap">
               <FileText className="h-4 w-4 text-zinc-500" />
               Pages ({thumbnails.length})
@@ -154,7 +154,7 @@ export function PageThumbnails() {
                 className="flex flex-col items-center gap-2 group cursor-pointer"
               >
                 <div
-                  className="relative bg-white dark:bg-[#09090b] rounded-md shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden group-hover:ring-2 group-hover:ring-indigo-500/50 transition-all"
+                  className="relative bg-white dark:bg-[#09090b] rounded-md shadow-sm border-2 border-zinc-200 dark:border-zinc-800 overflow-hidden group-hover:ring-2 group-hover:ring-indigo-500/50 transition-all"
                   style={{
                     width: "224px",
                     height: "317px",

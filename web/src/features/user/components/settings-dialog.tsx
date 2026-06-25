@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { User as UserIcon, Palette, Users, CreditCard, Shield, LogOut } from "lucide-react";
+import { User as UserIcon, FileText, Users, CreditCard, Shield, LogOut } from "lucide-react";
 import { ProfileSettingsTab } from "./profile-settings-tab";
+import { DocumentsSettingsTab } from "./documents-settings-tab";
 import { logout } from "@/features/auth/actions/logout.action";
 import { SignOutDialogContent } from "@/features/auth/components/sign-out-button";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -15,7 +16,7 @@ interface SettingsDialogProps {
   user: User;
 }
 
-type TabType = "profile" | "theme" | "accounts" | "billing" | "sessions";
+type TabType = "profile" | "documents" | "accounts" | "billing" | "sessions";
 
 export function SettingsDialog({ isOpen, onOpenChange, user }: SettingsDialogProps) {
   const [activeTab, setActiveTab] = useState<TabType>("profile");
@@ -29,7 +30,7 @@ export function SettingsDialog({ isOpen, onOpenChange, user }: SettingsDialogPro
 
   const tabs = [
     { id: "profile", label: "My Profile", icon: UserIcon, disabled: false },
-    { id: "theme", label: "Theme (Soon)", icon: Palette, disabled: true },
+    { id: "documents", label: "Documents", icon: FileText, disabled: false },
     { id: "accounts", label: "Switch Account (Soon)", icon: Users, disabled: true },
     { id: "billing", label: "Billing & Plans (Soon)", icon: CreditCard, disabled: true },
     { id: "sessions", label: "Active Sessions (Soon)", icon: Shield, disabled: true },
@@ -84,6 +85,7 @@ export function SettingsDialog({ isOpen, onOpenChange, user }: SettingsDialogPro
           {/* Main Content Area */}
           <div className="flex-1 bg-white dark:bg-zinc-900/30 overflow-y-auto p-8">
             {activeTab === "profile" && <ProfileSettingsTab user={user} />}
+            {activeTab === "documents" && <DocumentsSettingsTab user={user} />}
             {/* Future tabs will be rendered here */}
           </div>
         </DialogContent>

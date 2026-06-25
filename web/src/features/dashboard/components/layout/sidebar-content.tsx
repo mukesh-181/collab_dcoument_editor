@@ -13,7 +13,7 @@ import type { LucideIcon } from "lucide-react";
 import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action";
 import { createClient } from "@/lib/supabase/client";
 import { ROUTES } from "@/constants/routes";
-import { extractUserInfo } from "@/utils/user-utils";
+  import { extractUserInfo } from "@/utils/user-utils";
 
 function NavItem({ icon: Icon, label, href, badge, pathname }: { icon: LucideIcon; label: string; href: string; badge?: number; pathname: string }) {
   const isActive = pathname === href;
@@ -119,7 +119,7 @@ export function SidebarContent({
       </div>
 
       {/* Profile Section */}
-      <div className="flex items-center justify-between shrink-0 mb-6 px-2 bg-zinc-50/50 dark:bg-zinc-900/20 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm">
+      <div className="flex items-center justify-between shrink-0 mb-6 px-2 bg-zinc-50/50 dark:bg-zinc-900/20 p-2 rounded-xl border-2 border-zinc-200/50 dark:border-zinc-800/50 shadow-sm">
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9 border-2 border-white dark:border-zinc-800 shadow-sm">
             <AvatarImage src={avatarUrl} />
@@ -157,7 +157,7 @@ export function SidebarContent({
         </div>
       </div>
 
-      <div className="shrink-0 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+      <div className="shrink-0 pt-4 border-t-2 border-zinc-100 dark:border-zinc-800/50">
         <Button
           variant="ghost"
           className="w-full justify-start text-zinc-500 hover:text-zinc-900 font-medium h-9 rounded-lg"
