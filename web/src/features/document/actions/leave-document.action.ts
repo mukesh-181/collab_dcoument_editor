@@ -53,6 +53,15 @@ export async function leaveDocumentAction(documentId: string, ownerEmail: string
     console.error('Error inserting leave notification:', inviteError)
   }
 
+  // Log activity
+  await supabase
+    .from('document_activity')
+    .insert({
+      document_id: documentId,
+      actor_id: user.id,
+      action_type: 'member_left',
+    })
+
   revalidatePath(ROUTES.DASHBOARD)
   return { success: true }
 }

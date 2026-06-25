@@ -20,6 +20,7 @@ interface DocumentDeleteDialogProps {
   documentTitle: string;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  onSuccess?: () => void;
 }
 
 export function DocumentDeleteDialog({
@@ -27,6 +28,7 @@ export function DocumentDeleteDialog({
   documentTitle,
   isOpen,
   setIsOpen,
+  onSuccess,
 }: DocumentDeleteDialogProps) {
   const [isPending, setIsPending] = useState(false);
 
@@ -36,6 +38,7 @@ export function DocumentDeleteDialog({
       await deleteDocument(documentId);
       setIsOpen(false);
       toast.success("Document deleted");
+      onSuccess?.();
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "Failed to delete document");
     } finally {

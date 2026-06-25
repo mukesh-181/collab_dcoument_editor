@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { AcceptInviteButton } from '@/features/invites/components/accept-invite-button'
 import { User } from '@supabase/supabase-js'
 import Navbar from '@/features/invites/components/navbar'
+import { extractUserInfo } from "@/utils/user-utils";
 import { ROUTES } from "@/constants/routes";
 
 interface InviteDetails {
@@ -22,9 +23,7 @@ interface InvitePageProps {
 }
 
 export function InvitePage({ token, user, inviteDetails, error }: InvitePageProps) {
-  const rawName = user?.user_metadata?.full_name || user?.user_metadata?.username || user?.email || 'User'
-  const displayName = typeof rawName === 'string' ? rawName : 'User'
-  const avatarUrl = user?.user_metadata?.avatar_url
+  const { name: displayName, image: avatarUrl } = extractUserInfo(user);
 
   if (!token || typeof token !== 'string') {
     return (

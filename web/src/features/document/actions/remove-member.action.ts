@@ -50,6 +50,16 @@ export async function removeMemberAction(documentId: string, memberId: string, m
     console.error('Error inserting removal notification:', inviteError)
   }
 
+  // Log activity
+  await supabase
+    .from('document_activity')
+    .insert({
+      document_id: documentId,
+      actor_id: user.id, // owner
+      target_user_id: memberId,
+      action_type: 'member_removed',
+    })
+
   revalidatePath(ROUTES.DOCUMENT(documentId))
   return { success: true }
 }

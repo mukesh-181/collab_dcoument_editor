@@ -18,6 +18,7 @@ interface EditorProps {
   currentUserName: string;
   currentUserImage?: string;
   token: string;
+  initialYdocState?: string;
 }
 
 function EditorFocusListener() {
@@ -63,6 +64,7 @@ export function Editor({
   currentUserName,
   currentUserImage,
   token,
+  initialYdocState,
 }: EditorProps) {
   const { setSyncState, setActiveUsers, setIsEditorReady, currentUserRole } = useDocumentSync();
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
@@ -75,6 +77,22 @@ export function Editor({
     if (!token) return;
 
     const doc = new Y.Doc();
+    
+    if (initialYdocState) {
+      try {
+        const binaryString = atob(initialYdocState);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        Y.applyUpdate(doc, bytes);
+        setIsEditorReady(true);
+      } catch (e) {
+        console.error("Failed to parse initial ydoc state", e);
+      }
+    }
+
     const wsUrl = ENV.WEBSOCKET_URL;
 
     const hocuspocusProvider = new HocuspocusProvider({
@@ -124,7 +142,7 @@ export function Editor({
       hocuspocusProvider.destroy();
       doc.destroy();
     };
-  }, [documentId, token, setSyncState, setIsEditorReady, setActiveUsers]);
+  }, [documentId, token, setSyncState, setIsEditorReady, setActiveUsers, initialYdocState]);
 
   const editorProps = useMemo(() => editorPropsConfig, []);
 
@@ -137,13 +155,13 @@ export function Editor({
   );
 
   useEffect(() => {
-    if (provider && ydoc && (isSynced || isOffline) && !fadeIn) {
+    if (provider && ydoc && (isSynced || isOffline || initialYdocState) && !fadeIn) {
       const id = requestAnimationFrame(() => setFadeIn(true));
       return () => cancelAnimationFrame(id);
     }
-  }, [provider, ydoc, isSynced, isOffline, fadeIn]);
+  }, [provider, ydoc, isSynced, isOffline, fadeIn, initialYdocState]);
 
-  if (!provider || !ydoc || (!isSynced && !isOffline)) {
+  if (!provider || !ydoc || (!isSynced && !isOffline && !initialYdocState)) {
     return null;
   }
 
@@ -163,7 +181,7 @@ export function Editor({
         editable={currentUserRole !== "viewer"}
         slotBefore={
           <div className={`sticky top-14 z-40 w-full flex justify-center pt-4 pb-4 mb-4 bg-zinc-50 dark:bg-zinc-900 pointer-events-none ${currentUserRole === "viewer" ? "hidden" : ""}`}>
-            <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl shadow-md px-1 py-0.5 flex items-center justify-center pointer-events-auto max-w-[95%] overflow-hidden">
+            <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-2 border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl shadow-md px-1 py-0.5 flex items-center justify-center pointer-events-auto max-w-[95%] overflow-hidden">
               <Toolbar documentId={documentId} />
             </div>
           </div>

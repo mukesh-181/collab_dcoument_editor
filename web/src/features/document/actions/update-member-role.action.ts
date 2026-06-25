@@ -50,6 +50,17 @@ export async function updateMemberRoleAction(documentId: string, memberId: strin
     console.error('Error inserting role update notification:', inviteError)
   }
 
+  // Log activity
+  await supabase
+    .from('document_activity')
+    .insert({
+      document_id: documentId,
+      actor_id: user.id, // owner
+      target_user_id: memberId,
+      action_type: 'role_updated',
+      metadata: { new_role: newRole },
+    })
+
   revalidatePath(ROUTES.DOCUMENT(documentId))
   return { success: true }
 }

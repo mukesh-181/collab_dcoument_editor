@@ -136,7 +136,7 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
   const memberCount = document.all_members?.length || 0;
   const ownerMember = document.all_members?.find((m) => m.role === "owner");
   const ownerEmail = ownerMember?.user?.email || "";
-  const currentUserName = currentUser?.user_metadata?.full_name || currentUser?.email || "Unknown User";
+  const { name: currentUserName } = extractUserInfo(currentUser);
 
   const sortedMembers = document.all_members 
     ? [...document.all_members].sort((a, b) => {
@@ -152,10 +152,10 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
       onMouseEnter={preloadEditor}
       className="group block outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-2xl"
     >
-      <div className="relative flex flex-col h-[280px] bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-200 hover:shadow-lg overflow-hidden">
+      <div className="relative flex flex-col h-[280px] bg-white dark:bg-zinc-900/80 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition-all duration-200 hover:shadow-lg overflow-hidden">
 
         {/* Preview Area — top portion */}
-        <div className="relative flex-1 bg-zinc-50 dark:bg-zinc-950/50 overflow-hidden ">
+        <div className="relative flex-1 bg-zinc-50 dark:bg-zinc-950/50 overflow-hidden border-b-2 border-zinc-200 dark:border-zinc-800">
           <DocumentPreview json={document.previewJson} />
           {/* Fade-out gradient at the bottom of the preview */}
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-zinc-900/80 to-transparent pointer-events-none" />
@@ -175,13 +175,14 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
         </div>
 
         {/* Card Footer */}
-        <div className="shrink-0 px-5 py-4 space-y-3 bg-white dark:bg-zinc-900/80">
-          {/* Title + Edited */}
-          <div>
-            <h3 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-tight">
+        <div className="shrink-0 px-4 py-3 bg-white dark:bg-zinc-900/80 flex justify-between items-center gap-3">
+          
+          {/* Left side: Title and Edited Date */}
+          <div className="flex flex-col min-w-0 flex-1">
+            <h3 className="text-[14.5px] font-bold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-tight">
               {document.title}
             </h3>
-            <span className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5 block">
+            <span className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
               Edited{" "}
               {new Date(document.updated_at).toLocaleDateString("en-US", {
                 month: "short",
@@ -191,8 +192,8 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
             </span>
           </div>
 
-          {/* Bottom row: Avatars + member count + action menu */}
-          <div className="flex items-center justify-between">
+          {/* Right side: Avatars and Role Badge */}
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
             <div className="flex items-center gap-2">
               {document.all_members && memberCount > 0 && (
                 <div className="flex items-center -space-x-1.5">
@@ -203,11 +204,11 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
                       return (
                       <Avatar
                         key={member.user.id}
-                        className="w-7 h-7 border-2 border-white dark:border-zinc-900 relative shadow-sm"
+                        className="w-6 h-6 border-2 border-white dark:border-zinc-900 relative shadow-sm"
                         style={{ zIndex: 10 - i }}
                       >
                         <AvatarImage src={image} />
-                        <AvatarFallback className="text-[10px] bg-gradient-to-br from-indigo-400 to-purple-500 text-white font-semibold">
+                        <AvatarFallback className="text-[9px] bg-gradient-to-br from-indigo-400 to-purple-500 text-white font-semibold">
                           {getInitials(name, email)}
                         </AvatarFallback>
                       </Avatar>
@@ -216,15 +217,15 @@ export function DocumentCard({ document, role, currentUser }: DocumentCardProps)
               )}
               {memberCount > 0 && (
                 <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400">
-                  <Users className="w-3.5 h-3.5" />
-                  <span className="text-[12px] font-medium">{memberCount}</span>
+                  <Users className="w-3 h-3" />
+                  <span className="text-[11px] font-medium">{memberCount}</span>
                 </div>
               )}
             </div>
 
             {/* Role badge */}
             <span
-              className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${getRoleBadge(role)}`}
+              className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border-2 ${getRoleBadge(role)}`}
             >
               {role}
             </span>

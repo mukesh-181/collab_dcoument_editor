@@ -39,6 +39,7 @@ A full-viewport, app-shell interface (`fixed inset-0 h-[100dvh] overflow-hidden`
 - **Server-Side Pagination**: URL-driven (`?page=N&search=...`), 6 docs per page via Supabase `.range()`. `<Link prefetch={true}>` pre-fetches next page data.
 - **Debounced Search**: 500ms delay, dim overlay (`opacity-40`) + spinner while loading — no layout shift.
 - **Skeleton Loading**: `loading.tsx` in a `(home)` Route Group isolates the skeleton so it doesn't flash during document navigation. Pixel-accurate card dimensions prevent CLS. Content fades in via `opacity-0 animate-[fade-in_0.2s]`.
+- **Glassmorphic Aesthetics**: A seamless `noise.png` static asset is used extensively across the dashboard, login, and dialog overlays (`bg-[url('/noise.png')] mix-blend-overlay`) to create a premium frosted-glass texture.
 
 ---
 
@@ -50,6 +51,8 @@ Manages all received invitations at `/inbox` with real-time updates and persiste
 - **Persistent History**: Accept/Reject updates `status` column — row is NOT deleted. Badges replace buttons. Trash icon for explicit cleanup.
 - **Client-Side Filtering**: `useMemo` with 5 filters (All, Pending, Accepted, Rejected, Expired). Expired is computed live via `new Date(expires_at) < new Date()` — no server round-trip.
 - **Real-Time via Supabase Realtime**: `postgres_changes` INSERT listener on `invites` table. Uses localized `onNewEvent()` callback instead of `router.refresh()` to avoid full-page flash.
+- **Revocation Pattern**: `revokeInviteAction` uses a two-step `rejected` -> `DELETE` update. Supabase Realtime doesn't include the full row payload on DELETE, so temporarily updating to `rejected` forces a full payload emission, allowing client inboxes to instantly remove the item without a full refresh.
+- **Centralized Invite Management**: Sent invites are tracked and revokable directly within the document's `DocumentMembersPopover` rather than requiring a dedicated dashboard tab, simplifying the sender's workflow.
 - **Silent Background Fetch**: `fetchFiltered(silent=true)` skips skeleton for WebSocket-triggered updates.
 - **Stale Closure Fix**: WebSocket listener captures initial state permanently. Fixed with `useRef` — a separate `useEffect` keeps `onNewEventRef.current` fresh on every render. WebSocket always calls `.current`.
 - **Zero-Jitter Spinners**: Button text stays in DOM at `opacity-0`; spinner overlays with `absolute inset-0`. Applied globally to all 12+ action buttons.
@@ -193,7 +196,7 @@ Unauthenticated invite links redirect to `/login?next=/dashboard/invite?token=<u
 
 | Table | Purpose |
 |---|---|
-| `users` | Public profiles mirroring `auth.users` |
+| `users` | Public profiles (`name`, `email`, `image`) mirroring `auth.users` |
 | `documents` | Metadata: `title`, `owner_id`, timestamps, `is_deleted` |
 | `document_members` | ACL: `document_id`, `user_id`, `role` (owner/editor/viewer) |
 | `document_content_state` | `ydoc_state` (base64 CRDT binary) + `preview_json` |
@@ -223,6 +226,8 @@ Every table has RLS enabled. Queries are automatically scoped to the authenticat
 
 - **Email/Password**: Server Action calls `signInWithPassword()`. Password never round-trips through a client-side `fetch`.
 - **GitHub OAuth (PKCE)**: Client-side redirect to GitHub (`signInWithOAuth`), server-side code exchange in `app/auth/callback/route.ts` via `exchangeCodeForSession()`. GitHub credentials live in Supabase Dashboard, NOT in `.env.local`.
+- **Forgot Password (Magic Link)**: Uses `resetPasswordForEmail` to send a branded HTML email, routing through the PKCE callback to securely authenticate before reaching `/update-password`.
+- **User Profile Sync**: Profile updates (like avatar uploads) use a deferred local-preview model, saving the image to the database's `image` column only when explicitly submitted.
 - **Double Validation**: Zod schemas consumed by React Hook Form (client) and `.safeParse()` (server).
 - **Auth-Aware Navbar**: Async Server Component calls `getUser()` during render — correct buttons baked into first HTML response, zero-flicker.
 - **`{ success, error }` Contract**: Actions return JSON, never throw `redirect()` internally. Prevents `NEXT_REDIRECT` errors in client `try/catch` blocks.
@@ -246,3 +251,25 @@ Every table has RLS enabled. Queries are automatically scoped to the authenticat
 - **File Path**: `{documentId}/{crypto.randomUUID()}.{ext}` — groups assets by document, prevents filename collisions.
 - **Validation**: MIME type (`image/*`), 5MB size limit, auth check — all in `upload-image.action.ts` before the file reaches Supabase Storage.
 - **Why Server Action**: Supabase service role key must never be exposed to the browser.
+
+---
+
+## 17. Code Quality & Type Safety
+
+- **100% Type-Safe**: The core application (`src/`) has zero TypeScript errors (`npx tsc --noEmit` exit 0). All `any` types were systematically removed from server action payloads and component props.
+- **ESLint Compliance**: Zero lint warnings. React Hook rules (`exhaustive-deps`, `set-state-in-effect`) strictly followed via `useCallback` and proper render cycle management.
+- **Vitest Mocking Strategy**: In test files (`tests/unit/`), strict ESLint rules for `no-explicit-any` are bypassed explicitly via `/* eslint-disable */` to allow flexible coercion of Vitest's `vi.fn()` recursive types and complex `mockDoc` payloads without compromising the application's actual type definitions.
+
+---
+
+## 18. Caching Strategy & Real-Time Sync
+- **SWR Migration**: Migrated pagination lists (Inbox, Document Activity, User Documents) from standard React state to `useSWRInfinite`. Provides instant cache responses, eliminates UI jitter, and handles cursor management natively.
+- **Strict WebSockets**: Disabled all HTTP background polling (`revalidateIfStale: false`). Data is fetched only on mount or when triggered by a persistent Supabase `postgres_changes` WebSocket channel payload pushing updates down to the client.
+
+## 19. Auditing and History
+- **Document Activity Log**: Dedicated `document_activity` table capturing immutable events (creation, joins, role changes, removals).
+- **Activity Tree UI**: GitHub-style continuous vertical timeline slide-out drawer rendering the history of interactions per document.
+
+## 20. Advanced Session & Access Management
+- **Two-Step Revocation**: Solves Supabase Realtime's blind `DELETE` event payload by first applying an `UPDATE` (broadcasting the ID) before the `DELETE`.
+- **Sessions Tab**: Allows users to actively manage and revoke persistent authentication sessions across devices.

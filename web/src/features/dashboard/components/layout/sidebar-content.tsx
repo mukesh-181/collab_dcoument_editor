@@ -8,11 +8,13 @@ import { Settings, Inbox, LayoutGrid } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SignOutButton } from "@/features/auth/components/sign-out-button";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
 import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action";
 import { createClient } from "@/lib/supabase/client";
 import { ROUTES } from "@/constants/routes";
+import { extractUserInfo } from "@/utils/user-utils";
+import useSWR from "swr";
 
 function NavItem({ icon: Icon, label, href, badge, pathname }: { icon: LucideIcon; label: string; href: string; badge?: number; pathname: string }) {
   const isActive = pathname === href;
@@ -65,19 +67,19 @@ export function SidebarContent({
   user?: User | null;
 }) {
   const pathname = usePathname();
-  const avatarUrl = user?.user_metadata?.avatar_url;
-  const fullName =
-    user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const { name: fullName, image: avatarUrl } = extractUserInfo(user);
   const initial = fullName.charAt(0).toUpperCase();
 
-  const [unreadCount, setUnreadCount] = useState<number>(0);
   const supabase = useMemo(() => createClient(), []);
+  
+  const { data: unreadCount = 0, mutate } = useSWR(
+    user?.email ? "unread-count" : null,
+    getUnreadCount,
+    { fallbackData: 0 }
+  );
 
   useEffect(() => {
     if (!user?.email) return;
-
-    // Fetch initial count
-    getUnreadCount().then(setUnreadCount);
 
     // Setup realtime listener for instant badge updates globally
     const channelName = `global-inbox-badge-${crypto.randomUUID()}`;
@@ -92,7 +94,7 @@ export function SidebarContent({
           filter: `email=eq.${user.email}`,
         },
         () => {
-          getUnreadCount().then(setUnreadCount);
+          mutate();
         },
       )
       .subscribe();
@@ -100,7 +102,7 @@ export function SidebarContent({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.email, supabase]);
+  }, [user?.email, supabase, mutate]);
 
   return (
     <div className="flex h-full flex-col p-4">
@@ -120,7 +122,7 @@ export function SidebarContent({
       </div>
 
       {/* Profile Section */}
-      <div className="flex items-center justify-between shrink-0 mb-6 px-2 bg-zinc-50/50 dark:bg-zinc-900/20 p-2 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm">
+      <div className="flex items-center justify-between shrink-0 mb-6 px-2 bg-zinc-50/50 dark:bg-zinc-900/20 p-2 rounded-xl border-2 border-zinc-200/50 dark:border-zinc-800/50 shadow-sm">
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9 border-2 border-white dark:border-zinc-800 shadow-sm">
             <AvatarImage src={avatarUrl} />
@@ -158,7 +160,7 @@ export function SidebarContent({
         </div>
       </div>
 
-      <div className="shrink-0 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+      <div className="shrink-0 pt-4 border-t-2 border-zinc-100 dark:border-zinc-800/50">
         <Button
           variant="ghost"
           className="w-full justify-start text-zinc-500 hover:text-zinc-900 font-medium h-9 rounded-lg"

@@ -10,7 +10,7 @@ interface NavbarProps {
 
 export default function Navbar({ displayName, avatarUrl }: NavbarProps) {
   return (
-    <header className="relative z-10 h-14 shrink-0 border-b border-border bg-background flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
+    <header className="relative z-10 h-14 shrink-0 border-b-2 border-border bg-background flex items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8 border border-zinc-200 dark:border-zinc-800">
