@@ -120,7 +120,25 @@ export function DocumentHeader({
               )}
             </div>
 
-            <DocumentSyncStatus />
+            <div className="flex items-center gap-3">
+              <DocumentSyncStatus />
+              
+              <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-800 mt-0.5" />
+              
+              <button
+                onClick={() => setIsActivityOpen(true)}
+                className="flex items-center gap-1.5 text-[13px] text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 font-medium transition-colors mt-0.5"
+                title="View Document Activity"
+              >
+                <History className="h-3.5 w-3.5" />
+                <span className="underline underline-offset-2 decoration-zinc-300 dark:decoration-zinc-700 hover:decoration-zinc-500 dark:hover:decoration-zinc-400">Activity</span>
+              </button>
+              <DocumentActivityTree
+                documentId={document.id}
+                isOpen={isActivityOpen}
+                setIsOpen={setIsActivityOpen}
+              />
+            </div>
           </div>
         </div>
 
@@ -143,21 +161,7 @@ export function DocumentHeader({
           currentUserRole={currentUserRole} 
         />
 
-        {/* Activity / History Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsActivityOpen(true)}
-          className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          <History className="h-4 w-4" />
-          <span className="sr-only">Document Activity</span>
-        </Button>
-        <DocumentActivityTree
-          documentId={document.id}
-          isOpen={isActivityOpen}
-          setIsOpen={setIsActivityOpen}
-        />
+
 
         {/* Invite Button */}
         {currentUserRole === "owner" && (

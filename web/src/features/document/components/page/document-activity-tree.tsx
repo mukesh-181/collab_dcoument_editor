@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useRef, useCallback } from "react";
 import { format } from "date-fns";
 import {
   Sheet,
@@ -37,18 +37,58 @@ type ActivityEvent = {
 
 export function DocumentActivityTree({ documentId, isOpen, setIsOpen }: DocumentActivityTreeProps) {
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const fetchActivities = useCallback(async (pageToFetch: number, isInitial = false) => {
+    const result = await getDocumentActivity(documentId, pageToFetch, 15);
+    if (result.success && result.activity) {
+      const newActivities = result.activity as unknown as ActivityEvent[];
+      if (isInitial) {
+        setActivities(newActivities);
+      } else {
+        setActivities((prev) => [...prev, ...newActivities]);
+      }
+      setHasMore(!!result.hasMore);
+      setPage(pageToFetch);
+    }
+  }, [documentId]);
 
   useEffect(() => {
     if (isOpen) {
-      startTransition(async () => {
-        const result = await getDocumentActivity(documentId);
-        if (result.success && result.activity) {
-          setActivities(result.activity as unknown as ActivityEvent[]);
-        }
+      startTransition(() => {
+        fetchActivities(1, true);
+      });
+    } else {
+      // Reset state when sheet closes
+      requestAnimationFrame(() => {
+        setActivities([]);
+        setPage(1);
+        setHasMore(true);
       });
     }
-  }, [isOpen, documentId]);
+  }, [isOpen, documentId, fetchActivities]);
+
+  const triggerNodeRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isPending || isLoadingMore) return;
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setIsLoadingMore(true);
+          fetchActivities(page + 1).finally(() => setIsLoadingMore(false));
+        }
+      });
+
+      if (node) observerRef.current.observe(node);
+    },
+    [isPending, isLoadingMore, hasMore, page, fetchActivities]
+  );
 
   const renderEventText = (event: ActivityEvent) => {
     const actorName = getUserName(event.actor?.name, event.actor?.email);
@@ -97,8 +137,15 @@ export function DocumentActivityTree({ documentId, isOpen, setIsOpen }: Document
                   const actorNameForInitial = getUserName(event.actor?.name, event.actor?.email);
                   const actorInitial = actorNameForInitial.charAt(0).toUpperCase();
 
+                  // Trigger fetch when the 12th item of the current batch (i.e. length - 4) is scrolled into view
+                  const isTriggerNode = index === activities.length - 4;
+
                   return (
-                    <div key={event.id} className="relative z-10 flex gap-4">
+                    <div 
+                      key={event.id} 
+                      ref={isTriggerNode ? triggerNodeRef : null}
+                      className="relative z-10 flex gap-4"
+                    >
                       <Avatar className="h-10 w-10 border border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-950 shrink-0 z-10">
                         <AvatarImage src={actorImage} alt={actorInitial} />
                         <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
@@ -130,6 +177,12 @@ export function DocumentActivityTree({ documentId, isOpen, setIsOpen }: Document
                   );
                 })}
               </div>
+              
+              {isLoadingMore && (
+                <div className="flex justify-center py-6 relative z-10">
+                  <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
+                </div>
+              )}
             </div>
           )}
         </div>
