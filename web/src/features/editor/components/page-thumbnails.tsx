@@ -125,7 +125,7 @@ export function PageThumbnails() {
     <div className="fixed left-0 top-14 h-[calc(100vh-3.5rem)] z-50 flex">
       {/* Sidebar panel */}
       <div
-        className="overflow-hidden transition-[width] duration-300 ease-in-out"
+        className="overflow-hidden transition-[width] duration-300 ease-in-out border-2 border-zinc-200 dark:border-zinc-800 "
         style={{ width: isOpen ? '16rem' : '0' }}
       >
         <div className="w-64 h-full border-r-2 border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 flex flex-col backdrop-blur-sm shadow-xl">

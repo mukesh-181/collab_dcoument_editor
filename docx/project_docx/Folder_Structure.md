@@ -1,5 +1,5 @@
 # CollabDoc — Folder Structure
-*(Last Updated: 2026-06-18)*
+*(Last Updated: 2026-06-25)*
 
 Complete project structure of the `web/` directory with one-liner descriptions, incorporating recent modularization and feature enhancements.
 
@@ -54,6 +54,9 @@ collab_docx/
 │   │   ├── layout.tsx                  # Root layout — wraps entire app with fonts, metadata, Toaster
 │   │   ├── not-found.tsx               # Custom 404 error page for unmatched routes
 │   │   └── page.tsx                    # Landing page (/) — auth-aware hero CTA + editor mockup
+│   │
+│   ├── public/                         # Static assets
+│   │   └── noise.png                   # Glassmorphic texture overlay used for UI backgrounds
 │   │
 │   ├── components/                     # Shared, reusable components (not feature-specific)
 │   │   ├── layout/

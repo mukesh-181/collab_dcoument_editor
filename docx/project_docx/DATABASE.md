@@ -125,6 +125,7 @@ Manages document access provisioning via secure tokens. Supports two invite type
 - **One table, two invite types:** Both flows answer the same question — "does this token grant access?" — so `acceptInvite(token)` only branches on the `email` column instead of querying two tables.
 - **`expired` is NOT a stored status.** It is computed live: `expires_at < now()`. The database never writes "expired" — it's a pure function of time.
 - **24-Hour Expiry:** Universal links are dangerous if they last forever. We enforce a strict 24-hour Time-to-Live (`expires_at`) on all invites to balance convenience with enterprise security.
+- **Real-Time Revocation Sync:** Deleting an invite row does not emit the row's payload over Supabase Realtime (preventing the client from knowing *which* invite was revoked). To solve this, `revokeInviteAction` executes a two-step transaction: `UPDATE status = 'rejected'` (broadcasting the ID), immediately followed by `DELETE`. The frontend WebSocket listener catches the update event and seamlessly removes the invite from the Inbox UI without a page reload.
 - **SendGrid Resilience:** When an owner sends bulk email invites, we execute a two-step process in `send-email-invites.action.ts`. **First**, we insert the invite rows into the database. **Second**, we trigger the SendGrid API. If SendGrid fails, the database row still exists, and the invite still appears instantly in the recipient's in-app `/inbox`. The database is the primary source of truth.
 
 ---

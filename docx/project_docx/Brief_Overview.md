@@ -39,6 +39,7 @@ A full-viewport, app-shell interface (`fixed inset-0 h-[100dvh] overflow-hidden`
 - **Server-Side Pagination**: URL-driven (`?page=N&search=...`), 6 docs per page via Supabase `.range()`. `<Link prefetch={true}>` pre-fetches next page data.
 - **Debounced Search**: 500ms delay, dim overlay (`opacity-40`) + spinner while loading — no layout shift.
 - **Skeleton Loading**: `loading.tsx` in a `(home)` Route Group isolates the skeleton so it doesn't flash during document navigation. Pixel-accurate card dimensions prevent CLS. Content fades in via `opacity-0 animate-[fade-in_0.2s]`.
+- **Glassmorphic Aesthetics**: A seamless `noise.png` static asset is used extensively across the dashboard, login, and dialog overlays (`bg-[url('/noise.png')] mix-blend-overlay`) to create a premium frosted-glass texture.
 
 ---
 
@@ -50,6 +51,8 @@ Manages all received invitations at `/inbox` with real-time updates and persiste
 - **Persistent History**: Accept/Reject updates `status` column — row is NOT deleted. Badges replace buttons. Trash icon for explicit cleanup.
 - **Client-Side Filtering**: `useMemo` with 5 filters (All, Pending, Accepted, Rejected, Expired). Expired is computed live via `new Date(expires_at) < new Date()` — no server round-trip.
 - **Real-Time via Supabase Realtime**: `postgres_changes` INSERT listener on `invites` table. Uses localized `onNewEvent()` callback instead of `router.refresh()` to avoid full-page flash.
+- **Revocation Pattern**: `revokeInviteAction` uses a two-step `rejected` -> `DELETE` update. Supabase Realtime doesn't include the full row payload on DELETE, so temporarily updating to `rejected` forces a full payload emission, allowing client inboxes to instantly remove the item without a full refresh.
+- **Centralized Invite Management**: Sent invites are tracked and revokable directly within the document's `DocumentMembersPopover` rather than requiring a dedicated dashboard tab, simplifying the sender's workflow.
 - **Silent Background Fetch**: `fetchFiltered(silent=true)` skips skeleton for WebSocket-triggered updates.
 - **Stale Closure Fix**: WebSocket listener captures initial state permanently. Fixed with `useRef` — a separate `useEffect` keeps `onNewEventRef.current` fresh on every render. WebSocket always calls `.current`.
 - **Zero-Jitter Spinners**: Button text stays in DOM at `opacity-0`; spinner overlays with `absolute inset-0`. Applied globally to all 12+ action buttons.
@@ -248,3 +251,11 @@ Every table has RLS enabled. Queries are automatically scoped to the authenticat
 - **File Path**: `{documentId}/{crypto.randomUUID()}.{ext}` — groups assets by document, prevents filename collisions.
 - **Validation**: MIME type (`image/*`), 5MB size limit, auth check — all in `upload-image.action.ts` before the file reaches Supabase Storage.
 - **Why Server Action**: Supabase service role key must never be exposed to the browser.
+
+---
+
+## 17. Code Quality & Type Safety
+
+- **100% Type-Safe**: The core application (`src/`) has zero TypeScript errors (`npx tsc --noEmit` exit 0). All `any` types were systematically removed from server action payloads and component props.
+- **ESLint Compliance**: Zero lint warnings. React Hook rules (`exhaustive-deps`, `set-state-in-effect`) strictly followed via `useCallback` and proper render cycle management.
+- **Vitest Mocking Strategy**: In test files (`tests/unit/`), strict ESLint rules for `no-explicit-any` are bypassed explicitly via `/* eslint-disable */` to allow flexible coercion of Vitest's `vi.fn()` recursive types and complex `mockDoc` payloads without compromising the application's actual type definitions.

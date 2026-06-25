@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { User as UserIcon, FileText, Users, CreditCard, Shield, LogOut } from "lucide-react";
+import { User as UserIcon, FileText, CreditCard, Shield, LogOut } from "lucide-react";
 import { ProfileSettingsTab } from "./profile-settings-tab";
 import { DocumentsSettingsTab } from "./documents-settings-tab";
 import { logout } from "@/features/auth/actions/logout.action";
@@ -16,7 +16,7 @@ interface SettingsDialogProps {
   user: User;
 }
 
-type TabType = "profile" | "documents" | "accounts" | "billing" | "sessions";
+type TabType = "profile" | "documents" | "billing" | "sessions";
 
 export function SettingsDialog({ isOpen, onOpenChange, user }: SettingsDialogProps) {
   const [activeTab, setActiveTab] = useState<TabType>("profile");
@@ -31,9 +31,9 @@ export function SettingsDialog({ isOpen, onOpenChange, user }: SettingsDialogPro
   const tabs = [
     { id: "profile", label: "My Profile", icon: UserIcon, disabled: false },
     { id: "documents", label: "Documents", icon: FileText, disabled: false },
-    { id: "accounts", label: "Switch Account (Soon)", icon: Users, disabled: true },
+        { id: "sessions", label: "Active Sessions (Soon)", icon: Shield, disabled: true },
     { id: "billing", label: "Billing & Plans (Soon)", icon: CreditCard, disabled: true },
-    { id: "sessions", label: "Active Sessions (Soon)", icon: Shield, disabled: true },
+
   ] as const;
 
   return (
