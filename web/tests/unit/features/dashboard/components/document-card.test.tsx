@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { render, screen } from "@testing-library/react"
@@ -35,33 +36,33 @@ beforeEach(() => {
 
 describe("DocumentCard", () => {
   it("renders document title", () => {
-    render(<DocumentCard document={mockDoc} role="owner" />)
+    render(<DocumentCard document={mockDoc as any} role="owner" />)
     expect(screen.getByText("📝 My Document")).toBeInTheDocument()
   })
 
   it("renders role badge", () => {
-    render(<DocumentCard document={mockDoc} role="owner" />)
+    render(<DocumentCard document={mockDoc as any} role="owner" />)
     expect(screen.getByText("owner")).toBeInTheDocument()
   })
 
   it("shows member avatars", () => {
-    render(<DocumentCard document={mockDoc} role="owner" />)
+    render(<DocumentCard document={mockDoc as any} role="owner" />)
     expect(screen.getByText("A")).toBeInTheDocument()
     expect(screen.getByText("B")).toBeInTheDocument()
   })
 
   it("shows member count", () => {
-    render(<DocumentCard document={mockDoc} role="owner" />)
+    render(<DocumentCard document={mockDoc as any} role="owner" />)
     expect(screen.getByText("2")).toBeInTheDocument()
   })
 
   it("shows date", () => {
-    render(<DocumentCard document={mockDoc} role="owner" />)
+    render(<DocumentCard document={mockDoc as any} role="owner" />)
     expect(screen.getByText(/Edited/)).toBeInTheDocument()
   })
 
   it("renders link to document", () => {
-    render(<DocumentCard document={mockDoc} role="owner" />)
+    render(<DocumentCard document={mockDoc as any} role="owner" />)
     const links = screen.getAllByRole("link")
     const docLink = links.find((l) => l.getAttribute("href")?.includes("doc-1"))
     expect(docLink).toBeTruthy()

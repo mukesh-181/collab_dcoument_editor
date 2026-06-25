@@ -2140,3 +2140,68 @@ Avatar uploads inside the Profile Settings tab deliberately avoid immediate data
 - **Local Preview**: When a user selects a file, it generates a zero-cost local object URL via `URL.createObjectURL()`. This allows users to test multiple images without uploading them to Supabase Storage.
 - **Deferred Upload**: The actual upload (`upload-avatar.action.ts`) and profile mutation (`update-profile.action.ts`) only fire when the "Save Changes" button is submitted.
 - **Zero-Jitter Spinner & Preloading**: The "Save Changes" button transitions to a spinner. Upon a successful database update, the spinner intentionally remains active while a background `new Image()` silently downloads the newly generated Supabase URL. The UI only clears the spinner when the `onload` event confirms the image is fully cached, guaranteeing a completely flash-free update.
+
+---
+
+## 18. Final Architecture Polish: Type Safety, Revocation Pattern, and UI Consistency
+
+### 18.1 100% Strict Type Safety & Lint Compliance
+The core application logic (`src/`) has achieved full TypeScript and ESLint compliance (`npx tsc --noEmit` exits with 0). 
+- All usages of `any` were removed from feature modules (e.g., `get-inbox.action.ts`, `documents-settings-tab.tsx`).
+- React hook violations (`exhaustive-deps`, `set-state-in-effect`) were meticulously resolved by restructuring component side-effects.
+- In `tests/unit/`, Vitest mocking mismatches (where `ReturnType<typeof vi.fn>` causes strict typescript resolution to fail on chained mock queries) were circumvented explicitly via `/* eslint-disable @typescript-eslint/no-explicit-any */` pragmas to avoid polluting the core application with loosely typed test payloads.
+
+### 18.2 Two-Step Revocation Sync
+The real-time `inbox` updates relied on a `postgres_changes` listener for inserts and deletes. However, Supabase Realtime does not forward the row payload on a `DELETE` event, meaning clients couldn't know *which* invite was revoked.
+The `revokeInviteAction` was redesigned to perform a two-step mutation:
+1. `UPDATE` the invite to `status = 'rejected'` — forcing a full payload broadcast containing the invite ID.
+2. `DELETE` the invite row immediately afterward to clear the database.
+This guarantees the client WebSocket receives the full row payload on the update event, allowing the local `inbox-list` state to filter out the revoked invite instantaneously without requiring a full-page reload.
+
+### 18.3 Seamless Glassmorphic Textures (`noise.png`)
+The application heavily relies on `bg-[url('/noise.png')] mix-blend-overlay` in Tailwind classes to achieve a frosted glass, textured aesthetic across dialogs, page layouts, and skeletons. The `noise.png` static asset was integrated into the `public/` directory, resolving widespread 404 network errors and ensuring the premium UI consistency is flawlessly rendered.
+
+---
+
+## 19. Document Activity Tree
+
+CollabDoc provides an auditable, GitHub-style linear activity log for every document, allowing owners and editors to track the entire lifecycle of a document in a premium visual format.
+
+### 19.1 Architecture & Schema
+The history is powered by a new `document_activity` table that stores immutable historical events.
+- **Event Logging:** Natively triggers on document creation, member invitations, member roles updates, member removals, and document departures.
+- **Metadata:** Each row stores the `action_type`, the `actor_id` who triggered the event, an optional `target_user_id` for user-to-user actions, and a flexible JSONB `metadata` column for action-specific details (e.g. `new_role`).
+- **Security:** RLS is strictly enforced. The queries inherently verify the current user exists in the `document_members` table for that document before aggregating historical logs.
+
+### 19.3 Real-Time WebSocket Hooks
+The activity tree relies heavily on a dedicated `DocumentActivityRealtimeListener`. Since the activity log is a slide-out drawer, fetching data on every open would cause unnecessary database load. Instead, the UI subscribes directly to `postgres_changes` on the `document_activity` table. When an `INSERT` event fires (e.g. an owner removes a member), the WebSocket pushes the payload to the active listener, which immediately triggers a local cache revalidation.
+
+---
+
+## 20. SWR Caching & The "Silent Network" Architecture
+
+A major architectural shift was made from manual React `useState` / `useEffect` data fetching to an event-driven, cache-first architecture using SWR (Stale-While-Revalidate).
+
+### 20.1 Why `useSWRInfinite`?
+Managing cursor-based infinite scrolling natively in React involves complex dependency arrays, memory leak risks on unmount, and race conditions if requests fire concurrently. `useSWRInfinite` was chosen because it orchestrates sequential page fetching effortlessly by defining a global cache key shape (e.g. `['activity', documentId, pageIndex]`). 
+
+### 20.2 Locking Down the Polling
+By default, SWR attempts to ensure data freshness by revalidating (HTTP polling) the cache whenever the user re-focuses the browser window or when the cache becomes stale. To completely silence the network tab and reduce database load to absolute zero during idle usage, we applied strict config flags: `{ revalidateOnFocus: false, revalidateIfStale: false }`.
+
+### 20.3 Integrating with Supabase Realtime
+With background HTTP polling disabled, the application relies exclusively on Supabase WebSockets. Invisible listener components (`InboxRealtimeListener`, `DocumentListRealtimeListener`) maintain persistent channels to PostgreSQL. 
+When an event occurs (e.g., an invite is sent), the WebSocket receives the payload and manually invokes SWR's `mutate()` method. This instantly invalidates the local memory cache and triggers a targeted UI refresh. The result is a frontend that feels instantly responsive, drawing from cache on navigation, and only pinging the server when an actual database mutation happens.
+
+---
+
+## 21. Advanced Session & Access Management
+
+### 21.1 Two-Step Invite Revocation
+A known limitation of Supabase Realtime is that `DELETE` event payloads do not contain the deleted row's data (only its primary key). Because the frontend inbox state needed the invite data to properly filter the array, blind deletes caused state desynchronization.
+We implemented a two-step mutation pattern in `revokeInviteAction`:
+1. `UPDATE` the invite to `status = 'rejected'`. This forces Supabase to broadcast the full row payload (including the ID).
+2. Immediately `DELETE` the row in the same transaction.
+The frontend WebSocket listener catches the `UPDATE` payload, reads the ID, and instantly strips the revoked invite from the UI before the row is permanently destroyed on the backend.
+
+### 21.2 Sessions Management
+A new `sessions-settings-tab.tsx` was introduced to provide enterprise-grade visibility into active authentication sessions. It leverages Supabase's native sessions API to list active logins across devices, allowing users to securely revoke stale or unauthorized sessions remotely.

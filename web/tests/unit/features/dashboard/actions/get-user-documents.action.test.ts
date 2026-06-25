@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { createMockClient, type MockSupabaseClient } from "@test/unit/setup/supabase-mock"
 import { createClient } from "@/lib/supabase/server"
@@ -62,7 +63,7 @@ describe("getUserDocuments action", () => {
     expect(result.totalPages).toBe(1)
     expect(result.documents).toHaveLength(2)
     expect(result.documents[0].id).toBe("doc-1")
-    expect(result.documents[0].document_content_state).toBeUndefined()
+    expect((result.documents[0] as any).document_content_state).toBeUndefined()
   })
 
   it("applies search filter when provided", async () => {

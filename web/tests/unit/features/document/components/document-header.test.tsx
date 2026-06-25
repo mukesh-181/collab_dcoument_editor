@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { render, screen } from "@testing-library/react"
@@ -34,7 +35,7 @@ function renderHeader(role = "owner") {
   return render(
     <DocumentProvider initialRole={role}>
       <RoleSetter role={role} />
-      <DocumentHeader document={mockDoc} />
+      <DocumentHeader document={mockDoc as any} documents={[]} currentUserName="Alice" />
     </DocumentProvider>
   )
 }

@@ -237,7 +237,7 @@
   /* The editor DOM when pagination is active */
   .rm-with-pagination {
     margin: 2rem auto !important;
-    border: 1px solid #e4e4e7 !important; /* zinc-200 */
+    border: 2px solid #e4e4e7 !important; /* zinc-200 */
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
     border-radius: 2px !important;
     background-color: white !important;

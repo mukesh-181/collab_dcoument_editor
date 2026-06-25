@@ -1,5 +1,5 @@
 # CollabDoc — Folder Structure
-*(Last Updated: 2026-06-18)*
+*(Last Updated: 2026-06-25)*
 
 Complete project structure of the `web/` directory with one-liner descriptions, incorporating recent modularization and feature enhancements.
 
@@ -54,6 +54,9 @@ collab_docx/
 │   │   ├── layout.tsx                  # Root layout — wraps entire app with fonts, metadata, Toaster
 │   │   ├── not-found.tsx               # Custom 404 error page for unmatched routes
 │   │   └── page.tsx                    # Landing page (/) — auth-aware hero CTA + editor mockup
+│   │
+│   ├── public/                         # Static assets
+│   │   └── noise.png                   # Glassmorphic texture overlay used for UI backgrounds
 │   │
 │   ├── components/                     # Shared, reusable components (not feature-specific)
 │   │   ├── layout/
@@ -135,6 +138,7 @@ collab_docx/
 │   │   │
 │   │   ├── document/                   # Document-level operations
 │   │   │   ├── actions/
+│   │   │   │   ├── get-document-activity.action.ts
 │   │   │   │   ├── get-document-by-id.action.ts
 │   │   │   │   ├── leave-document.action.ts
 │   │   │   │   ├── remove-member.action.ts
@@ -142,6 +146,7 @@ collab_docx/
 │   │   │   └── components/
 │   │   │       ├── page/
 │   │   │       │   ├── active-users-cluster.tsx
+│   │   │       │   ├── document-activity-tree.tsx
 │   │   │       │   ├── document-client-layout.tsx
 │   │   │       │   ├── document-context.tsx
 │   │   │       │   ├── document-header.tsx

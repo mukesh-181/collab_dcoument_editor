@@ -25,16 +25,22 @@ export async function getInbox(
       expires_at,
       documents (
         title,
-        owner:users!documents_owner_id_fkey(name, email, image)
+        owner:users!documents_owner_id_fkey(name, email, image),
+        document_members (
+          user:users(name, email, image)
+        )
       )
     `, { count: 'exact' })
     .eq('email', user.email)
 
   // Apply server-side filtering
   if (filter === "invites") {
-    query = query.in('status', ["pending", "accepted", "rejected", "expired"]);
+    query = query
+      .in('status', ["pending", "accepted", "rejected", "expired"])
+      .not('token', 'like', 'request:%')
+      .not('token', 'like', 'request-denied:%');
   } else if (filter === "document") {
-    query = query.in('status', ["role_updated", "removed", "exited"]);
+    query = query.or('status.in.(role_updated,removed,exited),token.like.request:*,token.like.request-denied:*');
   }
 
   // Apply pagination
@@ -50,5 +56,56 @@ export async function getInbox(
     return { data: [], count: 0 }
   }
 
-  return { data: invites || [], count: count || 0 }
+  type InviteWithRequester = typeof invites[number] & {
+    requester?: { name: string; email: string; image: string };
+  };
+  const processedInvites = (invites || []) as InviteWithRequester[]
+  
+  // Extract requester emails from tokens
+  const requesterEmails = processedInvites
+    .filter(inv => inv.token?.startsWith('request:'))
+    .map(inv => inv.token.split(':')[2])
+    .filter(Boolean)
+
+  if (requesterEmails.length > 0) {
+    const { data: requesters } = await supabase
+      .from('users')
+      .select('name, email, image')
+      .in('email', requesterEmails)
+      // RLS applies here. If the user can't see the requester, it returns []
+
+    if (requesters) {
+      processedInvites.forEach(inv => {
+        if (inv.token?.startsWith('request:')) {
+          const email = inv.token.split(':')[2]?.toLowerCase().trim()
+          const requester = requesters.find(r => r.email?.toLowerCase().trim() === email)
+          if (requester) {
+            inv.requester = requester as { name: string; email: string; image: string };
+          }
+        }
+      })
+    }
+
+    // If RLS blocked the direct lookup, try to find them in document_members
+    processedInvites.forEach(inv => {
+      if (inv.token?.startsWith('request:') && !inv.requester) {
+        const email = inv.token.split(':')[2]?.toLowerCase().trim()
+        
+        const docsRaw = inv.documents
+        const docsData = Array.isArray(docsRaw) ? docsRaw[0] : docsRaw
+        if (docsData?.document_members) {
+          const members = Array.isArray(docsData.document_members) ? docsData.document_members : [docsData.document_members]
+          for (const member of members) {
+            const u = Array.isArray(member.user) ? member.user[0] : member.user
+            if (u && u.email?.toLowerCase().trim() === email) {
+              inv.requester = u as { name: string; email: string; image: string };
+              break
+            }
+          }
+        }
+      }
+    })
+  }
+
+  return { data: processedInvites, count: count || 0 }
 }

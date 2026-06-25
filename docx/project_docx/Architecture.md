@@ -184,3 +184,13 @@ Roles (`owner`, `editor`, `viewer`) are enforced via the `document_members` tabl
 1. **Frontend (Next.js):** Deploy to Vercel (serverless).
 2. **Database + Auth + Storage:** Supabase Cloud.
 3. **WebSocket Server (Hocuspocus):** Deploy as a persistent service on Render, Railway, Fly.io, or DigitalOcean.
+
+---
+
+## 11. Document Auditing & Activity Log
+
+CollabDoc includes a comprehensive GitHub-style linear activity audit log to trace the lifecycle of a document. 
+
+- **Table:** `document_activity` securely tracks all document events.
+- **Trigger Points:** Document creation, role updates, member joins, leaves, and removals are explicitly tracked at the server-action level.
+- **UI Component:** `DocumentActivityTree` aggregates the activities by natively joining `public.users` via Supabase RLS relations, rendering them in a precise, scrollable linear timeline natively integrated into the `DocumentHeader`.

@@ -176,9 +176,9 @@ export function ProfileSettingsTab({ user }: { user: User }) {
           <Input
             value={user.email}
             disabled
-            className="bg-zinc-50 dark:bg-zinc-900/50 text-zinc-500"
+            className="bg-zinc-50 dark:bg-zinc-900/70 text-zinc-900"
           />
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-zinc-500/80 dark:text-zinc-300/80">
             Your email address cannot be changed.
           </p>
         </div>

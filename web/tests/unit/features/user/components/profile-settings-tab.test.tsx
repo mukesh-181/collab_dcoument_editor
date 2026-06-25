@@ -16,7 +16,7 @@ describe("ProfileSettingsTab", () => {
     id: "user-1",
     email: "test@example.com",
     user_metadata: { full_name: "Test User", avatar_url: "avatar.png" }
-  } as User
+  } as unknown as User
 
   it("renders profile details", () => {
     render(<ProfileSettingsTab user={mockUser} />)

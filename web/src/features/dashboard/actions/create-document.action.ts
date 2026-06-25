@@ -47,7 +47,21 @@ export async function createDocument(formData: FormData) {
     throw new Error('Failed to assign document ownership')
   }
 
-  // 4. Return the new document ID
+  // 4. Log document creation activity
+  const { error: activityError } = await supabase
+    .from('document_activity')
+    .insert({
+      document_id: document.id,
+      actor_id: user.id,
+      action_type: 'document_created',
+      metadata: { role: 'owner' },
+    })
+
+  if (activityError) {
+    console.error('Error logging activity:', activityError)
+  }
+
+  // 5. Return the new document ID
   revalidatePath(ROUTES.DASHBOARD)
   return document.id
 }

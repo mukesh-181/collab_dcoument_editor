@@ -125,19 +125,27 @@ Manages document access provisioning via secure tokens. Supports two invite type
 - **One table, two invite types:** Both flows answer the same question — "does this token grant access?" — so `acceptInvite(token)` only branches on the `email` column instead of querying two tables.
 - **`expired` is NOT a stored status.** It is computed live: `expires_at < now()`. The database never writes "expired" — it's a pure function of time.
 - **24-Hour Expiry:** Universal links are dangerous if they last forever. We enforce a strict 24-hour Time-to-Live (`expires_at`) on all invites to balance convenience with enterprise security.
+- **Real-Time Revocation Sync:** Deleting an invite row does not emit the row's payload over Supabase Realtime (preventing the client from knowing *which* invite was revoked). To solve this, `revokeInviteAction` executes a two-step transaction: `UPDATE status = 'rejected'` (broadcasting the ID), immediately followed by `DELETE`. The frontend WebSocket listener catches the update event and seamlessly removes the invite from the Inbox UI without a page reload.
 - **SendGrid Resilience:** When an owner sends bulk email invites, we execute a two-step process in `send-email-invites.action.ts`. **First**, we insert the invite rows into the database. **Second**, we trigger the SendGrid API. If SendGrid fails, the database row still exists, and the invite still appears instantly in the recipient's in-app `/inbox`. The database is the primary source of truth.
 
 ---
 
-## 6. Storage Architecture: `document-assets`
+## 6. Storage Architecture: `document-assets`, `user-assets`, & `public-assets`
 
-To support rich text editing, we bypassed temporary Base64 strings in favor of true CDN-backed cloud storage.
+To support rich functionality across the platform, we utilize three distinct Supabase Storage buckets:
 
-- **The Bucket:** We created a public Supabase Storage bucket named `document-assets`.
-- **Access:** Public reads (anonymous — `<img>` tags work without auth headers), authenticated-only writes (RLS on `storage.objects`).
-- **The Upload Flow:** When a user inserts an image in the editor, the client sends a `FormData` payload to a server action (`upload-image.action.ts`). The server validates the MIME type and 5MB size limit, generates a `crypto.randomUUID()`, and uploads the file to a structured path: `{documentId}/{uuid}.{ext}`.
-- **Why it's efficient:** Grouping assets by `documentId` makes cleanup and data portability incredibly simple. Because the bucket is public, the Tiptap editor and exported PDFs can resolve the `<img>` tags natively without needing to generate expiring signed URLs, ensuring the document always renders perfectly.
-- **Why not `blob:` URLs?** `blob:` URLs are scoped to the browser tab that created them — other collaborators or page refreshes would show broken images.
+- **`document-assets`**: A public bucket used exclusively for rich text editor images. 
+  - **Access:** Public reads (anonymous — `<img>` tags work without auth headers), authenticated-only writes (RLS on `storage.objects`).
+  - **The Upload Flow:** When a user inserts an image in the editor, the client sends a `FormData` payload to a server action (`upload-image.action.ts`). The server validates the MIME type and 5MB size limit, generates a `crypto.randomUUID()`, and uploads the file to a structured path: `{documentId}/{uuid}.{ext}`.
+  - **Why it's efficient:** Grouping assets by `documentId` makes cleanup and data portability incredibly simple. Because the bucket is public, the Tiptap editor and exported PDFs can resolve the `<img>` tags natively without needing to generate expiring signed URLs, ensuring the document always renders perfectly.
+  - **Why not `blob:` URLs?** `blob:` URLs are scoped to the browser tab that created them — other collaborators or page refreshes would show broken images.
+
+- **`user-assets`**: A public bucket for storing custom user profile avatars.
+  - *Access*: Public reads, authenticated writes (restricted so users can only write to their own folder).
+  - *Structure*: `{userId}/{uuid}.{ext}`. Ensures profile images are decoupled from OAuth providers and can be managed locally.
+
+- **`public-assets`**: A public bucket for static application assets.
+  - *Usage*: Primarily used to host the official application logo and branding assets so they can be securely embedded in external systems, such as SendGrid HTML email templates.
 
 ---
 
@@ -243,3 +251,14 @@ To maintain MVP focus:
 - In-document chat
 
 These can all be added later without breaking the core 5-table schema.
+
+-- 6. Document Activity Table (Audit Log)
+create table public.document_activity (
+  id uuid primary key default uuid_generate_v4(),
+  document_id uuid references public.documents(id) on delete cascade not null,
+  actor_id uuid references public.users(id) on delete cascade not null,
+  target_user_id uuid references public.users(id) on delete cascade,
+  action_type text not null check (action_type in ('document_created', 'member_joined', 'member_removed', 'member_left', 'role_updated')),
+  metadata jsonb,
+  created_at timestamptz not null default now()
+);
