@@ -19,7 +19,7 @@ export function SessionsSettingsTab({ user }: SessionsSettingsTabProps) {
       try {
         await logout("others");
         toast.success("Successfully logged out of all other devices.");
-      } catch (error) {
+      } catch {
         toast.error("Failed to log out of other devices.");
       }
     });

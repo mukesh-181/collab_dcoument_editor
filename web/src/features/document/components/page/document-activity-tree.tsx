@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition, useRef, useCallback } from "react";
+import { useRef, useCallback } from "react";
 import { format } from "date-fns";
 import {
   Sheet,
@@ -12,6 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getDocumentActivity } from "../../actions/get-document-activity.action";
 import { getUserName, getUserImage } from "@/utils/user-utils";
 import { Loader2 } from "lucide-react";
+import useSWRInfinite from "swr/infinite";
+import { DocumentActivityRealtimeListener } from "./document-activity-realtime-listener";
 
 interface DocumentActivityTreeProps {
   documentId: string;
@@ -36,58 +38,47 @@ type ActivityEvent = {
 };
 
 export function DocumentActivityTree({ documentId, isOpen, setIsOpen }: DocumentActivityTreeProps) {
-  const [activities, setActivities] = useState<ActivityEvent[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isPending, startTransition] = useTransition();
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  const fetchActivities = useCallback(async (pageToFetch: number, isInitial = false) => {
-    const result = await getDocumentActivity(documentId, pageToFetch, 15);
-    if (result.success && result.activity) {
-      const newActivities = result.activity as unknown as ActivityEvent[];
-      if (isInitial) {
-        setActivities(newActivities);
-      } else {
-        setActivities((prev) => [...prev, ...newActivities]);
-      }
-      setHasMore(!!result.hasMore);
-      setPage(pageToFetch);
-    }
-  }, [documentId]);
+  const getKey = (pageIndex: number, previousPageData: { hasMore?: boolean } | null) => {
+    if (previousPageData && !previousPageData.hasMore) return null; 
+    return ['activity', documentId, pageIndex]; 
+  };
 
-  useEffect(() => {
-    if (isOpen) {
-      startTransition(() => {
-        fetchActivities(1, true);
-      });
-    } else {
-      // Reset state when sheet closes
-      requestAnimationFrame(() => {
-        setActivities([]);
-        setPage(1);
-        setHasMore(true);
-      });
+  const fetcher = async (args: [string, string, number]) => {
+    const [, docId, pageIndex] = args;
+    return await getDocumentActivity(docId, pageIndex + 1, 15);
+  };
+
+  const { data, error, size, setSize, isValidating, mutate } = useSWRInfinite(
+    getKey,
+    fetcher,
+    {
+      revalidateOnFocus: false, 
+      revalidateIfStale: false,
     }
-  }, [isOpen, documentId, fetchActivities]);
+  );
+
+  const activities = data ? data.flatMap(d => d.activity as unknown as ActivityEvent[]) : [];
+  const isLoadingInitialData = !data && !error && isOpen;
+  const isLoadingMore = isLoadingInitialData || (size > 0 && data && typeof data[size - 1] === "undefined");
+  const isReachingEnd = data?.[data.length - 1]?.hasMore === false;
+  const isPending = isValidating && data && data.length === size;
 
   const triggerNodeRef = useCallback(
     (node: HTMLDivElement | null) => {
-      if (isPending || isLoadingMore) return;
+      if (isPending || isLoadingMore || isReachingEnd) return;
       if (observerRef.current) observerRef.current.disconnect();
 
       observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setIsLoadingMore(true);
-          fetchActivities(page + 1).finally(() => setIsLoadingMore(false));
+        if (entries[0].isIntersecting && !isReachingEnd) {
+          setSize(size + 1);
         }
       });
 
       if (node) observerRef.current.observe(node);
     },
-    [isPending, isLoadingMore, hasMore, page, fetchActivities]
+    [isPending, isLoadingMore, isReachingEnd, setSize, size]
   );
 
   const renderEventText = (event: ActivityEvent) => {
@@ -112,13 +103,14 @@ export function DocumentActivityTree({ documentId, isOpen, setIsOpen }: Document
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <DocumentActivityRealtimeListener documentId={documentId} onNewEvent={() => mutate()} />
       <SheetContent className="w-[400px] sm:w-[540px] flex flex-col p-0" aria-describedby={undefined}>
         <SheetHeader className="p-6 pb-2 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
           <SheetTitle>Document Activity</SheetTitle>
         </SheetHeader>
 
         <div className="flex-1 p-6 overflow-y-auto">
-          {isPending ? (
+          {isLoadingInitialData ? (
             <div className="flex h-full items-center justify-center py-20">
               <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
             </div>

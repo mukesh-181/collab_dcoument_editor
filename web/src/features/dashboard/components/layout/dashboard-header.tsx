@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation";
 import { Inbox, LayoutGrid } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import { UserDropdownMenu } from "@/features/user/components/user-dropdown-menu";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
 import { getUnreadCount } from "@/features/inbox/actions/get-unread-count.action";
 import { createClient } from "@/lib/supabase/client";
 import { ROUTES } from "@/constants/routes";
+import useSWR from "swr";
 
 function NavItem({ icon: Icon, label, href, badge, pathname }: { icon: LucideIcon; label: string; href: string; badge?: number; pathname: string }) {
   const isActive = pathname === href;
@@ -39,14 +40,16 @@ function NavItem({ icon: Icon, label, href, badge, pathname }: { icon: LucideIco
 export function DashboardHeader({ user }: { user: User | null }) {
   const pathname = usePathname();
   const isDocumentPage = pathname?.match(/^\/dashboard\/[^/]+$/);
-  const [unreadCount, setUnreadCount] = useState<number>(0);
   const supabase = useMemo(() => createClient(), []);
+  
+  const { data: unreadCount = 0, mutate } = useSWR(
+    user?.email ? "unread-count" : null,
+    getUnreadCount,
+    { fallbackData: 0 }
+  );
 
   useEffect(() => {
     if (!user?.email) return;
-
-    // Fetch initial count
-    getUnreadCount().then(setUnreadCount);
 
     // Setup realtime listener for instant badge updates globally
     const channelName = `global-inbox-badge-${crypto.randomUUID()}`;
@@ -61,7 +64,7 @@ export function DashboardHeader({ user }: { user: User | null }) {
           filter: `email=eq.${user.email}`,
         },
         () => {
-          getUnreadCount().then(setUnreadCount);
+          mutate();
         },
       )
       .subscribe();
@@ -69,7 +72,7 @@ export function DashboardHeader({ user }: { user: User | null }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.email, supabase]);
+  }, [user?.email, supabase, mutate]);
 
   if (isDocumentPage) {
     return null;

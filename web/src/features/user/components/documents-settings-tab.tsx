@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { User } from "@supabase/supabase-js";
 import { getUserDocuments } from "@/features/dashboard/actions/get-user-documents.action";
 import { getDocumentById } from "@/features/document/actions/get-document-by-id.action";
@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { extractUserInfo } from "@/utils/user-utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/utils/string-utils";
+import useSWRInfinite from "swr/infinite";
+import { DocumentListRealtimeListener } from "@/features/dashboard/components/layout/document-list-realtime-listener";
 
 interface DocumentsSettingsTabProps {
   user: User;
@@ -53,16 +55,47 @@ interface DocumentItem {
 type FilterType = "all" | "owner" | "editor" | "viewer";
 
 export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
-  const [documents, setDocuments] = useState<DocumentItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
-  
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  
+  const getKey = (pageIndex: number, previousPageData: { documents: DocumentItem[], totalCount: number } | null) => {
+    if (previousPageData && (!previousPageData.documents || previousPageData.documents.length < 10)) return null;
+    return ['user-documents', filter, pageIndex];
+  };
+
+  const fetcher = async (args: [string, string, number]) => {
+    const [, currentFilter, pageIndex] = args;
+    return await getUserDocuments({ 
+      filter: currentFilter === 'all' ? 'all' : (currentFilter === 'owner' ? 'owned-by-me' : currentFilter as 'editor' | 'viewer' | 'all' | 'owned-by-me'), 
+      page: pageIndex + 1,
+      limit: 10 
+    });
+  };
+
+  const { data, error, size, setSize, mutate } = useSWRInfinite(
+    getKey,
+    fetcher,
+    { 
+      revalidateOnFocus: false,
+      revalidateIfStale: false 
+    }
+  );
+
+  const documents = data ? data.flatMap(d => d.documents as unknown as DocumentItem[]) : [];
+  const totalCount = data?.[0]?.totalCount ?? 0;
+  const loading = !data && !error && !selectedDocId;
+  const isLoadingMore = loading || (size > 0 && data && typeof data[size - 1] === "undefined");
+  const isReachingEnd = (data?.[data.length - 1]?.documents?.length ?? 0) < 10;
+
+  const loadMore = useCallback(() => {
+    if (isLoadingMore || isReachingEnd) return;
+    setSize(size + 1);
+  }, [isLoadingMore, isReachingEnd, setSize, size]);
+
+  const fetchDocuments = useCallback(() => {
+    mutate();
+  }, [mutate]);
+  
   const [docDetails, setDocDetails] = useState<DocumentItem | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [pendingRequests, setPendingRequests] = useState<Record<string, boolean>>({});
@@ -73,54 +106,6 @@ export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
   const [removeDialogData, setRemoveDialogData] = useState<{ isOpen: boolean; memberId: string; memberEmail: string; memberName: string }>({ isOpen: false, memberId: "", memberEmail: "", memberName: "" });
   const [revokeDialogData, setRevokeDialogData] = useState<{ isOpen: boolean; inviteId: string; email: string }>({ isOpen: false, inviteId: "", email: "" });
 
-  const fetchDocuments = useCallback(async (pageNum = 1, isInitial = false) => {
-    if (isInitial) setLoading(true);
-    else setIsLoadingMore(true);
-
-    try {
-      const { documents: docs, totalCount: count } = await getUserDocuments({ 
-        filter: filter === 'all' ? 'all' : (filter === 'owner' ? 'owned-by-me' : filter), 
-        page: pageNum,
-        limit: 10 
-      });
-      
-      const typedDocs = (docs as unknown) as DocumentItem[];
-      
-      if (isInitial) {
-        setDocuments(typedDocs || []);
-      } else {
-        setDocuments(prev => {
-          const existingIds = new Set(prev.map(d => d.id));
-          const uniqueDocs = (typedDocs || []).filter((d: DocumentItem) => !existingIds.has(d.id));
-          return [...prev, ...uniqueDocs];
-        });
-      }
-      
-      setTotalCount(count || 0);
-      setHasMore((docs || []).length === 10);
-    } catch {
-      toast.error("Failed to load documents");
-    } finally {
-      if (isInitial) setLoading(false);
-      else setIsLoadingMore(false);
-    }
-  }, [filter]);
-
-  useEffect(() => {
-    if (!selectedDocId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPage(1);
-      fetchDocuments(1, true);
-    }
-  }, [selectedDocId, fetchDocuments]);
-
-  const loadMore = useCallback(() => {
-    if (isLoadingMore || !hasMore) return;
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchDocuments(nextPage, false);
-  }, [isLoadingMore, hasMore, page, fetchDocuments]);
-
   const observer = useRef<IntersectionObserver | null>(null);
   const triggerRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -128,14 +113,14 @@ export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
       if (observer.current) observer.current.disconnect();
       
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0].isIntersecting && !isReachingEnd) {
           loadMore();
         }
       });
       
       if (node) observer.current.observe(node);
     },
-    [isLoadingMore, hasMore, loadMore]
+    [isLoadingMore, isReachingEnd, loadMore]
   );
 
   const loadDocDetails = async (id: string) => {
@@ -195,8 +180,7 @@ export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
       const res = await leaveDocumentAction(leaveDialogData.docId, leaveDialogData.ownerEmail, user.email || '');
       if (res.error) throw new Error(res.error);
       toast.success("Left document");
-      setPage(1);
-      fetchDocuments(1, true);
+      mutate();
       if (selectedDocId === leaveDialogData.docId) {
         setSelectedDocId(null);
       }
@@ -402,6 +386,7 @@ export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
 
   return (
     <div className="space-y-6">
+      <DocumentListRealtimeListener userId={user.id} onNewEvent={fetchDocuments} />
       <div className="flex flex-col gap-2">
         <h3 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
           My Documents <span className="text-zinc-500 text-sm font-medium ml-1 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">&nbsp; {totalCount}&nbsp; Documents</span>
