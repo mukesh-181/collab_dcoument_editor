@@ -73,6 +73,17 @@ export async function acceptRoleRequestAction(inviteId: string) {
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     })
 
+  // 5. Log activity
+  await supabase
+    .from('document_activity')
+    .insert({
+      document_id: invite.document_id,
+      actor_id: user.id, // owner
+      target_user_id: requester.id,
+      action_type: 'role_updated',
+      metadata: { new_role: role },
+    })
+
   revalidatePath('/dashboard/inbox')
   return { success: true }
 }

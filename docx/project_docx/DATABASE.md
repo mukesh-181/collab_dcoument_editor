@@ -244,3 +244,14 @@ To maintain MVP focus:
 - In-document chat
 
 These can all be added later without breaking the core 5-table schema.
+
+-- 6. Document Activity Table (Audit Log)
+create table public.document_activity (
+  id uuid primary key default uuid_generate_v4(),
+  document_id uuid references public.documents(id) on delete cascade not null,
+  actor_id uuid references public.users(id) on delete cascade not null,
+  target_user_id uuid references public.users(id) on delete cascade,
+  action_type text not null check (action_type in ('document_created', 'member_joined', 'member_removed', 'member_left', 'role_updated')),
+  metadata jsonb,
+  created_at timestamptz not null default now()
+);

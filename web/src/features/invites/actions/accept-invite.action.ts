@@ -66,6 +66,16 @@ export async function acceptInvite(token: string) {
       .eq('id', invite.id)
   }
 
+  // Log activity
+  await supabase
+    .from('document_activity')
+    .insert({
+      document_id: invite.document_id,
+      actor_id: user.id,
+      action_type: 'member_joined',
+      metadata: { role: invite.role },
+    })
+
   revalidatePath('/dashboard/inbox')
   revalidatePath('/dashboard')
   return invite.document_id

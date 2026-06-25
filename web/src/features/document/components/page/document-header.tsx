@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Pencil, LogOut } from "lucide-react";
+import { ArrowLeft, Pencil, LogOut, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ShareDialog } from "@/features/invites/components/share-dialog";
@@ -15,6 +15,7 @@ import { DocumentRenameDialog } from "@/features/dashboard/components/dialogs/do
 import { DocumentSyncStatus } from "./document-sync-status";
 import { DocumentMembersPopover } from "./document-members-popover";
 import { LeaveDocumentDialog } from "./leave-document-dialog";
+import { DocumentActivityTree } from "./document-activity-tree";
 import { useDocumentSync } from "./document-context";
 import { ROUTES } from "@/constants/routes";
 import { USER_FALLBACKS } from "@/utils/user-utils";
@@ -53,6 +54,7 @@ export function DocumentHeader({
   }, [document.title]);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
+  const [isActivityOpen, setIsActivityOpen] = useState(false);
   const router = useRouter();
 
   const handleLeave = async () => {
@@ -139,6 +141,22 @@ export function DocumentHeader({
           invites={document.invites as { id: string; email: string; status: string; expires_at: string; role: string; name?: string | null; image?: string | null }[]}
           documentId={document.id} 
           currentUserRole={currentUserRole} 
+        />
+
+        {/* Activity / History Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsActivityOpen(true)}
+          className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+        >
+          <History className="h-4 w-4" />
+          <span className="sr-only">Document Activity</span>
+        </Button>
+        <DocumentActivityTree
+          documentId={document.id}
+          isOpen={isActivityOpen}
+          setIsOpen={setIsActivityOpen}
         />
 
         {/* Invite Button */}
