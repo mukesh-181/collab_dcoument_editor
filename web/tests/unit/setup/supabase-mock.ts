@@ -26,6 +26,8 @@ type SupabaseQuery = {
   gte: any
   lt: any
   lte: any
+  not: any
+  or: any
 }
 
 function createMockChain(overrides: Partial<QueryResult> = {}): SupabaseQuery {
@@ -54,6 +56,8 @@ function createMockChain(overrides: Partial<QueryResult> = {}): SupabaseQuery {
     gte: vi.fn(() => chain),
     lt: vi.fn(() => chain),
     lte: vi.fn(() => chain),
+    not: vi.fn(() => chain),
+    or: vi.fn(() => chain),
   }
   return chain
 }

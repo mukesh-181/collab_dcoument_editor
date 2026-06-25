@@ -31,8 +31,7 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data } = await supabase.auth.getClaims()
-  const user = data?.claims
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Define routes that do not require authentication
   const isPublicRoute = 

@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { User as UserIcon, FileText, CreditCard, Shield, LogOut } from "lucide-react";
 import { ProfileSettingsTab } from "./profile-settings-tab";
 import { DocumentsSettingsTab } from "./documents-settings-tab";
+import { SessionsSettingsTab } from "./sessions-settings-tab";
 import { logout } from "@/features/auth/actions/logout.action";
 import { SignOutDialogContent } from "@/features/auth/components/sign-out-button";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -31,9 +32,8 @@ export function SettingsDialog({ isOpen, onOpenChange, user }: SettingsDialogPro
   const tabs = [
     { id: "profile", label: "My Profile", icon: UserIcon, disabled: false },
     { id: "documents", label: "Documents", icon: FileText, disabled: false },
-        { id: "sessions", label: "Active Sessions (Soon)", icon: Shield, disabled: true },
+    { id: "sessions", label: "Active Sessions", icon: Shield, disabled: false },
     { id: "billing", label: "Billing & Plans (Soon)", icon: CreditCard, disabled: true },
-
   ] as const;
 
   return (
@@ -86,6 +86,7 @@ export function SettingsDialog({ isOpen, onOpenChange, user }: SettingsDialogPro
           <div className="flex-1 bg-white dark:bg-zinc-900/30 overflow-y-auto p-8">
             {activeTab === "profile" && <ProfileSettingsTab user={user} />}
             {activeTab === "documents" && <DocumentsSettingsTab user={user} />}
+            {activeTab === "sessions" && <SessionsSettingsTab user={user} />}
             {/* Future tabs will be rendered here */}
           </div>
         </DialogContent>

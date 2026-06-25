@@ -115,19 +115,19 @@ export function InboxItem({ invite, onItemUpdate }: { invite: InboxInvite, onIte
   } else if (invite.status === "removed") {
     messageNode = (
       <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
-        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterEmail}</span> has removed you from <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span>.
+        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterName || inviterEmail}</span> has removed you from <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span>.
       </span>
     );
   } else if (invite.status === "role_updated") {
     messageNode = (
       <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
-        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterEmail}</span> has updated your role for <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span> to <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span>.
+        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterName || inviterEmail}</span> has updated your role for <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span> to <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span>.
       </span>
     );
   } else if (invite.token?.startsWith("request-denied:")) {
     messageNode = (
       <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
-        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterEmail}</span> has denied your request for <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span> access for <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span>.
+        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterName || inviterEmail}</span> has denied your request for <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span> access for <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span>.
       </span>
     );
   } else if (invite.token?.startsWith("request:")) {
@@ -141,13 +141,13 @@ export function InboxItem({ invite, onItemUpdate }: { invite: InboxInvite, onIte
     
     messageNode = (
       <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
-        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{reqEmail}</span> has requested <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span> access for <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span>.
+        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{reqName || reqEmail}</span> has requested <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span> access for <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span>.
       </span>
     );
   } else {
     messageNode = (
       <span className="text-[14px] text-zinc-700 dark:text-zinc-300 mb-1">
-        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterEmail}</span> invited you to join <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span> with <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span> access.
+        <span className="font-semibold text-zinc-900 dark:text-zinc-100">{inviterName || inviterEmail}</span> invited you to join <span className="font-semibold text-zinc-900 dark:text-zinc-100">&apos;{documentTitle}&apos;</span> with <span className="font-semibold capitalize text-zinc-900 dark:text-zinc-100">{invite.role}</span> access.
       </span>
     );
   }

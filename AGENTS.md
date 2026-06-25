@@ -128,7 +128,7 @@ Do not create generic Supabase clients. Next.js App Router runs in 3 environment
 
 ### 10. Automated Testing & Documentation Sync
 
-- **Mandatory Testing**: Always create a corresponding unit test file when implementing a new feature, server action, or UI component. Maintain the project's 100% unit test coverage standard. (Note: E2E testing is deferred for later; focus exclusively on unit tests via Vitest for now).
+- **Mandatory Testing**: Always create a corresponding unit test file when implementing a new feature, server action, or UI component. Maintain the project's 100% unit test coverage standard.
 - **Verification**: After making code changes, you MUST run the test suite (`npm run test` in `web/`), run ESLint, and run TypeScript checking to ensure all previous tests pass, linting is clean, and types are valid before completing your task. You must also create and verify any newly created tests for your feature.
 - **Documentation Sync**: If you create, move, or **delete** any files, you MUST immediately update `docx/project_docx/Folder_Structure.md` and `docx/project_docx/step_by_step_log.md` to reflect those architectural changes accurately. Detecting and logging file deletions is critical to prevent future agents from hallucinating missing files.
 

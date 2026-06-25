@@ -95,6 +95,6 @@ describe("getInbox", () => {
     }))
 
     await getInbox(0, 15, "document")
-    expect(mockClient.from().in).toHaveBeenCalledWith("status", ["role_updated", "removed", "exited"])
+    expect(mockClient.from().or).toHaveBeenCalledWith("status.in.(role_updated,removed,exited),token.like.request:*,token.like.request-denied:*")
   })
 })
