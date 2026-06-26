@@ -12,16 +12,22 @@ import Highlight from "@tiptap/extension-highlight";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import FontFamily from "@tiptap/extension-font-family";
-import Table from "@tiptap/extension-table";
-import TableRow from "@tiptap/extension-table-row";
-import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
+import {
+  TablePlus,
+  TableRowPlus,
+  TableCellPlus,
+  TableHeaderPlus,
+} from "tiptap-table-plus";
+import { TablePlusNodeView } from "tiptap-table-plus/dist/pagination/TablePlusNodeView";
 import { InlineQuote } from "@/features/editor/extensions/inline-quote";
 import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 import { PaginationPlus } from "tiptap-pagination-plus";
 import { FontSize } from "@/features/editor/extensions/font-size";
-import { SlashCommand, slashSuggestion } from "@/features/editor/extensions/slash-command";
+import {
+  SlashCommand,
+  slashSuggestion,
+} from "@/features/editor/extensions/slash-command";
 import * as Y from "yjs";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import type { EditorView } from "@tiptap/pm/view";
@@ -30,6 +36,101 @@ const CustomLink = Link.extend({
   renderHTML({ HTMLAttributes }) {
     const { href, ...rest } = HTMLAttributes;
     return ["a", { ...rest, "data-href": href, style: "cursor: text" }, 0];
+  },
+});
+
+class CustomTablePlusNodeView extends TablePlusNodeView {
+  addHandles() {
+    const dragHandle = (handle: HTMLDivElement) => {
+      const handleIndex = parseInt(handle.dataset.index ?? "0");
+      const onMouseMove = (e: MouseEvent) => {
+        const rect = this.slider.getBoundingClientRect();
+        if (rect.width === 0) return;
+
+        const x = e.clientX - rect.left;
+
+        // Convert mouse position to percent
+        const mousePercent = (x / rect.width) * 100;
+
+        // Calculate minimum allowed percent based on previous handle or 0
+        const minPercent = (this.options.minColumnSize / rect.width) * 100;
+        let minAllowedPercent = minPercent;
+        if (handleIndex > 0) {
+          const prevPercent = parseFloat(this.handles[handleIndex - 1].style.left);
+          minAllowedPercent = prevPercent + minPercent;
+        }
+
+        // Calculate maximum allowed percent based on next handle or 100
+        let maxAllowedPercent = 100;
+        if (handleIndex < this.handles.length - 1) {
+          const nextPercent = parseFloat(this.handles[handleIndex + 1].style.left);
+          maxAllowedPercent = nextPercent - minPercent;
+        }
+
+        // Clamp the percentage
+        const percent = Math.max(minAllowedPercent, Math.min(maxAllowedPercent, mousePercent));
+
+        handle.style.left = percent + "%";
+        this.updateValues(this.getColumnSizes(this.handles), false);
+      };
+
+      const onMouseUp = () => {
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+        this.updateValues(this.getColumnSizes(this.handles), true);
+      };
+
+      handle.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      });
+    };
+
+    let lastValue = 0;
+    for (let index = 0; index < this.cellPercentage.length; index++) {
+      lastValue = lastValue + this.cellPercentage[index];
+      if (index >= this.handles.length) {
+        const handle = document.createElement("div");
+        handle.className = "handle";
+        handle.style.position = "absolute";
+        handle.style.top = "50%";
+        handle.style.width = "12px";
+        handle.style.height = "12px";
+        handle.style.zIndex = "9999";
+        handle.style.borderRadius = "50%";
+        handle.style.transform = "translate(-50%, -50%)";
+        handle.style.cursor = "ew-resize";
+        Object.assign(handle.style, this.options.resizeHandleStyle);
+        handle.dataset.index = index.toString();
+        handle.style.left = `${lastValue}%`;
+
+        this.slider.appendChild(handle);
+        this.handles.push(handle);
+        dragHandle(handle);
+      }
+    }
+  }
+
+  updateHandlePositions() {
+    super.updateHandlePositions();
+    this.handles.forEach((handle, index) => {
+      if (index === this.cellPercentage.length - 1) {
+        handle.style.display = "none";
+        handle.style.pointerEvents = "none";
+      } else {
+        handle.style.display = "";
+        handle.style.pointerEvents = "auto";
+      }
+    });
+  }
+}
+
+const CustomTablePlus = TablePlus.extend({
+  addNodeView() {
+    return ({ node, getPos, editor }) => {
+      return new CustomTablePlusNodeView(node, getPos, editor, this.options);
+    };
   },
 });
 
@@ -64,13 +165,22 @@ export const getEditorExtensions = ({
     Highlight.configure({
       multicolor: true,
     }),
-    Table.configure({
+    CustomTablePlus.configure({
       resizable: true,
-      allowTableNodeSelection: true,
+      allowTableNodeSelection: false,
+      minColumnSize: 50,
+      resizeHandleStyle: {
+        background: "#4f46e5", // Solid Indigo 600
+        width: "6px",
+        height: "2000px", // Full vertical line
+        borderRadius: "0",
+        top: "0",
+        transform: "translate(-50%, 0)",
+      },
     }),
-    TableRow,
-    TableHeader,
-    TableCell,
+    TableRowPlus,
+    TableHeaderPlus,
+    TableCellPlus,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (ResizableImage as any).configure({
       documentId: documentId,
@@ -151,11 +261,12 @@ export const editorPropsConfig = {
       "prose-li:my-1 prose-li:marker:text-zinc-400",
       "[&_.tableWrapper]:my-4",
       "prose-blockquote:border-l-4 prose-blockquote:border-zinc-300 dark:prose-blockquote:border-zinc-700 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4",
-      "prose-q:quotes-['\"'_'\"'] prose-q:italic prose-q:text-zinc-600 dark:prose-q:text-zinc-400"
+      "prose-q:quotes-['\"'_'\"'] prose-q:italic prose-q:text-zinc-600 dark:prose-q:text-zinc-400",
     ].join(" "),
   },
   handleClick: (view: EditorView, pos: number, event: MouseEvent) => {
-    void view; void pos;
+    void view;
+    void pos;
     const target = event.target as HTMLElement;
     if (target && target.closest("a")) {
       event.preventDefault();
