@@ -13,6 +13,7 @@ export async function InboxList() {
     status: inv.status as string,
     created_at: inv.created_at as string,
     expires_at: (inv.expires_at as string) || null,
+    requester: inv.requester as InboxInvite['requester'],
     documents: (() => {
         const raw = inv.documents;
         if (!raw) return undefined;

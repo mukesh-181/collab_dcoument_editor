@@ -15,10 +15,12 @@ export const ROUTES = {
   ABOUT: '/about',
   CONTACT: '/contact',
   AUTH_CALLBACK: '/auth/callback',
+  FORGOT_PASSWORD: '/forgot-password',
 
   // Protected Routes
   DASHBOARD: '/dashboard',
   INBOX: '/inbox',
+  UPDATE_PASSWORD: '/update-password',
   
   // Dynamic Routes
   /**

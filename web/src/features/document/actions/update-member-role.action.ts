@@ -33,6 +33,14 @@ export async function updateMemberRoleAction(documentId: string, memberId: strin
     return { error: 'Failed to update member role' }
   }
 
+  // Mark any pending role requests from this user for this document as accepted
+  await supabase
+    .from('invites')
+    .update({ status: 'accepted' })
+    .eq('document_id', documentId)
+    .like('token', `request:%:${memberEmail}:%`)
+    .eq('status', 'pending')
+
   // Insert notification into invites table
   const token = crypto.randomUUID()
   const { error: inviteError } = await supabase
@@ -49,6 +57,17 @@ export async function updateMemberRoleAction(documentId: string, memberId: strin
   if (inviteError) {
     console.error('Error inserting role update notification:', inviteError)
   }
+
+  // Log activity
+  await supabase
+    .from('document_activity')
+    .insert({
+      document_id: documentId,
+      actor_id: user.id, // owner
+      target_user_id: memberId,
+      action_type: 'role_updated',
+      metadata: { new_role: newRole },
+    })
 
   revalidatePath(ROUTES.DOCUMENT(documentId))
   return { success: true }

@@ -31,13 +31,13 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data } = await supabase.auth.getClaims()
-  const user = data?.claims
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Define routes that do not require authentication
   const isPublicRoute = 
     request.nextUrl.pathname === ROUTES.HOME ||
     request.nextUrl.pathname === ROUTES.LOGIN ||
+    request.nextUrl.pathname === ROUTES.FORGOT_PASSWORD ||
     request.nextUrl.pathname.startsWith(ROUTES.AUTH_CALLBACK)
 
   if (!user && !isPublicRoute) {

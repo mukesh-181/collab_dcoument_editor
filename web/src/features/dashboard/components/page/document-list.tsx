@@ -17,6 +17,7 @@ import { CreateDocumentButton } from "../layout/create-document-button";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DocumentCard } from "./document-card";
+import { DocumentListRealtimeListener } from "../layout/document-list-realtime-listener";
 
 interface DocumentListProps {
   documents: DashboardDocument[];
@@ -97,6 +98,7 @@ export function DocumentList({
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-y-auto relative">
+      <DocumentListRealtimeListener userId={user?.id} onNewEvent={() => router.refresh()} />
       <div className="relative z-10 px-6 py-8 max-w-6xl mx-auto w-full flex flex-col grow">
         {/* Header Row */}
         <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 mb-8 shrink-0">

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { login } from '../../actions/login.action'
 import { loginSchema, LoginInput } from '../../schemas/auth.schema'
 import { Button } from '@/components/ui/button'
@@ -81,6 +82,12 @@ export function LoginForm({ next }: { next?: string }) {
             <FormItem className="space-y-1 text-left">
               <div className="flex items-center justify-between">
                 <FormLabel className="text-sm font-medium">Password <span className="text-red-500">*</span></FormLabel>
+                <Link
+                  href={ROUTES.FORGOT_PASSWORD}
+                  className="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 underline-offset-4 hover:underline transition-all"
+                >
+                  Forgot Password?
+                </Link>
               </div>
               <FormControl>
                 <div className="relative">

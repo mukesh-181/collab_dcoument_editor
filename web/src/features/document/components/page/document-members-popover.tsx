@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { getInitials } from "@/utils/string-utils";
 import { extractUserInfo } from "@/utils/user-utils";
 import { RemoveMemberDialog } from "./remove-member-dialog";
+import { RevokeInviteDialog } from "./revoke-invite-dialog";
+import { revokeInviteAction } from "@/features/invites/actions/revoke-invite.action";
 
 
 interface DocumentMembersPopoverProps {
@@ -23,17 +25,27 @@ interface DocumentMembersPopoverProps {
       email: string;
     };
   }[];
+  invites?: {
+    id: string;
+    email: string;
+    status: string;
+    expires_at: string;
+    role: string;
+    name?: string | null;
+    image?: string | null;
+  }[];
   documentId: string;
   currentUserRole?: string;
 }
 
-export function DocumentMembersPopover({ members, documentId, currentUserRole }: DocumentMembersPopoverProps) {
+export function DocumentMembersPopover({ members, invites = [], documentId, currentUserRole }: DocumentMembersPopoverProps) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
   const [pendingAction, setPendingAction] = useState<{ memberId: string, type: 'editor' | 'viewer' | 'remove' } | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [removeDialogData, setRemoveDialogData] = useState<{ isOpen: boolean, memberId: string, memberEmail: string, memberName: string } | null>(null);
+  const [revokeDialogData, setRevokeDialogData] = useState<{ isOpen: boolean, inviteId: string, email: string } | null>(null);
 
   const handleRoleUpdate = (memberId: string, memberEmail: string, newRole: string) => {
     setPendingAction({ memberId, type: newRole as 'editor' | 'viewer' });
@@ -59,6 +71,18 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
       setOpenMenuId(null);
     }
   };
+
+  const handleRevoke = async (inviteId: string) => {
+    const result = await revokeInviteAction(inviteId, documentId);
+    if (result.error) {
+      toast.error(result.error);
+      throw new Error(result.error);
+    } else {
+      toast.success("Invite revoked successfully");
+      setOpenMenuId(null);
+    }
+  };
+
   if (!members || members.length === 0) return null;
 
   // Pin the owner to the top of the list, followed by editors, then viewers
@@ -66,6 +90,8 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
     const roleOrder: Record<string, number> = { owner: 0, editor: 1, viewer: 2 };
     return (roleOrder[a.role] ?? 3) - (roleOrder[b.role] ?? 3);
   });
+
+  const pendingInvites = invites.filter(inv => inv.status === 'pending' && inv.email && new Date(inv.expires_at) > new Date());
 
   return (
     <Popover 
@@ -109,10 +135,10 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
           </div>
           <div>
             <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-50">
-              Document Members
+              Document Access
             </h3>
             <p className="text-[13px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-              {members.length} people have access
+              {members.length + pendingInvites.length} people have access
             </p>
           </div>
         </div>
@@ -233,6 +259,67 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
               )}
             </div>
           )})}
+          
+          {pendingInvites.map((inv) => (
+            <div
+              key={inv.id}
+              className="flex items-center justify-between p-2.5 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-colors opacity-80"
+            >
+              <div className="flex items-center space-x-3 overflow-hidden">
+                <Avatar className="w-9 h-9 border border-zinc-200 dark:border-zinc-800 shrink-0 shadow-sm opacity-70">
+                  <AvatarImage src={inv.image || undefined} />
+                  <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800">
+                    {getInitials(inv.name, inv.email)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col overflow-hidden">
+                  <span className="text-[14px] font-medium text-zinc-900 dark:text-zinc-50 truncate leading-snug flex items-center gap-2">
+                    {inv.name || inv.email}
+                  </span>
+                  <span className="text-[12px] text-zinc-500 dark:text-zinc-400 truncate leading-snug">
+                    {inv.name ? inv.email : "Pending Invite"}
+                  </span>
+                </div>
+              </div>
+              <div className="ml-3 shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-300/15 text-emerald-800 border border-emerald-500 border-dashed cursor-default select-none">
+                <span className="text-[11px] font-medium capitalize">
+                  Invited
+                </span>
+              </div>
+              
+              {currentUserRole === "owner" && (
+                <div className="ml-2">
+                  <DropdownMenu open={openMenuId === inv.id} onOpenChange={(isOpen) => setOpenMenuId(isOpen ? inv.id : null)}>
+                    <DropdownMenuTrigger asChild>
+                      <button 
+                        disabled={isPending}
+                        className="p-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-500 transition-colors focus:outline-none disabled:opacity-50"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem 
+                        disabled={isPending}
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          setRevokeDialogData({
+                            isOpen: true,
+                            inviteId: inv.id,
+                            email: inv.email
+                          });
+                        }}
+                        className="text-red-600 dark:text-red-400 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20"
+                      >
+                        <UserMinus className="mr-2 h-4 w-4" />
+                        <span>Revoke Invite</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </PopoverContent>
       {removeDialogData && (
@@ -241,6 +328,14 @@ export function DocumentMembersPopover({ members, documentId, currentUserRole }:
           setIsOpen={(isOpen) => setRemoveDialogData(prev => prev ? { ...prev, isOpen } : null)}
           memberName={removeDialogData.memberName}
           onConfirm={() => handleRemove(removeDialogData.memberId, removeDialogData.memberEmail)}
+        />
+      )}
+      {revokeDialogData && (
+        <RevokeInviteDialog
+          isOpen={revokeDialogData.isOpen}
+          setIsOpen={(isOpen) => setRevokeDialogData(prev => prev ? { ...prev, isOpen } : null)}
+          inviteEmail={revokeDialogData.email}
+          onConfirm={() => handleRevoke(revokeDialogData.inviteId)}
         />
       )}
     </Popover>

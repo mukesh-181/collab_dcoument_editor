@@ -44,6 +44,7 @@ export function DocumentPage({
               currentUserName={currentUserName}
               currentUserImage={currentUserImage}
               token={token}
+              initialYdocState={(document.document_content_state as { ydoc_state?: string })?.ydoc_state}
             />
           </div>
         </div>

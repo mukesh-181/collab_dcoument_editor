@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Pencil, LogOut } from "lucide-react";
+import { ArrowLeft, Pencil, LogOut, History, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ShareDialog } from "@/features/invites/components/share-dialog";
+import { requestRoleChangeAction } from "@/features/document/actions/request-role-change.action";
+import { checkPendingRequestAction } from "@/features/document/actions/check-pending-request.action";
 import { ActiveUsersCluster } from "./active-users-cluster";
 import { MobileSidebar } from "@/features/dashboard/components/layout/mobile-sidebar";
 import { leaveDocumentAction } from "@/features/document/actions/leave-document.action";
@@ -15,9 +17,11 @@ import { DocumentRenameDialog } from "@/features/dashboard/components/dialogs/do
 import { DocumentSyncStatus } from "./document-sync-status";
 import { DocumentMembersPopover } from "./document-members-popover";
 import { LeaveDocumentDialog } from "./leave-document-dialog";
+import { DocumentActivityTree } from "./document-activity-tree";
 import { useDocumentSync } from "./document-context";
 import { ROUTES } from "@/constants/routes";
 import { USER_FALLBACKS } from "@/utils/user-utils";
+import { createClient } from "@/lib/supabase/client";
 
 interface DocumentHeaderProps {
   document: {
@@ -53,7 +57,66 @@ export function DocumentHeader({
   }, [document.title]);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
+  const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [isRequestingRole, setIsRequestingRole] = useState(false);
+  const [hasRequested, setHasRequested] = useState(false);
+  const [isCheckingPending, setIsCheckingPending] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    let isMounted = true;
+    const supabase = createClient();
+
+    const checkPending = async () => {
+      if (currentUserRole === "viewer") {
+        setIsCheckingPending(true);
+        const res = await checkPendingRequestAction(document.id);
+        if (isMounted) {
+          setHasRequested(res.isPending);
+          setIsCheckingPending(false);
+        }
+      } else {
+        if (isMounted) {
+          setHasRequested(false);
+          setIsCheckingPending(false);
+        }
+      }
+    };
+
+    checkPending();
+
+    if (currentUserRole !== "viewer") return;
+
+    const channel = supabase
+      .channel(`header-invites-${document.id}-${crypto.randomUUID()}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'invites', filter: `document_id=eq.${document.id}` },
+        () => {
+          checkPending();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [document.id, currentUserRole]);
+
+  const handleRequestRole = async () => {
+    setIsRequestingRole(true);
+    try {
+      const res = await requestRoleChangeAction(document.id, 'editor');
+      if (res.error) throw new Error(res.error);
+      toast.success("Role upgrade request sent");
+      setHasRequested(true);
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Failed to request role change");
+    } finally {
+      setIsRequestingRole(false);
+    }
+  };
 
   const handleLeave = async () => {
     const ownerMember = document.all_members?.find((m) => m.role === "owner");
@@ -73,7 +136,7 @@ export function DocumentHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white dark:border-zinc-800/50 dark:bg-zinc-950 shrink-0">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-zinc-200/50 bg-white dark:border-zinc-800/50 dark:bg-zinc-950 shrink-0">
       <div className="flex h-14 items-center justify-between px-6 max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-2">
           <MobileSidebar documents={documents} />
@@ -97,7 +160,7 @@ export function DocumentHeader({
                 {title}
               </h1>
 
-              {currentUserRole !== "viewer" && (
+              {currentUserRole === "owner" && (
                 <>
                   <Button
                     variant="ghost"
@@ -118,11 +181,49 @@ export function DocumentHeader({
               )}
             </div>
 
-            <DocumentSyncStatus />
+            <div className="flex items-center gap-3">
+              <DocumentSyncStatus />
+              
+              <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-800 mt-0.5" />
+              
+              <button
+                onClick={() => setIsActivityOpen(true)}
+                className="flex items-center gap-1.5 text-[13px] text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 font-medium transition-colors mt-0.5"
+                title="View Document Activity"
+              >
+                <History className="h-3.5 w-3.5" />
+                <span className="underline underline-offset-2 decoration-zinc-300 dark:decoration-zinc-700 hover:decoration-zinc-500 dark:hover:decoration-zinc-400">Activity</span>
+              </button>
+              <DocumentActivityTree
+                documentId={document.id}
+                isOpen={isActivityOpen}
+                setIsOpen={setIsActivityOpen}
+              />
+            </div>
           </div>
         </div>
 
       <div className="flex items-center gap-4">
+        {/* Request Editor Access Button */}
+        {currentUserRole === "viewer" && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRequestRole}
+            disabled={isRequestingRole || hasRequested || isCheckingPending}
+            className="relative h-8"
+          >
+            <span className={isRequestingRole || isCheckingPending ? "opacity-0" : ""}>
+              {hasRequested ? "Editor Access Requested (Pending)" : "Request Editor Access"}
+            </span>
+            {(isRequestingRole || isCheckingPending) && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />
+              </div>
+            )}
+          </Button>
+        )}
+
         {/* View Only Badge */}
         {currentUserRole === "viewer" && (
           <div className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 bg-zinc-100 dark:text-zinc-400 dark:bg-zinc-800 rounded-sm">
@@ -134,7 +235,14 @@ export function DocumentHeader({
         <ActiveUsersCluster />
 
         {/* Member Avatars Popover */}
-        <DocumentMembersPopover members={document.all_members} documentId={document.id} currentUserRole={currentUserRole} />
+        <DocumentMembersPopover 
+          members={document.all_members} 
+          invites={document.invites as { id: string; email: string; status: string; expires_at: string; role: string; name?: string | null; image?: string | null }[]}
+          documentId={document.id} 
+          currentUserRole={currentUserRole} 
+        />
+
+
 
         {/* Invite Button */}
         {currentUserRole === "owner" && (

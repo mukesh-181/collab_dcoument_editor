@@ -14,7 +14,8 @@ export async function getDocumentById(documentId: string) {
       *,
       document_members!inner(role),
       all_members:document_members(role, user:users(id, name, image, email)),
-      invites(email, status, expires_at)
+      invites(id, email, status, expires_at, created_at, role),
+      document_content_state(ydoc_state)
     `)
     .eq('id', documentId)
     .eq('is_deleted', false)

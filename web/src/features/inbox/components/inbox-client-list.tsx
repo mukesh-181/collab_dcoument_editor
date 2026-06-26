@@ -12,78 +12,57 @@ import {
 } from "@/components/ui/select";
 import { getInbox } from "../actions/get-inbox.action";
 import { Loader2 } from "lucide-react";
+import useSWRInfinite from "swr/infinite";
+import { useSWRConfig } from "swr";
+import { markInboxAsReadAction } from "../actions/mark-inbox-read.action";
 
 export type FilterType = "all" | "invites" | "document";
 
 export function InboxClientList({ initialInvites, initialCount }: { initialInvites: InboxInvite[], initialCount: number }) {
+  const { mutate: globalMutate } = useSWRConfig();
   const [filter, setFilter] = useState<FilterType>("all");
-  const [invites, setInvites] = useState<InboxInvite[]>(initialInvites);
-  const [totalCount, setTotalCount] = useState(initialCount);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(initialInvites.length === 15);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isFilterLoading, setIsFilterLoading] = useState(false);
+  const [lastReadAt, setLastReadAt] = useState<string | null>(null);
 
-  const fetchFiltered = useCallback(async (silent = false) => {
-    if (!silent) setIsFilterLoading(true);
-    try {
-      const { data, count } = await getInbox(0, 15, filter);
-      setInvites(data as InboxInvite[]);
-      setTotalCount(count);
-      setPage(0);
-      setHasMore(data.length === 15);
-    } finally {
-      if (!silent) setIsFilterLoading(false);
-    }
-  }, [filter]);
-
-  // Load new items when filter changes
-  useEffect(() => {
-    // Skip if it's the initial load with "all" (already have initialInvites)
-    if (filter === "all" && page === 0 && invites === initialInvites) return;
-    
-    let isMounted = true;
-    const fetch = async () => {
-      setIsFilterLoading(true);
-      try {
-        const { data, count } = await getInbox(0, 15, filter);
-        if (isMounted) {
-          setInvites(data as InboxInvite[]);
-          setTotalCount(count);
-          setPage(0);
-          setHasMore(data.length === 15);
-        }
-      } finally {
-        if (isMounted) setIsFilterLoading(false);
-      }
-    };
-    
-    fetch();
-    return () => { isMounted = false; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
-
-  const loadMore = async () => {
-    if (isLoadingMore || !hasMore) return;
-    setIsLoadingMore(true);
-    
-    try {
-      const nextPage = page + 1;
-      const { data: newItems, count: newCount } = await getInbox(nextPage, 15, filter);
-      
-      setInvites((prev) => {
-        // Filter out duplicates just in case realtime/pagination overlap
-        const existingIds = new Set(prev.map(i => i.id));
-        const uniqueNewItems = (newItems as InboxInvite[]).filter((i: InboxInvite) => !existingIds.has(i.id));
-        return [...prev, ...uniqueNewItems];
-      });
-      setTotalCount(newCount);
-      setPage(nextPage);
-      setHasMore(newItems.length === 15);
-    } finally {
-      setIsLoadingMore(false);
-    }
+  const getKey = (pageIndex: number, previousPageData: { data: InboxInvite[], count: number } | null) => {
+    if (previousPageData && !previousPageData.data.length) return null; // reached the end
+    return ['inbox', pageIndex, filter]; // SWR key
   };
+
+  const fetcher = async (args: [string, number, FilterType]) => {
+    const [, pageIndex, currentFilter] = args;
+    return await getInbox(pageIndex, 15, currentFilter);
+  };
+
+  const { data, error, size, setSize, mutate } = useSWRInfinite<{ data: InboxInvite[], count: number }, Error>(
+    getKey,
+    fetcher,
+    {
+      fallbackData: filter === 'all' ? [{ data: initialInvites, count: initialCount }] : undefined,
+      revalidateOnFocus: false
+    }
+  );
+
+  const invites = data ? data.flatMap(d => d.data) : [];
+  const totalCount = data?.[0]?.count ?? 0;
+  const isLoadingInitialData = !data && !error;
+  const isLoadingMore = isLoadingInitialData || (size > 0 && data && typeof data[size - 1] === "undefined");
+  const isEmpty = data?.[0]?.data.length === 0;
+  const isReachingEnd = isEmpty || (data && data[data.length - 1]?.data.length < 15);
+  const isFilterLoading = isLoadingInitialData && size === 1;
+
+  const loadMore = useCallback(() => {
+    if (isLoadingMore || isReachingEnd) return;
+    setSize(size + 1);
+  }, [isLoadingMore, isReachingEnd, setSize, size]);
+
+  const fetchFiltered = useCallback(() => {
+    mutate();
+    globalMutate((key) => {
+      if (typeof key === 'string' && key.includes('inbox')) return true;
+      if (Array.isArray(key) && key[0] === 'inbox') return true;
+      return false;
+    });
+  }, [mutate, globalMutate]);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const triggerRef = useCallback(
@@ -92,16 +71,27 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
       if (observer.current) observer.current.disconnect();
       
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0].isIntersecting && !isReachingEnd) {
           loadMore();
         }
       });
       
       if (node) observer.current.observe(node);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isLoadingMore, hasMore]
+    [isLoadingMore, isReachingEnd, loadMore]
   );
+
+  const hasMarkedRead = useRef(false);
+
+  useEffect(() => {
+    if (hasMarkedRead.current) return;
+    hasMarkedRead.current = true;
+
+    markInboxAsReadAction().then((res) => {
+      setLastReadAt(res.prevReadAt);
+      globalMutate('unread-count');
+    });
+  }, [globalMutate]);
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-y-auto relative">
@@ -187,13 +177,9 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
                 <div key={invite.id} ref={isTrigger ? triggerRef : null}>
                   <InboxItem 
                     invite={invite} 
-                    onItemUpdate={(updates) => {
-                      setInvites(prev => {
-                        if (updates._deleted) {
-                          return prev.filter(i => i.id !== invite.id);
-                        }
-                        return prev.map(i => i.id === invite.id ? { ...i, ...updates } : i);
-                      });
+                    isNew={lastReadAt ? new Date(invite.created_at) > new Date(lastReadAt) : false}
+                    onItemUpdate={() => {
+                      mutate(); // Optimistic update could go here, but a revalidation is simplest and robust
                     }}
                   />
                 </div>

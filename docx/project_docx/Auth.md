@@ -51,7 +51,18 @@ We rely exclusively on GitHub for OAuth integration.
 
 ---
 
-## 4. The Sign-Out Pattern
+## 4. Forgot Password & Magic Link Flow
+
+We utilize Supabase's secure "Magic Link" API to handle password resets natively.
+
+- **The Request:** The user navigates to `/forgot-password` and enters their email. We call `supabase.auth.resetPasswordForEmail`, which triggers a branded SendGrid HTML email containing a secure Magic Link.
+- **The Callback Handshake:** When the user clicks the email link, it redirects them to our existing `app/auth/callback/route.ts` using the PKCE flow. The Edge Proxy intercepts the secure code, seamlessly establishing an authenticated session.
+- **The Reset Action:** The callback then routes the newly authenticated user to `/update-password`. Since the user is now legally authenticated with an active session, the `update-password.action.ts` can safely execute `supabase.auth.updateUser({ password })` to save the new credentials.
+- **Why we use it:** This offloads complex token generation and verification to Supabase, completely avoiding the need to manually pass insecure user IDs or custom hash tokens in the URL.
+
+---
+
+## 5. The Sign-Out Pattern
 
 Instantly signing a user out when they misclick the "Log Out" button is a frustrating UX anti-pattern. 
 

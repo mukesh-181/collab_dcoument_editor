@@ -2,9 +2,23 @@ import { ReactNode } from "react";
 import { DashboardHeader } from "./layout/dashboard-header";
 import { MainWrapper } from "./layout/main-wrapper";
 import { createClient } from "@/lib/supabase/server";
+import { getUserName, getUserImage } from "@/utils/user-utils";
 export async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: dbUser } = await supabase
+      .from('users')
+      .select('name, image')
+      .eq('id', user.id)
+      .single();
+      
+    if (dbUser && user.user_metadata) {
+      user.user_metadata.full_name = getUserName(dbUser.name || user.user_metadata.full_name, user.email);
+      user.user_metadata.avatar_url = getUserImage(dbUser.image || user.user_metadata.avatar_url);
+    }
+  }
 
   return (
     <div className="flex h-screen w-full flex-col bg-zinc-50 dark:bg-zinc-950 relative overflow-hidden">

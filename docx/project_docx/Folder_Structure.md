@@ -1,5 +1,5 @@
 # CollabDoc — Folder Structure
-*(Last Updated: 2026-06-18)*
+*(Last Updated: 2026-06-25)*
 
 Complete project structure of the `web/` directory with one-liner descriptions, incorporating recent modularization and feature enhancements.
 
@@ -10,13 +10,16 @@ collab_docx/
 ├── hocuspocus-server/                  # Standalone WebSocket server for real-time collaboration
 │   ├── package.json                    # Dependencies (tsx, @hocuspocus/server, yjs, supabase-js)
 │   ├── tsconfig.json                   # TypeScript compiler options (ESNext module resolution)
-│   └── src/                            # Server source code
-│       ├── config/
-│       │   ├── env.ts                  # Centralized constants for environment variables
-│       │   └── hocuspocus.config.ts    # Core logic — onAuthenticate, onLoadDocument, onStoreDocument hooks
-│       ├── lib/
-│       │   └── supabase.ts             # Supabase client initialized with Service Role key to bypass RLS
-│       └── server.ts                   # Entry point — starts the HTTP/WebSocket listener
+│   ├── src/                            # Server source code
+│   │   ├── config/
+│   │   │   ├── env.ts                  # Centralized constants for environment variables
+│   │   │   └── hocuspocus.config.ts    # Core logic — onAuthenticate, onLoadDocument, onStoreDocument hooks
+│   │   ├── lib/
+│   │   │   └── supabase.ts             # Supabase client initialized with Service Role key to bypass RLS
+│   │   └── server.ts                   # Entry point — starts the HTTP/WebSocket listener
+│   └── tests/                          # Vitest unit test suite for WebSocket server
+│       ├── env.test.ts                 # Validates environment variable parsing
+│       └── hooks.test.ts               # Mocks Supabase and tests auth/persistence hooks
 │
 ├── web/                                # Next.js frontend application
 │   ├── AGENTS.md                       # LLM agent instructions & context
@@ -28,6 +31,7 @@ collab_docx/
 │   ├── package.json                    # Dependencies and scripts (next dev, build, start)
 │   ├── postcss.config.mjs              # PostCSS config for Tailwind processing
 │   ├── tsconfig.json                   # TypeScript compiler options and path aliases (@/)
+│   ├── vitest.config.ts                # Vitest configuration for unit testing
 │   ├── proxy.ts                        # Edge Proxy — intercepts every request for auth + route protection
 │   ├── app/                            # Next.js App Router — strictly for URL routing only
 │   │   ├── (main)/dashboard/           # Main dashboard routes group
@@ -39,14 +43,20 @@ collab_docx/
 │   │   │   ├── invite/
 │   │   │   │   └── page.tsx            # Intermediate Accept/Cancel invitation screen
 │   │   │   └── layout.tsx              # Dashboard layout shell — provides global sidebar navigation
+
 │   │   ├── auth/callback/route.ts      # OAuth callback — exchanges auth code for session (PKCE flow)
+│   │   ├── forgot-password/page.tsx    # Password reset request page
 │   │   ├── inbox/page.tsx              # Interactive inbox displaying pending and historical invitations
 │   │   ├── login/page.tsx              # Login/Register page — renders AuthTabs with tab param support
+│   │   ├── update-password/page.tsx    # New password entry page
 │   │   ├── favicon.ico                 # Browser tab icon
 │   │   ├── globals.css                 # Global styles, Tailwind directives, CSS custom properties
 │   │   ├── layout.tsx                  # Root layout — wraps entire app with fonts, metadata, Toaster
 │   │   ├── not-found.tsx               # Custom 404 error page for unmatched routes
 │   │   └── page.tsx                    # Landing page (/) — auth-aware hero CTA + editor mockup
+│   │
+│   ├── public/                         # Static assets
+│   │   └── noise.png                   # Glassmorphic texture overlay used for UI backgrounds
 │   │
 │   ├── components/                     # Shared, reusable components (not feature-specific)
 │   │   ├── layout/
@@ -84,15 +94,19 @@ collab_docx/
 │   │   │   ├── actions/
 │   │   │   │   ├── login.action.ts
 │   │   │   │   ├── logout.action.ts
-│   │   │   │   └── signup.action.ts
+│   │   │   │   ├── request-password-reset.action.ts
+│   │   │   │   ├── signup.action.ts
+│   │   │   │   └── update-password.action.ts
 │   │   │   ├── components/
 │   │   │   │   ├── page/
 │   │   │   │   │   ├── auth-tabs.tsx
 │   │   │   │   │   ├── login-form.tsx
 │   │   │   │   │   ├── oauth-buttons.tsx
 │   │   │   │   │   └── register-form.tsx
+│   │   │   │   ├── forgot-password-form.tsx
 │   │   │   │   ├── login-page.tsx
-│   │   │   │   └── sign-out-button.tsx
+│   │   │   │   ├── sign-out-button.tsx
+│   │   │   │   └── update-password-form.tsx
 │   │   │   └── schemas/
 │   │   │       └── auth.schema.ts
 │   │   │
@@ -124,6 +138,7 @@ collab_docx/
 │   │   │
 │   │   ├── document/                   # Document-level operations
 │   │   │   ├── actions/
+│   │   │   │   ├── get-document-activity.action.ts
 │   │   │   │   ├── get-document-by-id.action.ts
 │   │   │   │   ├── leave-document.action.ts
 │   │   │   │   ├── remove-member.action.ts
@@ -131,6 +146,7 @@ collab_docx/
 │   │   │   └── components/
 │   │   │       ├── page/
 │   │   │       │   ├── active-users-cluster.tsx
+│   │   │       │   ├── document-activity-tree.tsx
 │   │   │       │   ├── document-client-layout.tsx
 │   │   │       │   ├── document-context.tsx
 │   │   │       │   ├── document-header.tsx
@@ -209,13 +225,24 @@ collab_docx/
 │   │   │       ├── share-dialog.tsx
 │   │   │       └── user-search-input.tsx
 │   │   │
-│   │   └── landing/                    # Marketing / Landing page UI components
-│   │       └── components/
-│   │           ├── editor-mockup.tsx
-│   │           ├── features-grid.tsx
-│   │           ├── footer.tsx
-│   │           ├── hero.tsx
-│   │           └── landing-page.tsx
+│   │   ├── landing/                    # Marketing / Landing page UI components
+│   │   │   └── components/
+│   │   │       ├── editor-mockup.tsx
+│   │   │       ├── features-grid.tsx
+│   │   │       ├── footer.tsx
+│   │   │       ├── hero.tsx
+│   │   │       └── landing-page.tsx
+│   │   │
+│   │   └── user/                       # User profile and settings feature
+│   │       ├── actions/
+│   │       │   ├── update-profile.action.ts
+│   │       │   └── upload-avatar.action.ts
+│   │       ├── components/
+│   │       │   ├── profile-settings-tab.tsx
+│   │       │   ├── settings-dialog.tsx
+│   │       │   └── user-dropdown-menu.tsx
+│   │       └── schemas/
+│   │           └── user.schema.ts
 │   │
 │   ├── lib/
 │   │   └── supabase/                   # Supabase client factory (3 environments)
@@ -227,6 +254,12 @@ collab_docx/
 │       ├── cn.ts                       # ClassName merging wrapper
 │       ├── string-utils.ts             # Assorted string manipulations
 │       └── user-utils.ts               # User avatar/initials extraction logic
+│
+│   └── tests/                          # Automated testing suites
+│       └── unit/                       # Vitest unit tests (300+ tests achieving 100% action/UI coverage)
+│           ├── constants/              # Route and environment variable tests
+│           ├── features/               # Server Actions, Context Providers, and UI Component tests
+│           └── utils/                  # Standalone utility function tests
 ```
 
 ---
