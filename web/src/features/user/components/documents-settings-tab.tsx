@@ -300,11 +300,11 @@ export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
           </Button>
           <div>
             <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">{docDetails.title}</h3>
-            <p className="text-sm text-zinc-500">Your role: <span className="font-medium capitalize">{myRole}</span></p>
+            <p className="text-sm text-zinc-500">Your role: <span className="font-bold capitalize ">{myRole}</span></p>
           </div>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 border-b-2 border-zinc-200 dark:border-zinc-800 pb-2">
           <Link href={`/dashboard/${docDetails.id}`}>
             <Button variant="secondary" size="sm" className="gap-2">
               Open Document <ExternalLink className="w-4 h-4" />
