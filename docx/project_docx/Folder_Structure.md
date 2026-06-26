@@ -138,10 +138,15 @@ collab_docx/
 │   │   │
 │   │   ├── document/                   # Document-level operations
 │   │   │   ├── actions/
+│   │   │   │   ├── accept-request.action.ts
+│   │   │   │   ├── check-pending-request.action.ts
 │   │   │   │   ├── get-document-activity.action.ts
 │   │   │   │   ├── get-document-by-id.action.ts
+│   │   │   │   ├── has-pending-role-request.action.ts
 │   │   │   │   ├── leave-document.action.ts
+│   │   │   │   ├── reject-request.action.ts
 │   │   │   │   ├── remove-member.action.ts
+│   │   │   │   ├── request-role-change.action.ts
 │   │   │   │   └── update-member-role.action.ts
 │   │   │   └── components/
 │   │   │       ├── page/
@@ -197,7 +202,8 @@ collab_docx/
 │   │   ├── inbox/                      # Inbox feature
 │   │   │   ├── actions/
 │   │   │   │   ├── get-inbox.action.ts
-│   │   │   │   └── get-unread-count.action.ts
+│   │   │   │   ├── get-unread-count.action.ts
+│   │   │   │   └── mark-inbox-read.action.ts
 │   │   │   └── components/
 │   │   │       ├── inbox-client-list.tsx
 │   │   │       ├── inbox-item-dialogs.tsx
