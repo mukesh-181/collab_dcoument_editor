@@ -414,6 +414,30 @@ The button text is never removed from the DOM — it is hidden with `opacity-0`.
 
 ---
 
+### 4.8 Cookie-Based Read State & Notification Highlights
+
+To keep track of which Inbox invitations a user has seen, we rely on a completely stateless "time capsule" cookie approach rather than updating rows in the database.
+
+**The `last_inbox_read_at` Cookie**:
+Instead of creating a complex `is_read` column or a pivot table to track read receipts for every single invite, the `markInboxAsReadAction` server action simply sets a secure cookie named `last_inbox_read_at` containing the exact timestamp of when the user opened the `/inbox` route. 
+The unread count in the global dashboard header is then calculated effortlessly by `getUnreadCount.action.ts`: it just counts the number of pending invites where `created_at > last_inbox_read_at`.
+
+**The Visual Highlight & Strict Mode Fix**:
+When the user views their Inbox, any new invites are highlighted with a distinct background color to draw attention. The client component computes the `isNew` status by comparing the invite's `created_at` against the cookie timestamp. 
+However, because React 18 Strict Mode intentionally double-mounts components in development, the `markInboxAsReadAction` was being triggered twice instantly. The second mount would see the newly updated cookie and incorrectly mark everything as "Old", instantly wiping out the visual highlights before the user even saw them. 
+
+We fixed this by wrapping the server action call in a `useRef` initialization guard:
+```tsx
+const hasMarkedRead = useRef(false);
+useEffect(() => {
+  if (!hasMarkedRead.current) {
+    hasMarkedRead.current = true;
+    markInboxAsReadAction().then((prevReadAt) => { ... });
+  }
+}, []);
+```
+This guarantees the read-state is only synchronized to the cookie once per visit, perfectly preserving the visual highlights for the duration of the user's session while keeping the global unread badge perfectly accurate.
+
 ---
 
 ## 5. The Document Page
@@ -543,6 +567,16 @@ When a user clicks an invite link (e.g., `/dashboard/invite?token=abc123`), they
 The invite page lives at `/dashboard/invite` (inside the dashboard route segment) so it automatically inherits the dashboard layout — the user sees the full app chrome (top nav, sign out button) rather than a disconnected standalone page. This makes the experience feel cohesive rather than like they have been sent to an external website.
 
 ---
+
+### 5.8 Preserving Historical Audit Trails via Invite States
+
+When a member's role is updated or they are removed from a document entirely, the initial naive approach would be to `DELETE` their underlying invite record or just delete the `document_members` row.
+
+However, deleting the invite row destroys the historical audit trail in the user's Inbox. To solve this, `remove-member.action.ts` and `update-member-role.action.ts` execute a deliberate state mutation:
+- When a user is removed, any outstanding or accepted invites linking them to the document are `UPDATE`'d to `status = 'rejected'`.
+- This ensures that when the removed user checks their Inbox, they see a permanent "Rejected" / "Revoked" log entry, clearly indicating they lost access, rather than the invite silently vanishing into thin air.
+
+This design guarantees an append-only (or mutate-only) audit trail that respects the recipient's right to know what happened to their permissions.
 
 ---
 
