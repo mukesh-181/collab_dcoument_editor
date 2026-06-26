@@ -40,7 +40,7 @@ export interface InboxInvite {
   requester?: UserLike;
 }
 
-export function InboxItem({ invite, onItemUpdate }: { invite: InboxInvite, onItemUpdate?: (updates: Partial<InboxInvite> & { _deleted?: boolean }) => void }) {
+export function InboxItem({ invite, isNew, onItemUpdate }: { invite: InboxInvite, isNew?: boolean, onItemUpdate?: (updates: Partial<InboxInvite> & { _deleted?: boolean }) => void }) {
   const router = useRouter();
   const [isAcceptOpen, setIsAcceptOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
@@ -209,7 +209,13 @@ export function InboxItem({ invite, onItemUpdate }: { invite: InboxInvite, onIte
 
   return (
     <div
-      className={`py-4 px-5 bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm transition-all duration-300 group relative overflow-hidden ${isExpiredLocal && invite.status === "pending" ? "opacity-75 grayscale-[0.5]" : "hover:border-indigo-500/40 dark:hover:border-indigo-500/40 hover:shadow-md hover:-translate-y-0.5"}`}
+      className={`py-4 px-5 border rounded-2xl shadow-sm transition-all duration-300 group relative overflow-hidden ${
+        isExpiredLocal && invite.status === "pending" 
+          ? "opacity-75 grayscale-[0.5] bg-white dark:bg-zinc-900/80 border-zinc-200 dark:border-zinc-800" 
+          : isNew 
+            ? "bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800 shadow-sm ring-1 ring-indigo-500/10 hover:border-indigo-300 dark:hover:border-indigo-700"
+            : "bg-white dark:bg-zinc-900/80 border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/40 dark:hover:border-indigo-500/40"
+      } hover:shadow-md hover:-translate-y-0.5`}
     >
       <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] pointer-events-none mix-blend-overlay"></div>
       <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-between">

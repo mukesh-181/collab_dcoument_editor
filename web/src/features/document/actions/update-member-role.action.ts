@@ -33,6 +33,14 @@ export async function updateMemberRoleAction(documentId: string, memberId: strin
     return { error: 'Failed to update member role' }
   }
 
+  // Mark any pending role requests from this user for this document as accepted
+  await supabase
+    .from('invites')
+    .update({ status: 'accepted' })
+    .eq('document_id', documentId)
+    .like('token', `request:%:${memberEmail}:%`)
+    .eq('status', 'pending')
+
   // Insert notification into invites table
   const token = crypto.randomUUID()
   const { error: inviteError } = await supabase
