@@ -1717,3 +1717,31 @@ We implemented a robust, cookie-based architecture to manage Inbox read states a
 
 **Why:**
 - Deleting invite rows outright destroys the audit trail. By explicitly rejecting or accepting them instead, the history remains visible in the user's Inbox UI, allowing them to see a permanent log of all access grants and revocations.
+
+---
+
+## Step 43: Page Preview & Thumbnail Architecture (2026-06-26)
+
+We finalized the architectural documentation for the live Page Thumbnails sidebar, which renders miniaturized A4 pages that stay perfectly synchronized with the active Tiptap editor.
+
+### 1. DOM Observation (`MutationObserver`)
+**How it works:**
+- Instead of re-parsing Tiptap's underlying JSON/Yjs state (which is computationally expensive), the thumbnails simply observe the live DOM. 
+- Inside `page-thumbnails.tsx`, a `MutationObserver` attaches to the `.ProseMirror` editor element.
+- To prevent crippling the main thread during fast typing, the mutation trigger is wrapped in a `useDebounce` hook set to 500ms. The thumbnails only re-calculate after the user pauses typing for half a second.
+
+### 2. Positional Extraction (`extractAllPageContents`)
+**How it works:**
+- The extraction logic in `page-extraction.ts` iterates over the top-level DOM nodes in the editor.
+- It calculates each node's vertical position relative to the A4 page boundaries (where each page is defined by a fixed height, e.g., 1123px, plus gaps).
+- Nodes are cloned and distributed into an array of HTML strings, one for each page.
+- **Current Limitations:** Because the logic assigns an element to a page based strictly on its `top` offset, large block elements (like an image or a tall paragraph) that span across a page break will be assigned entirely to the first page. This can cause the element to overflow visually in the thumbnail and be completely missing from the subsequent page's thumbnail.
+
+### 3. The `translateY` Experiment & Reversion
+**What we tried:**
+- To fix the "split-element" bug, we experimented with a "CSS Windowing" approach. Instead of mathematically slicing nodes into chunks, we rendered the *entire* document HTML inside every thumbnail container.
+- We then applied a `transform: translateY(-Npx)` offset on each container to frame the specific page, relying on `overflow: hidden` to act as a window.
+- This provided pixel-perfect fidelity, effortlessly rendering elements split perfectly across page boundaries.
+
+**Why we reverted:**
+- At the user's explicit request, we executed `git restore` to revert the system back to the original positional-based DOM extraction logic. While the `translateY` trick solved the visual split issue, it resulted in massive DOM duplication (rendering the entire document 50 times for a 50-page document), heavily penalizing browser memory and performance. The positional extraction approach remains the active, preferred architecture for stability.
