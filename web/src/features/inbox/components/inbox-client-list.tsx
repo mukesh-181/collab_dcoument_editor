@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { InboxItem, type InboxInvite } from "./inbox-item";
 import { InboxRealtimeListener } from "./inbox-realtime-listener";
 import {
@@ -13,11 +13,15 @@ import {
 import { getInbox } from "../actions/get-inbox.action";
 import { Loader2 } from "lucide-react";
 import useSWRInfinite from "swr/infinite";
+import { useSWRConfig } from "swr";
+import { markInboxAsReadAction } from "../actions/mark-inbox-read.action";
 
 export type FilterType = "all" | "invites" | "document";
 
 export function InboxClientList({ initialInvites, initialCount }: { initialInvites: InboxInvite[], initialCount: number }) {
+  const { mutate: globalMutate } = useSWRConfig();
   const [filter, setFilter] = useState<FilterType>("all");
+  const [lastReadAt, setLastReadAt] = useState<string | null>(null);
 
   const getKey = (pageIndex: number, previousPageData: { data: InboxInvite[], count: number } | null) => {
     if (previousPageData && !previousPageData.data.length) return null; // reached the end
@@ -34,8 +38,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
     fetcher,
     {
       fallbackData: filter === 'all' ? [{ data: initialInvites, count: initialCount }] : undefined,
-      revalidateOnFocus: false,
-      revalidateFirstPage: false,
+      revalidateOnFocus: false
     }
   );
 
@@ -54,7 +57,12 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
 
   const fetchFiltered = useCallback(() => {
     mutate();
-  }, [mutate]);
+    globalMutate((key) => {
+      if (typeof key === 'string' && key.includes('inbox')) return true;
+      if (Array.isArray(key) && key[0] === 'inbox') return true;
+      return false;
+    });
+  }, [mutate, globalMutate]);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const triggerRef = useCallback(
@@ -72,6 +80,18 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
     },
     [isLoadingMore, isReachingEnd, loadMore]
   );
+
+  const hasMarkedRead = useRef(false);
+
+  useEffect(() => {
+    if (hasMarkedRead.current) return;
+    hasMarkedRead.current = true;
+
+    markInboxAsReadAction().then((res) => {
+      setLastReadAt(res.prevReadAt);
+      globalMutate('unread-count');
+    });
+  }, [globalMutate]);
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-y-auto relative">
@@ -157,6 +177,7 @@ export function InboxClientList({ initialInvites, initialCount }: { initialInvit
                 <div key={invite.id} ref={isTrigger ? triggerRef : null}>
                   <InboxItem 
                     invite={invite} 
+                    isNew={lastReadAt ? new Date(invite.created_at) > new Date(lastReadAt) : false}
                     onItemUpdate={() => {
                       mutate(); // Optimistic update could go here, but a revalidation is simplest and robust
                     }}

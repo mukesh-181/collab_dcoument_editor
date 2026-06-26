@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { getUserDocuments } from "@/features/dashboard/actions/get-user-documents.action";
 import { getDocumentById } from "@/features/document/actions/get-document-by-id.action";
@@ -8,6 +8,7 @@ import { removeMemberAction } from "@/features/document/actions/remove-member.ac
 import { revokeInviteAction } from "@/features/invites/actions/revoke-invite.action";
 import { leaveDocumentAction } from "@/features/document/actions/leave-document.action";
 import { requestRoleChangeAction } from "@/features/document/actions/request-role-change.action";
+import { checkPendingRequestAction } from "@/features/document/actions/check-pending-request.action";
 import { DocumentDeleteDialog } from "@/features/dashboard/components/dialogs/document-delete-dialog";
 import { LeaveDocumentDialog } from "@/features/document/components/page/leave-document-dialog";
 import { RemoveMemberDialog } from "@/features/document/components/page/remove-member-dialog";
@@ -20,6 +21,8 @@ import { extractUserInfo } from "@/utils/user-utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/utils/string-utils";
 import useSWRInfinite from "swr/infinite";
+import { useSWRConfig } from "swr";
+import { createClient } from "@/lib/supabase/client";
 import { DocumentListRealtimeListener } from "@/features/dashboard/components/layout/document-list-realtime-listener";
 
 interface DocumentsSettingsTabProps {
@@ -55,6 +58,7 @@ interface DocumentItem {
 type FilterType = "all" | "owner" | "editor" | "viewer";
 
 export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
+  const { mutate: globalMutate } = useSWRConfig();
   const [filter, setFilter] = useState<FilterType>("all");
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   
@@ -76,8 +80,8 @@ export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
     getKey,
     fetcher,
     { 
-      revalidateOnFocus: false,
-      revalidateIfStale: false 
+      revalidateOnFocus: false
+      // Removed revalidateIfStale: false so switching tabs fetches fresh data
     }
   );
 
@@ -91,10 +95,6 @@ export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
     if (isLoadingMore || isReachingEnd) return;
     setSize(size + 1);
   }, [isLoadingMore, isReachingEnd, setSize, size]);
-
-  const fetchDocuments = useCallback(() => {
-    mutate();
-  }, [mutate]);
   
   const [docDetails, setDocDetails] = useState<DocumentItem | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -123,19 +123,72 @@ export function DocumentsSettingsTab({ user }: DocumentsSettingsTabProps) {
     [isLoadingMore, isReachingEnd, loadMore]
   );
 
-  const loadDocDetails = async (id: string) => {
+  const loadDocDetails = useCallback(async (id: string) => {
     setSelectedDocId(id);
     setDetailsLoading(true);
     try {
       const details = await getDocumentById(id);
       setDocDetails(details);
+      
+      // Check for pending requests if viewer
+      if (details) {
+        const role = details.document_members?.[0]?.role;
+        if (role === 'viewer') {
+          const res = await checkPendingRequestAction(id);
+          setPendingRequests(prev => ({ ...prev, [id]: res.isPending }));
+        } else {
+          setPendingRequests(prev => ({ ...prev, [id]: false }));
+        }
+      }
     } catch {
       toast.error("Failed to load document details");
       setSelectedDocId(null);
     } finally {
       setDetailsLoading(false);
     }
-  };
+  }, []);
+
+  const fetchDocuments = useCallback(() => {
+    // 1. Refetch the currently active tab
+    mutate();
+    
+    // 2. Clear cache for all other tabs (swr/infinite serializes keys to strings starting with $inf$)
+    globalMutate((key) => {
+      if (typeof key === 'string' && key.includes('user-documents')) return true;
+      if (Array.isArray(key) && key[0] === 'user-documents') return true;
+      return false;
+    });
+    
+    // 3. Reload open document details if any
+    if (selectedDocId) {
+      loadDocDetails(selectedDocId);
+    }
+  }, [globalMutate, mutate, selectedDocId, loadDocDetails]);
+
+  useEffect(() => {
+    if (!selectedDocId) return;
+    
+    let isMounted = true;
+    const supabase = createClient();
+    
+    const channel = supabase
+      .channel(`settings-invites-${selectedDocId}-${crypto.randomUUID()}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'invites', filter: `document_id=eq.${selectedDocId}` },
+        () => {
+          if (isMounted) {
+            loadDocDetails(selectedDocId);
+          }
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    }
+  }, [selectedDocId, loadDocDetails]);
 
   const handleConfirmRemoveMember = async () => {
     if (!docDetails) return;

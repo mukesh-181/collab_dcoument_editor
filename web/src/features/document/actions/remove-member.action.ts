@@ -33,6 +33,14 @@ export async function removeMemberAction(documentId: string, memberId: string, m
     return { error: 'Failed to remove member' }
   }
 
+  // Mark any pending role requests from this user for this document as rejected
+  await supabase
+    .from('invites')
+    .update({ status: 'rejected' })
+    .eq('document_id', documentId)
+    .like('token', `request:%:${memberEmail}:%`)
+    .eq('status', 'pending')
+
   // Insert notification into invites table
   const token = crypto.randomUUID()
   const { error: inviteError } = await supabase
