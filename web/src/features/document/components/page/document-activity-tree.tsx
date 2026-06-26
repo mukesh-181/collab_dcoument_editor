@@ -54,8 +54,7 @@ export function DocumentActivityTree({ documentId, isOpen, setIsOpen }: Document
     getKey,
     fetcher,
     {
-      revalidateOnFocus: false, 
-      revalidateIfStale: false,
+      revalidateOnFocus: false
     }
   );
 
